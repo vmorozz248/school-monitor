@@ -8,9 +8,7 @@ const firebaseConfig = {
     appId: "1:838073337449:web:33a254365be4761b0544f8"
 };
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const database = firebase.database();
 const adminCode = "21.08";
 
@@ -21,7 +19,7 @@ const studentsData = {
     "id7": { name: "Іванця Тімура", code: "05.07" }, "id8": { name: "Калантаєву Анастасію", code: "12.02" },
     "id9": { name: "Лисих Ліану", code: "31.01" }, "id10": { name: "Оковитого Максима", code: "17.06" },
     "id11": { name: "Павлова Тимура", code: "26.04" }, "id12": { name: "Радченко Владиславу", code: "25.04" },
-    "id13": { name: "Скабардіну Мілославу", code: "15.01" }, "id14": { name: "Удовіка Макара", code: "27.10" },
+    "id13": { name: "Скабардіна Мілославу", code: "15.01" }, "id14": { name: "Удовіка Макара", code: "27.10" },
     "id15": { name: "Філатову Ульяну", code: "24.06" }, "id16": { name: "Холматову Віолетту", code: "04.03" },
     "id17": { name: "Шаповала Тимура", code: "04.05" }
 };
@@ -40,29 +38,19 @@ async function checkData() {
     const resultBlock = document.getElementById('result');
     const errorMsg = document.getElementById('errorMsg');
 
-    if (!id) {
-        alert("Оберіть учня!");
-        return;
-    }
-
     const isTeacher = (inputCode === adminCode);
-    const isParent = (studentsData[id] && studentsData[id].code === inputCode);
+    const isParent = (id && studentsData[id] && studentsData[id].code === inputCode);
 
-    if (isTeacher || isParent) {
+    if (id && (isTeacher || isParent)) {
         errorMsg.classList.add('hidden');
         resultBlock.classList.remove('hidden');
         document.getElementById('studentNameDisplay').innerText = studentsData[id].name;
         
-        try {
-            const snapshot = await database.ref('students/' + id).once('value');
-            renderData(id, snapshot.val() || {}, isTeacher);
-            
-            if (isTeacher) {
-                database.ref('students/' + id).on('value', (snap) => renderData(id, snap.val() || {}, true));
-            }
-        } catch (e) {
-            console.error(e);
-            alert("Помилка бази даних. Перевірте інтернет.");
+        const snapshot = await database.ref('students/' + id).once('value');
+        renderData(id, snapshot.val() || {}, isTeacher);
+        
+        if (isTeacher) {
+            database.ref('students/' + id).on('value', (snap) => renderData(id, snap.val() || {}, true));
         }
     } else {
         resultBlock.classList.add('hidden');
