@@ -9,7 +9,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 15px; /* Відступ для малих екранів */
+    padding: 15px;
 }
 
 .card {
@@ -25,19 +25,15 @@ body {
 h1 { color: #1a012b; text-align: center; font-size: 32px; margin-bottom: 5px; }
 .subtitle { color: #8352b2; text-align: center; margin-bottom: 30px; font-size: 18px; }
 
-.form-group { margin-bottom: 25px; }
 label { display: block; margin-bottom: 10px; font-weight: 700; color: #4b1681; font-size: 20px; }
-
 select, input {
-    width: 100%; padding: 15px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 20px; box-sizing: border-box; background: white;
+    width: 100%; padding: 15px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 20px; box-sizing: border-box; background: white; margin-bottom: 20px;
 }
 
 button {
-    width: 100%; padding: 20px; background-color: #61309e; color: white; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s;
+    width: 100%; padding: 20px; background-color: #61309e; color: white; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer;
 }
-button:hover { background-color: #4b1681; }
 
-/* Картки предметів */
 .subject-group {
     background: rgba(250, 245, 254, 0.7);
     border-radius: 15px;
@@ -47,7 +43,6 @@ button:hover { background-color: #4b1681; }
 }
 
 .subject-group h4 { color: #61309e; font-size: 22px; margin: 0 0 15px 0; border-bottom: 2px solid #cbb2eb; padding-bottom: 8px; }
-
 .category-title { font-weight: 800; font-size: 18px; color: #1a012b; margin: 15px 0 10px 0; }
 
 .multi-row {
@@ -63,7 +58,7 @@ button:hover { background-color: #4b1681; }
 .status-debt { color: #c0392b; font-weight: bold; }
 
 .add-btn { background: #cbb2eb; color: #4b1681; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-top: 10px; font-weight: bold; }
-.del-btn { background: #fee2e2; color: #ef4444; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 18px; }
+.del-btn { background: #fee2e2; color: #ef4444; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; }
 
 .hidden { display: none; }
 .update-info { font-size: 15px; color: #8352b2; font-style: italic; font-weight: bold; margin-bottom: 15px; text-align: center; }

@@ -26,11 +26,13 @@ const studentsData = {
     "id17": { name: "Шаповала Тимура", code: "04.05" }
 };
 
+// ОНОВЛЕНА СТРУКТУРА
 const schoolStructure = {
     "Літературне читання": ["Діагностична робота", "Вірш", "Творча робота"],
     "Українська мова": ["Діагностична робота", "Свій вид діяльності"],
     "Математика": ["Діагностична робота", "Самостійна робота"],
-    "Я досліджую світ": ["Діагностична робота", "Свій вид діяльності"]
+    "Я досліджую світ": ["Діагностична робота", "Свій вид діяльності"],
+    "Дизайн і технології": ["Творча робота"]
 };
 
 async function checkData() {
@@ -47,11 +49,9 @@ async function checkData() {
         resultBlock.classList.remove('hidden');
         document.getElementById('studentNameDisplay').innerText = studentsData[id].name;
         
-        // Оптимізація: завантажуємо один раз для батьків
         const snapshot = await database.ref('students/' + id).once('value');
         renderData(id, snapshot.val() || {}, isTeacher);
         
-        // Тільки вчитель отримує постійне оновлення в реальному часі
         if (isTeacher) {
             database.ref('students/' + id).on('value', (snap) => renderData(id, snap.val() || {}, true));
         }
