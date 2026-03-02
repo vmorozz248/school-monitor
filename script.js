@@ -21,12 +21,11 @@ const studentsData = {
     "id7": { name: "Іванця Тімура", code: "05.07" }, "id8": { name: "Калантаєву Анастасію", code: "12.02" },
     "id9": { name: "Лисих Ліану", code: "31.01" }, "id10": { name: "Оковитого Максима", code: "17.06" },
     "id11": { name: "Павлова Тимура", code: "26.04" }, "id12": { name: "Радченко Владиславу", code: "25.04" },
-    "id13": { name: "Скабардіна Мілославу", code: "15.01" }, "id14": { name: "Удовіка Макара", code: "27.10" },
+    "id13": { name: "Скабардіну Мілославу", code: "15.01" }, "id14": { name: "Удовіка Макара", code: "27.10" },
     "id15": { name: "Філатову Ульяну", code: "24.06" }, "id16": { name: "Холматову Віолетту", code: "04.03" },
     "id17": { name: "Шаповала Тимура", code: "04.05" }
 };
 
-// ОНОВЛЕНА СТРУКТУРА
 const schoolStructure = {
     "Літературне читання": ["Діагностична робота", "Вірш", "Творча робота"],
     "Українська мова": ["Діагностична робота", "Свій вид діяльності"],
@@ -41,19 +40,29 @@ async function checkData() {
     const resultBlock = document.getElementById('result');
     const errorMsg = document.getElementById('errorMsg');
 
-    const isTeacher = (inputCode === adminCode);
-    const isParent = (id && studentsData[id] && studentsData[id].code === inputCode);
+    if (!id) {
+        alert("Оберіть учня!");
+        return;
+    }
 
-    if (id && (isTeacher || isParent)) {
+    const isTeacher = (inputCode === adminCode);
+    const isParent = (studentsData[id] && studentsData[id].code === inputCode);
+
+    if (isTeacher || isParent) {
         errorMsg.classList.add('hidden');
         resultBlock.classList.remove('hidden');
         document.getElementById('studentNameDisplay').innerText = studentsData[id].name;
         
-        const snapshot = await database.ref('students/' + id).once('value');
-        renderData(id, snapshot.val() || {}, isTeacher);
-        
-        if (isTeacher) {
-            database.ref('students/' + id).on('value', (snap) => renderData(id, snap.val() || {}, true));
+        try {
+            const snapshot = await database.ref('students/' + id).once('value');
+            renderData(id, snapshot.val() || {}, isTeacher);
+            
+            if (isTeacher) {
+                database.ref('students/' + id).on('value', (snap) => renderData(id, snap.val() || {}, true));
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Помилка бази даних. Перевірте інтернет.");
         }
     } else {
         resultBlock.classList.add('hidden');
@@ -78,9 +87,9 @@ function renderData(id, data, canEdit) {
 
             const records = (data[subject] && data[subject][category]) ? data[subject][category] : {};
             
-            for (let key in records) {
+            Object.keys(records).forEach(key => {
                 const val = records[key].val || "";
-                if (!canEdit && val.trim() === "") continue;
+                if (!canEdit && val.trim() === "") return;
 
                 let row = document.createElement('div');
                 row.className = 'multi-row';
@@ -111,7 +120,7 @@ function renderData(id, data, canEdit) {
                 row.appendChild(dateCell);
                 row.appendChild(status);
                 catBlock.appendChild(row);
-            }
+            });
 
             if (canEdit) {
                 let addBtn = document.createElement('button');
