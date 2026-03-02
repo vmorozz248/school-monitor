@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шкільний монітор: Особистий кабінет</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="card">
+        <h1>Шкільний монітор</h1>
+        <p class="subtitle">Перевірте список незданих робіт</p>
+
+        <div class="form-group">
+            <label>Оберіть учня:</label>
+            <select id="studentSelect">
+                <option value="">-- Оберіть зі списку --</option>
+                <option value="id1">Астахова Євгенія</option>
+                <option value="id2">Бабенко Поліна</option>
+                <option value="id3">Водолазька Соломія</option>
+                <option value="id4">Гомонюк Софія</option>
+                <option value="id5">Деміденко Аріна</option>
+                <option value="id6">Єлісеєв Дмитро</option>
+                <option value="id7">Іванець Тімур</option>
+                <option value="id8">Калантаєва Анастасія</option>
+                <option value="id9">Лисих Ліана</option>
+                <option value="id10">Оковитий Максим</option>
+                <option value="id11">Павлов Тимур</option>
+                <option value="id12">Радченко Владислава</option>
+                <option value="id13">Скабардіна Мілослава</option>
+                <option value="id14">Удовіка Макар</option>
+                <option value="id15">Філатова Ульяна</option>
+                <option value="id16">Холматова Віолетта</option>
+                <option value="id17">Шаповал Тимур</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Введіть код:</label>
+            <input type="text" id="passCode" placeholder="Наприклад: 26.12" maxlength="10">
+        </div>
+
+        <button onclick="checkData()">Перевірити</button>
+
+        <div id="result" class="result-box hidden">
+            <h3>Список для: <span id="studentNameDisplay"></span></h3>
+            <p id="updateTime" class="update-info"></p>
+            <div id="debtList"></div>
+        </div>
+
+        <p id="errorMsg" class="error hidden">Невірний код. Будь ласка, перевірте дані.</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

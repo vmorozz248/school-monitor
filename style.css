@@ -1,0 +1,40 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    /* ФОНОВЕ ЗОБРАЖЕННЯ */
+    background-image: url('background.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.card {
+    /* Напівпрозора біла картка */
+    background: rgba(255, 255, 255, 0.9); 
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(75, 22, 129, 0.2);
+    width: 100%;
+    max-width: 500px;
+    backdrop-filter: blur(5px); /* Легке розмиття фону за карткою */
+}
+
+h1 { color: #1a012b; text-align: center; }
+.subtitle { color: #8352b2; text-align: center; margin-bottom: 25px; }
+
+/* Стилі для журнальних записів */
+.subject-group { background: rgba(250, 245, 254, 0.7); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #e9dcf5; }
+.subject-group h4 { color: #61309e; margin-top: 0; border-bottom: 2px solid #cbb2eb; }
+.multi-row { display: flex; align-items: center; gap: 10px; background: white; padding: 8px; border-radius: 8px; margin-bottom: 5px; border: 1px solid #f3ebf9; }
+.date-cell { background: #8352b2; color: white; padding: 3px 8px; border-radius: 5px; font-weight: bold; font-size: 13px; }
+.status-debt { color: #c0392b; font-weight: bold; }
+.status-ok { color: #27ae60; font-weight: bold; }
+
+/* Кнопки */
+button { width: 100%; padding: 15px; background-color: #61309e; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+button:hover { background-color: #4b1681; }
+.add-btn { background: #cbb2eb; color: #4b1681; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 5px; }
