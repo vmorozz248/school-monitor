@@ -8,7 +8,9 @@ const firebaseConfig = {
     appId: "1:838073337449:web:33a254365be4761b0544f8"
 };
 
-if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const database = firebase.database();
 const adminCode = "21.08";
 
@@ -38,20 +40,21 @@ async function checkData() {
     const resultBlock = document.getElementById('result');
     const errorMsg = document.getElementById('errorMsg');
 
-    const isTeacher = (inputCode === adminCode);
-    const isParent = (id && studentsData[id] && studentsData[id].code === inputCode);
+    if (!id || !inputCode) {
+        alert("Оберіть учня та введіть код!");
+        return;
+    }
 
-    if (id && (isTeacher || isParent)) {
+    const isTeacher = (inputCode === adminCode);
+    const isParent = (studentsData[id] && studentsData[id].code === inputCode);
+
+    if (isTeacher || isParent) {
         errorMsg.classList.add('hidden');
         resultBlock.classList.remove('hidden');
         document.getElementById('studentNameDisplay').innerText = studentsData[id].name;
         
         const snapshot = await database.ref('students/' + id).once('value');
         renderData(id, snapshot.val() || {}, isTeacher);
-        
-        if (isTeacher) {
-            database.ref('students/' + id).on('value', (snap) => renderData(id, snap.val() || {}, true));
-        }
     } else {
         resultBlock.classList.add('hidden');
         errorMsg.classList.remove('hidden');
@@ -72,63 +75,18 @@ function renderData(id, data, canEdit) {
         schoolStructure[subject].forEach(category => {
             let catBlock = document.createElement('div');
             catBlock.innerHTML = `<p class="category-title">${category}</p>`;
-
             const records = (data[subject] && data[subject][category]) ? data[subject][category] : {};
             
             Object.keys(records).forEach(key => {
                 const val = records[key].val || "";
                 if (!canEdit && val.trim() === "") return;
-
                 let row = document.createElement('div');
                 row.className = 'multi-row';
-
-                let dateCell = document.createElement('span');
-                dateCell.className = "date-cell";
-                dateCell.contentEditable = canEdit;
-                dateCell.innerText = records[key].date || "ДД.ММ";
-                if (canEdit) dateCell.onblur = () => updateCloud(id, subject, category, key, 'date', dateCell.innerText);
-
-                let status = document.createElement('div');
-                status.className = 'subject-status';
-                status.contentEditable = canEdit;
-                status.innerText = val || "немає ✅";
-                status.classList.add(val ? "status-debt" : "status-ok");
-
-                if (canEdit) {
-                    status.onblur = () => {
-                        let text = status.innerText.replace("немає ✅", "").trim();
-                        updateCloud(id, subject, category, key, 'val', text);
-                    };
-                    let delBtn = document.createElement('button');
-                    delBtn.innerHTML = "×"; delBtn.className = "del-btn";
-                    delBtn.onclick = () => database.ref(`students/${id}/${subject}/${category}/${key}`).remove();
-                    row.appendChild(delBtn);
-                }
-
-                row.appendChild(dateCell);
-                row.appendChild(status);
+                row.innerHTML = `<span class="date-cell">${records[key].date || 'ДД.ММ'}</span><div class="subject-status ${val ? 'status-debt' : 'status-ok'}">${val || 'немає ✅'}</div>`;
                 catBlock.appendChild(row);
             });
-
-            if (canEdit) {
-                let addBtn = document.createElement('button');
-                addBtn.innerText = "+ додати роботу"; addBtn.className = "add-btn";
-                addBtn.onclick = () => {
-                    let newKey = database.ref().child('students').push().key;
-                    database.ref(`students/${id}/${subject}/${category}/${newKey}`).set({ 
-                        date: new Date().toLocaleDateString('uk-UA').slice(0, 5), 
-                        val: "" 
-                    });
-                };
-                catBlock.appendChild(addBtn);
-            }
             subBlock.appendChild(catBlock);
-        }
+        });
         listDisplay.appendChild(subBlock);
     }
-}
-
-function updateCloud(id, sub, cat, key, field, value) {
-    database.ref(`students/${id}/${sub}/${cat}/${key}/${field}`).set(value);
-    database.ref(`students/${id}/lastChange`).set(new Date().toLocaleDateString('uk-UA'));
 }
