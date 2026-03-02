@@ -19,7 +19,7 @@ const studentsData = {
     "id7": { name: "Іванця Тімура", code: "05.07" }, "id8": { name: "Калантаєву Анастасію", code: "12.02" },
     "id9": { name: "Лисих Ліану", code: "31.01" }, "id10": { name: "Оковитого Максима", code: "17.06" },
     "id11": { name: "Павлова Тимура", code: "26.04" }, "id12": { name: "Радченко Владиславу", code: "25.04" },
-    "id13": { name: "Скабардіну Мілославу", code: "15.01" }, "id14": { name: "Удовіка Макара", code: "27.10" },
+    "id13": { name: "Скабардіна Мілославу", code: "15.01" }, "id14": { name: "Удовіка Макара", code: "27.10" },
     "id15": { name: "Філатову Ульяну", code: "24.06" }, "id16": { name: "Холматову Віолетту", code: "04.03" },
     "id17": { name: "Шаповала Тимура", code: "04.05" }
 };
@@ -38,9 +38,9 @@ function checkData() {
     const errorMsg = document.getElementById('errorMsg');
 
     const isTeacher = (inputCode === adminCode);
-    const isParent = (studentsData[id] && studentsData[id].code === inputCode);
+    const isParent = (id && studentsData[id] && studentsData[id].code === inputCode);
 
-    if (id && (isTeacher || isParent)) {
+    if (isTeacher || isParent) {
         errorMsg.classList.add('hidden');
         resultBlock.classList.remove('hidden');
         document.getElementById('studentNameDisplay').innerText = studentsData[id].name;
@@ -67,11 +67,14 @@ function loadData(id, canEdit) {
 
             schoolStructure[subject].forEach(category => {
                 let catBlock = document.createElement('div');
-                catBlock.innerHTML = `<p class="category-title">${category}</p>`;
+                catBlock.innerHTML = `<p style="font-weight:bold; color:#8352b2; font-size:14px; margin:10px 0 5px;">${category}</p>`;
 
                 const records = data[subject] && data[subject][category] ? data[subject][category] : {};
 
                 for (let key in records) {
+                    const val = records[key].val || "";
+                    if (!canEdit && val.trim() === "") continue;
+
                     let row = document.createElement('div');
                     row.className = 'multi-row';
 
@@ -84,7 +87,6 @@ function loadData(id, canEdit) {
                     let status = document.createElement('div');
                     status.className = 'subject-status';
                     status.contentEditable = canEdit;
-                    const val = records[key].val || "";
                     status.innerText = val || "немає ✅";
                     status.className += val ? " status-debt" : " status-ok";
 
