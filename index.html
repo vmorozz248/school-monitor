@@ -22,31 +22,31 @@
             padding: 15px;
         }
         .card {
-            background: rgba(255, 255, 255, 0.96);
+            background: rgba(255, 255, 255, 0.97);
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(75, 22, 129, 0.3);
             width: 100%;
             max-width: 500px;
         }
-        h1 { color: #1a012b; text-align: center; font-size: 32px; margin-bottom: 5px; }
+        h1 { color: #1a012b; text-align: center; font-size: 30px; margin-bottom: 5px; }
         .subtitle { color: #8352b2; text-align: center; margin-bottom: 25px; font-size: 18px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #4b1681; font-size: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #4b1681; font-size: 18px; }
         select, input {
-            width: 100%; padding: 15px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 20px; box-sizing: border-box; margin-bottom: 20px;
+            width: 100%; padding: 15px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 18px; box-sizing: border-box; margin-bottom: 20px;
         }
         button {
-            width: 100%; padding: 18px; background-color: #61309e; color: white; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer;
+            width: 100%; padding: 18px; background-color: #61309e; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer;
         }
-        .subject-group { background: #fdfaff; border-radius: 15px; padding: 20px; margin-top: 20px; border: 1px solid #e9dcf5; }
-        .subject-group h4 { color: #61309e; font-size: 22px; margin: 0 0 10px 0; border-bottom: 2px solid #cbb2eb; }
-        .multi-row { display: flex; align-items: center; gap: 12px; background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #f3ebf9; }
+        .subject-group { background: #fdfaff; border-radius: 15px; padding: 15px; margin-top: 20px; border: 1px solid #e9dcf5; }
+        .subject-group h4 { color: #61309e; font-size: 20px; margin: 0 0 10px 0; border-bottom: 2px solid #cbb2eb; }
+        .multi-row { display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #f3ebf9; }
         .date-cell { background: #8352b2; color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 16px; }
-        .status-debt { color: #c0392b; font-weight: bold; font-size: 18px; }
-        .status-ok { color: #27ae60; font-weight: bold; font-size: 18px; }
+        .status-debt { color: #c0392b; font-weight: bold; flex-grow: 1; font-size: 16px; }
+        .status-ok { color: #27ae60; font-weight: bold; flex-grow: 1; font-size: 16px; }
         .hidden { display: none; }
-        .error { color: #c0392b; text-align: center; font-weight: bold; margin-top: 15px; font-size: 18px; }
-        .add-btn { background: #cbb2eb; color: #4b1681; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; width: auto; }
+        .error { color: #c0392b; text-align: center; font-weight: bold; margin-top: 15px; }
+        .add-btn { background: #cbb2eb; color: #4b1681; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -57,7 +57,7 @@
 
     <label>Оберіть учня:</label>
     <select id="studentSelect">
-        <option value="">-- Список учнів --</option>
+        <option value="">-- Оберіть зі списку --</option>
         <option value="id1">Астахова Євгенія</option>
         <option value="id2">Бабенко Поліна</option>
         <option value="id3">Водолазька Соломія</option>
@@ -78,7 +78,7 @@
     </select>
 
     <label>Введіть код:</label>
-    <input type="text" id="passCode" placeholder="Наприклад 21.08">
+    <input type="text" id="passCode" placeholder="Код (наприклад 21.08)">
 
     <button onclick="checkData()">Перевірити</button>
 
@@ -103,7 +103,6 @@
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const adminCode = "21.08";
 
     const students = {
         "id1": { name: "Астахову Євгенію", code: "26.12" }, "id2": { name: "Бабенко Поліну", code: "01.04" },
@@ -131,13 +130,16 @@
         const res = document.getElementById('result');
         const err = document.getElementById('errorMsg');
 
-        if (!id) { alert("Оберіть учня зі списку!"); return; }
+        if (!id) { alert("Будь ласка, спочатку оберіть учня!"); return; }
 
-        if (code === adminCode || (students[id] && students[id].code === code)) {
+        const isTeacher = (code === "21.08");
+        const isParent = (students[id] && students[id].code === code);
+
+        if (isTeacher || isParent) {
             err.classList.add('hidden');
             res.classList.remove('hidden');
             document.getElementById('studentNameDisplay').innerText = students[id].name;
-            loadData(id, code === adminCode);
+            loadData(id, isTeacher);
         } else {
             res.classList.add('hidden');
             err.classList.remove('hidden');
@@ -150,76 +152,70 @@
         database.ref('students/' + id).on('value', (snap) => {
             const data = snap.val() || {};
             list.innerHTML = "";
-            upTime.innerText = data.lastChange ? "Останні зміни: " + data.lastChange : "";
+            upTime.innerText = data.lastChange ? "Оновлено: " + data.lastChange : "";
             
             for (let sub in structure) {
-                let section = document.createElement('div');
-                section.className = 'subject-group';
-                section.innerHTML = `<h4>${sub}</h4>`;
+                let div = document.createElement('div');
+                div.className = 'subject-group';
+                div.innerHTML = `<h4>${sub}</h4>`;
                 
                 structure[sub].forEach(cat => {
-                    let catTitle = document.createElement('p');
-                    catTitle.style.fontWeight = "bold";
-                    catTitle.style.margin = "10px 0 5px";
-                    catTitle.innerText = cat;
-                    section.appendChild(catTitle);
+                    let p = document.createElement('p');
+                    p.style.fontWeight = "bold"; p.style.margin = "10px 0 5px"; p.innerText = cat;
+                    div.appendChild(p);
 
-                    const records = (data[sub] && data[sub][cat]) ? data[sub][cat] : {};
-                    for (let key in records) {
-                        const val = records[key].val || "";
+                    const items = (data[sub] && data[sub][cat]) ? data[sub][cat] : {};
+                    for (let key in items) {
+                        const val = items[key].val || "";
                         if (!canEdit && !val) continue;
 
                         let row = document.createElement('div');
                         row.className = 'multi-row';
                         
-                        let dateBox = document.createElement('span');
-                        dateBox.className = 'date-cell';
-                        dateBox.innerText = records[key].date || 'ДД.ММ';
+                        let dBox = document.createElement('span');
+                        dBox.className = 'date-cell';
+                        dBox.innerText = items[key].date || '02.03';
                         if(canEdit) {
-                            dateBox.contentEditable = true;
-                            dateBox.onblur = () => database.ref(`students/${id}/${sub}/${cat}/${key}/date`).set(dateBox.innerText);
+                            dBox.contentEditable = true;
+                            dBox.onblur = () => database.ref(`students/${id}/${sub}/${cat}/${key}/date`).set(dBox.innerText);
                         }
 
-                        let statusBox = document.createElement('span');
-                        statusBox.className = val ? 'status-debt' : 'status-ok';
-                        statusBox.innerText = val || 'немає ✅';
+                        let sBox = document.createElement('span');
+                        sBox.className = val ? 'status-debt' : 'status-ok';
+                        sBox.innerText = val || 'немає ✅';
                         if(canEdit) {
-                            statusBox.contentEditable = true;
-                            statusBox.onblur = () => {
-                                let newV = statusBox.innerText.replace('немає ✅', '').trim();
-                                database.ref(`students/${id}/${sub}/${cat}/${key}/val`).set(newV);
+                            sBox.contentEditable = true;
+                            sBox.onblur = () => {
+                                let txt = sBox.innerText.replace('немає ✅', '').trim();
+                                database.ref(`students/${id}/${sub}/${cat}/${key}/val`).set(txt);
                                 database.ref(`students/${id}/lastChange`).set(new Date().toLocaleDateString('uk-UA'));
                             };
                         }
 
-                        row.appendChild(dateBox);
-                        row.appendChild(statusBox);
-                        
+                        row.appendChild(dBox);
+                        row.appendChild(sBox);
                         if(canEdit) {
-                            let del = document.createElement('button');
-                            del.innerText = "×";
-                            del.style.width = "30px"; del.style.padding = "2px"; del.style.background = "#fee2e2"; del.style.color = "red";
-                            del.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${key}`).remove();
-                            row.appendChild(del);
+                            let btn = document.createElement('button');
+                            btn.innerText = "×"; btn.style.width="30px"; btn.style.color="red"; btn.style.background="none"; btn.style.border="none"; btn.style.fontSize="20px";
+                            btn.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${key}`).remove();
+                            row.appendChild(btn);
                         }
-                        section.appendChild(row);
+                        div.appendChild(row);
                     }
                     if (canEdit) {
                         let addB = document.createElement('button');
-                        addB.className = 'add-btn';
-                        addB.innerText = "+ додати";
+                        addB.className = 'add-btn'; addB.innerText = "+ додати запис";
                         addB.onclick = () => {
-                            const newK = database.ref().child('students').push().key;
-                            database.ref(`students/${id}/${sub}/${cat}/${newK}`).set({date: "02.03", val: ""});
+                            const k = database.ref().child('students').push().key;
+                            database.ref(`students/${id}/${sub}/${cat}/${k}`).set({date: "02.03", val: ""});
                         };
-                        section.appendChild(addB);
+                        div.appendChild(addB);
                     }
                 });
-                list.appendChild(section);
+                list.appendChild(div);
             }
         });
     }
 </script>
-
 </body>
 </html>
