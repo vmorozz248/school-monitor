@@ -1,52 +1,70 @@
 body {
-    font-family: 'Segoe UI', sans-serif;
-    background-image: url('background.jpg'); /* Назва твого фото на GitHub */
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-image: url('background.jpg'); 
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    background-color: #f1e6f9; /* Світло-бузковий запасний фон */
     margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 15px; /* Відступ для малих екранів */
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.92); /* Ефект скла */
+    background: rgba(255, 255, 255, 0.94); 
     padding: 30px;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(131, 82, 178, 0.2);
-    width: 90%;
-    max-width: 500px;
-    backdrop-filter: blur(5px);
+    box-shadow: 0 10px 40px rgba(75, 22, 129, 0.25);
+    width: 100%;
+    max-width: 550px;
+    backdrop-filter: blur(8px);
 }
 
-h1 { color: #1a012b; text-align: center; }
-.subtitle { color: #8352b2; text-align: center; margin-bottom: 25px; }
+h1 { color: #1a012b; text-align: center; font-size: 32px; margin-bottom: 5px; }
+.subtitle { color: #8352b2; text-align: center; margin-bottom: 30px; font-size: 18px; }
 
-label { font-weight: 600; color: #4b1681; }
+.form-group { margin-bottom: 25px; }
+label { display: block; margin-bottom: 10px; font-weight: 700; color: #4b1681; font-size: 20px; }
+
 select, input {
-    width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 10px; margin: 8px 0 20px; box-sizing: border-box;
+    width: 100%; padding: 15px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 20px; box-sizing: border-box; background: white;
 }
 
 button {
-    width: 100%; padding: 15px; background-color: #61309e; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s;
+    width: 100%; padding: 20px; background-color: #61309e; color: white; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s;
 }
 button:hover { background-color: #4b1681; }
 
-.subject-group { background: rgba(250, 245, 254, 0.8); border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #e9dcf5; }
-.subject-group h4 { color: #61309e; margin-top: 0; border-bottom: 2px solid #cbb2eb; }
+/* Картки предметів */
+.subject-group {
+    background: rgba(250, 245, 254, 0.7);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid #e9dcf5;
+}
 
-.multi-row { display: flex; align-items: center; gap: 10px; background: white; padding: 8px; border-radius: 8px; margin-bottom: 5px; }
-.date-cell { background: #8352b2; color: white; padding: 3px 8px; border-radius: 5px; font-weight: bold; font-size: 13px; min-width: 50px; text-align: center; }
+.subject-group h4 { color: #61309e; font-size: 22px; margin: 0 0 15px 0; border-bottom: 2px solid #cbb2eb; padding-bottom: 8px; }
 
+.category-title { font-weight: 800; font-size: 18px; color: #1a012b; margin: 15px 0 10px 0; }
+
+.multi-row {
+    display: flex; align-items: center; gap: 12px; background: white; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #f3ebf9;
+}
+
+.date-cell {
+    background: #8352b2; color: white; padding: 5px 12px; border-radius: 8px; font-weight: bold; font-size: 16px; min-width: 60px; text-align: center;
+}
+
+.subject-status { flex-grow: 1; font-size: 18px; color: #1a012b; }
 .status-ok { color: #27ae60; font-weight: bold; }
 .status-debt { color: #c0392b; font-weight: bold; }
 
-.add-btn { background: #cbb2eb; color: #4b1681; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
-.del-btn { background: #fee2e2; color: #ef4444; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
+.add-btn { background: #cbb2eb; color: #4b1681; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-top: 10px; font-weight: bold; }
+.del-btn { background: #fee2e2; color: #ef4444; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 18px; }
 
 .hidden { display: none; }
-.update-info { font-size: 12px; color: #8352b2; font-style: italic; margin-bottom: 10px; }
-.error { color: #ef4444; text-align: center; font-weight: bold; }
+.update-info { font-size: 15px; color: #8352b2; font-style: italic; font-weight: bold; margin-bottom: 15px; text-align: center; }
+.error { color: #c0392b; text-align: center; font-weight: bold; font-size: 18px; }

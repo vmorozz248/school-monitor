@@ -8,7 +8,9 @@ const firebaseConfig = {
     appId: "1:838073337449:web:33a254365be4761b0544f8"
 };
 
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const database = firebase.database();
 const adminCode = "21.08";
 
@@ -31,7 +33,7 @@ const schoolStructure = {
     "Я досліджую світ": ["Діагностична робота", "Свій вид діяльності"]
 };
 
-function checkData() {
+async function checkData() {
     const id = document.getElementById('studentSelect').value;
     const inputCode = document.getElementById('passCode').value.trim();
     const resultBlock = document.getElementById('result');
@@ -40,86 +42,93 @@ function checkData() {
     const isTeacher = (inputCode === adminCode);
     const isParent = (id && studentsData[id] && studentsData[id].code === inputCode);
 
-    if (isTeacher || isParent) {
+    if (id && (isTeacher || isParent)) {
         errorMsg.classList.add('hidden');
         resultBlock.classList.remove('hidden');
         document.getElementById('studentNameDisplay').innerText = studentsData[id].name;
-        loadData(id, isTeacher);
+        
+        // Оптимізація: завантажуємо один раз для батьків
+        const snapshot = await database.ref('students/' + id).once('value');
+        renderData(id, snapshot.val() || {}, isTeacher);
+        
+        // Тільки вчитель отримує постійне оновлення в реальному часі
+        if (isTeacher) {
+            database.ref('students/' + id).on('value', (snap) => renderData(id, snap.val() || {}, true));
+        }
     } else {
         resultBlock.classList.add('hidden');
         errorMsg.classList.remove('hidden');
     }
 }
 
-function loadData(id, canEdit) {
+function renderData(id, data, canEdit) {
     const listDisplay = document.getElementById('debtList');
     const updateDisplay = document.getElementById('updateTime');
-    
-    database.ref('students/' + id).on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        listDisplay.innerHTML = "";
-        updateDisplay.innerText = data.lastChange ? "Останні зміни: " + data.lastChange : "Оновлень ще не було";
+    listDisplay.innerHTML = "";
+    updateDisplay.innerText = data.lastChange ? "Останні зміни: " + data.lastChange : "Оновлень ще не було";
 
-        for (let subject in schoolStructure) {
-            let subBlock = document.createElement('div');
-            subBlock.className = "subject-group";
-            subBlock.innerHTML = `<h4>${subject}</h4>`;
+    for (let subject in schoolStructure) {
+        let subBlock = document.createElement('div');
+        subBlock.className = "subject-group";
+        subBlock.innerHTML = `<h4>${subject}</h4>`;
 
-            schoolStructure[subject].forEach(category => {
-                let catBlock = document.createElement('div');
-                catBlock.innerHTML = `<p style="font-weight:bold; color:#8352b2; font-size:14px; margin:10px 0 5px;">${category}</p>`;
+        schoolStructure[subject].forEach(category => {
+            let catBlock = document.createElement('div');
+            catBlock.innerHTML = `<p class="category-title">${category}</p>`;
 
-                const records = data[subject] && data[subject][category] ? data[subject][category] : {};
+            const records = (data[subject] && data[subject][category]) ? data[subject][category] : {};
+            
+            for (let key in records) {
+                const val = records[key].val || "";
+                if (!canEdit && val.trim() === "") continue;
 
-                for (let key in records) {
-                    const val = records[key].val || "";
-                    if (!canEdit && val.trim() === "") continue;
+                let row = document.createElement('div');
+                row.className = 'multi-row';
 
-                    let row = document.createElement('div');
-                    row.className = 'multi-row';
+                let dateCell = document.createElement('span');
+                dateCell.className = "date-cell";
+                dateCell.contentEditable = canEdit;
+                dateCell.innerText = records[key].date || "ДД.ММ";
+                if (canEdit) dateCell.onblur = () => updateCloud(id, subject, category, key, 'date', dateCell.innerText);
 
-                    let dateCell = document.createElement('span');
-                    dateCell.className = "date-cell";
-                    dateCell.contentEditable = canEdit;
-                    dateCell.innerText = records[key].date || "ДД.ММ";
-                    if (canEdit) dateCell.onblur = () => updateCloud(id, subject, category, key, 'date', dateCell.innerText);
-
-                    let status = document.createElement('div');
-                    status.className = 'subject-status';
-                    status.contentEditable = canEdit;
-                    status.innerText = val || "немає ✅";
-                    status.className += val ? " status-debt" : " status-ok";
-
-                    if (canEdit) {
-                        status.onblur = () => {
-                            let text = status.innerText.replace("немає ✅", "").trim();
-                            updateCloud(id, subject, category, key, 'val', text);
-                        };
-                        let delBtn = document.createElement('button');
-                        delBtn.innerHTML = "×"; delBtn.className = "del-btn";
-                        delBtn.onclick = () => database.ref(`students/${id}/${subject}/${category}/${key}`).remove();
-                        row.appendChild(delBtn);
-                    }
-
-                    row.appendChild(dateCell);
-                    row.appendChild(status);
-                    catBlock.appendChild(row);
-                }
+                let status = document.createElement('div');
+                status.className = 'subject-status';
+                status.contentEditable = canEdit;
+                status.innerText = val || "немає ✅";
+                status.classList.add(val ? "status-debt" : "status-ok");
 
                 if (canEdit) {
-                    let addBtn = document.createElement('button');
-                    addBtn.innerText = "+ додати роботу"; addBtn.className = "add-btn";
-                    addBtn.onclick = () => {
-                        let newKey = database.ref().child('students').push().key;
-                        database.ref(`students/${id}/${subject}/${category}/${newKey}`).set({ date: "ДД.ММ", val: "" });
+                    status.onblur = () => {
+                        let text = status.innerText.replace("немає ✅", "").trim();
+                        updateCloud(id, subject, category, key, 'val', text);
                     };
-                    catBlock.appendChild(addBtn);
+                    let delBtn = document.createElement('button');
+                    delBtn.innerHTML = "×"; delBtn.className = "del-btn";
+                    delBtn.onclick = () => database.ref(`students/${id}/${subject}/${category}/${key}`).remove();
+                    row.appendChild(delBtn);
                 }
-                subBlock.appendChild(catBlock);
-            });
-            listDisplay.appendChild(subBlock);
+
+                row.appendChild(dateCell);
+                row.appendChild(status);
+                catBlock.appendChild(row);
+            }
+
+            if (canEdit) {
+                let addBtn = document.createElement('button');
+                addBtn.innerText = "+ додати роботу"; addBtn.className = "add-btn";
+                addBtn.onclick = () => {
+                    let newKey = database.ref().child('students').push().key;
+                    database.ref(`students/${id}/${subject}/${category}/${newKey}`).set({ 
+                        date: new Date().toLocaleDateString('uk-UA').slice(0, 5), 
+                        val: "" 
+                    });
+                };
+                catBlock.appendChild(addBtn);
+            }
+            subBlock.appendChild(catBlock);
         }
-    });
+        listDisplay.appendChild(subBlock);
+    }
 }
 
 function updateCloud(id, sub, cat, key, field, value) {
