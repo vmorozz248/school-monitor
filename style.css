@@ -1,5 +1,5 @@
 body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Segoe UI', system-ui, sans-serif;
     background-image: url('background.jpg'); 
     background-size: cover;
     background-position: center;
@@ -42,23 +42,18 @@ button {
     border: 1px solid #e9dcf5;
 }
 
-.subject-group h4 { color: #61309e; font-size: 22px; margin: 0 0 15px 0; border-bottom: 2px solid #cbb2eb; padding-bottom: 8px; }
+.subject-group h4 { color: #61309e; font-size: 22px; border-bottom: 2px solid #cbb2eb; padding-bottom: 8px; }
 .category-title { font-weight: 800; font-size: 18px; color: #1a012b; margin: 15px 0 10px 0; }
 
-.multi-row {
-    display: flex; align-items: center; gap: 12px; background: white; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #f3ebf9;
-}
+.multi-row { display: flex; align-items: center; gap: 12px; background: white; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #f3ebf9; }
+.date-cell { background: #8352b2; color: white; padding: 5px 12px; border-radius: 8px; font-weight: bold; font-size: 16px; min-width: 60px; text-align: center; }
 
-.date-cell {
-    background: #8352b2; color: white; padding: 5px 12px; border-radius: 8px; font-weight: bold; font-size: 16px; min-width: 60px; text-align: center;
-}
-
-.subject-status { flex-grow: 1; font-size: 18px; color: #1a012b; }
+.subject-status { flex-grow: 1; font-size: 18px; }
 .status-ok { color: #27ae60; font-weight: bold; }
 .status-debt { color: #c0392b; font-weight: bold; }
 
-.add-btn { background: #cbb2eb; color: #4b1681; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-top: 10px; font-weight: bold; }
-.del-btn { background: #fee2e2; color: #ef4444; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; }
+.add-btn { background: #cbb2eb; color: #4b1681; border: none; padding: 8px 15px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+.del-btn { background: #fee2e2; color: #ef4444; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 18px; }
 
 .hidden { display: none; }
 .update-info { font-size: 15px; color: #8352b2; font-style: italic; font-weight: bold; margin-bottom: 15px; text-align: center; }
