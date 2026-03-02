@@ -2,58 +2,224 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Шкільний монітор: Особистий кабінет</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шкільний монітор</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(75, 22, 129, 0.3);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 { color: #1a012b; text-align: center; font-size: 32px; margin-bottom: 5px; }
+        .subtitle { color: #8352b2; text-align: center; margin-bottom: 25px; font-size: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #4b1681; font-size: 20px; }
+        select, input {
+            width: 100%; padding: 15px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 20px; box-sizing: border-box; margin-bottom: 20px;
+        }
+        button {
+            width: 100%; padding: 18px; background-color: #61309e; color: white; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer;
+        }
+        .subject-group { background: #fdfaff; border-radius: 15px; padding: 20px; margin-top: 20px; border: 1px solid #e9dcf5; }
+        .subject-group h4 { color: #61309e; font-size: 22px; margin: 0 0 10px 0; border-bottom: 2px solid #cbb2eb; }
+        .multi-row { display: flex; align-items: center; gap: 12px; background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #f3ebf9; }
+        .date-cell { background: #8352b2; color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 16px; }
+        .status-debt { color: #c0392b; font-weight: bold; font-size: 18px; }
+        .status-ok { color: #27ae60; font-weight: bold; font-size: 18px; }
+        .hidden { display: none; }
+        .error { color: #c0392b; text-align: center; font-weight: bold; margin-top: 15px; font-size: 18px; }
+        .add-btn { background: #cbb2eb; color: #4b1681; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; width: auto; }
+    </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>Шкільний монітор</h1>
-        <p class="subtitle">Перевірте список незданих робіт</p>
+<div class="card">
+    <h1>Шкільний монітор</h1>
+    <p class="subtitle">Перевірка незданих робіт</p>
 
-        <div class="form-group">
-            <label>Оберіть учня:</label>
-            <select id="studentSelect">
-                <option value="">-- Оберіть зі списку --</option>
-                <option value="id1">Астахова Євгенія</option>
-                <option value="id2">Бабенко Поліна</option>
-                <option value="id3">Водолазька Соломія</option>
-                <option value="id4">Гомонюк Софія</option>
-                <option value="id5">Деміденко Аріна</option>
-                <option value="id6">Єлісеєв Дмитро</option>
-                <option value="id7">Іванець Тімур</option>
-                <option value="id8">Калантаєва Анастасія</option>
-                <option value="id9">Лисих Ліана</option>
-                <option value="id10">Оковитий Максим</option>
-                <option value="id11">Павлов Тимур</option>
-                <option value="id12">Радченко Владислава</option>
-                <option value="id13">Скабардіна Мілослава</option>
-                <option value="id14">Удовіка Макар</option>
-                <option value="id15">Філатова Ульяна</option>
-                <option value="id16">Холматова Віолетта</option>
-                <option value="id17">Шаповал Тимур</option>
-            </select>
-        </div>
+    <label>Оберіть учня:</label>
+    <select id="studentSelect">
+        <option value="">-- Список учнів --</option>
+        <option value="id1">Астахова Євгенія</option>
+        <option value="id2">Бабенко Поліна</option>
+        <option value="id3">Водолазька Соломія</option>
+        <option value="id4">Гомонюк Софія</option>
+        <option value="id5">Деміденко Аріна</option>
+        <option value="id6">Єлісеєв Дмитро</option>
+        <option value="id7">Іванець Тімур</option>
+        <option value="id8">Калантаєва Анастасія</option>
+        <option value="id9">Лисих Ліана</option>
+        <option value="id10">Оковитий Максим</option>
+        <option value="id11">Павлов Тимур</option>
+        <option value="id12">Радченко Владислава</option>
+        <option value="id13">Скабардіна Мілослава</option>
+        <option value="id14">Удовіка Макар</option>
+        <option value="id15">Філатова Ульяна</option>
+        <option value="id16">Холматова Віолетта</option>
+        <option value="id17">Шаповал Тимур</option>
+    </select>
 
-        <div class="form-group">
-            <label>Введіть код:</label>
-            <input type="text" id="passCode" placeholder="Наприклад: 26.12" maxlength="10">
-        </div>
+    <label>Введіть код:</label>
+    <input type="text" id="passCode" placeholder="Наприклад 21.08">
 
-        <button onclick="checkData()">Перевірити</button>
+    <button onclick="checkData()">Перевірити</button>
 
-        <div id="result" class="result-box hidden">
-            <h3>Список для: <span id="studentNameDisplay"></span></h3>
-            <p id="updateTime" class="update-info"></p>
-            <div id="debtList"></div>
-        </div>
-
-        <p id="errorMsg" class="error hidden">Невірний код або учня не обрано.</p>
+    <div id="result" class="hidden">
+        <h3 id="studentNameDisplay" style="text-align:center; color:#4b1681; margin: 20px 0 10px;"></h3>
+        <p id="updateTime" style="text-align:center; font-style:italic; color:#8352b2; font-size:14px;"></p>
+        <div id="debtList"></div>
     </div>
+    <p id="errorMsg" class="error hidden">Невірний код або учня не обрано!</p>
+</div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <script src="script.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCaf5Zwl4mIxdReLgdoUCkzi1KWEMzeEpA",
+        authDomain: "schoolmonitor-b1c8b.firebaseapp.com",
+        databaseURL: "https://schoolmonitor-b1c8b-default-rtdb.firebaseio.com/",
+        projectId: "schoolmonitor-b1c8b",
+        storageBucket: "schoolmonitor-b1c8b.firebasestorage.app",
+        messagingSenderId: "838073337449",
+        appId: "1:838073337449:web:33a254365be4761b0544f8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const adminCode = "21.08";
+
+    const students = {
+        "id1": { name: "Астахову Євгенію", code: "26.12" }, "id2": { name: "Бабенко Поліну", code: "01.04" },
+        "id3": { name: "Водолазьку Соломію", code: "13.02" }, "id4": { name: "Гомонюк Софію", code: "15.02" },
+        "id5": { name: "Деміденко Аріну", code: "01.10" }, "id6": { name: "Єлісеєва Дмитра", code: "11.12" },
+        "id7": { name: "Іванця Тімура", code: "05.07" }, "id8": { name: "Калантаєву Анастасію", code: "12.02" },
+        "id9": { name: "Лисих Ліану", code: "31.01" }, "id10": { name: "Оковитого Максима", code: "17.06" },
+        "id11": { name: "Павлова Тимура", code: "26.04" }, "id12": { name: "Радченко Владиславу", code: "25.04" },
+        "id13": { name: "Скабардіна Мілославу", code: "15.01" }, "id14": { name: "Удовіка Макара", code: "27.10" },
+        "id15": { name: "Філатову Ульяну", code: "24.06" }, "id16": { name: "Холматову Віолетту", code: "04.03" },
+        "id17": { name: "Шаповала Тимура", code: "04.05" }
+    };
+
+    const structure = {
+        "Літературне читання": ["Діагностична робота", "Вірш", "Творча робота"],
+        "Українська мова": ["Діагностична робота", "Свій вид діяльності"],
+        "Математика": ["Діагностична робота", "Самостійна робота"],
+        "Я досліджую світ": ["Діагностична робота", "Свій вид діяльності"],
+        "Дизайн і технології": ["Творча робота"]
+    };
+
+    function checkData() {
+        const id = document.getElementById('studentSelect').value;
+        const code = document.getElementById('passCode').value.trim();
+        const res = document.getElementById('result');
+        const err = document.getElementById('errorMsg');
+
+        if (!id) { alert("Оберіть учня зі списку!"); return; }
+
+        if (code === adminCode || (students[id] && students[id].code === code)) {
+            err.classList.add('hidden');
+            res.classList.remove('hidden');
+            document.getElementById('studentNameDisplay').innerText = students[id].name;
+            loadData(id, code === adminCode);
+        } else {
+            res.classList.add('hidden');
+            err.classList.remove('hidden');
+        }
+    }
+
+    function loadData(id, canEdit) {
+        const list = document.getElementById('debtList');
+        const upTime = document.getElementById('updateTime');
+        database.ref('students/' + id).on('value', (snap) => {
+            const data = snap.val() || {};
+            list.innerHTML = "";
+            upTime.innerText = data.lastChange ? "Останні зміни: " + data.lastChange : "";
+            
+            for (let sub in structure) {
+                let section = document.createElement('div');
+                section.className = 'subject-group';
+                section.innerHTML = `<h4>${sub}</h4>`;
+                
+                structure[sub].forEach(cat => {
+                    let catTitle = document.createElement('p');
+                    catTitle.style.fontWeight = "bold";
+                    catTitle.style.margin = "10px 0 5px";
+                    catTitle.innerText = cat;
+                    section.appendChild(catTitle);
+
+                    const records = (data[sub] && data[sub][cat]) ? data[sub][cat] : {};
+                    for (let key in records) {
+                        const val = records[key].val || "";
+                        if (!canEdit && !val) continue;
+
+                        let row = document.createElement('div');
+                        row.className = 'multi-row';
+                        
+                        let dateBox = document.createElement('span');
+                        dateBox.className = 'date-cell';
+                        dateBox.innerText = records[key].date || 'ДД.ММ';
+                        if(canEdit) {
+                            dateBox.contentEditable = true;
+                            dateBox.onblur = () => database.ref(`students/${id}/${sub}/${cat}/${key}/date`).set(dateBox.innerText);
+                        }
+
+                        let statusBox = document.createElement('span');
+                        statusBox.className = val ? 'status-debt' : 'status-ok';
+                        statusBox.innerText = val || 'немає ✅';
+                        if(canEdit) {
+                            statusBox.contentEditable = true;
+                            statusBox.onblur = () => {
+                                let newV = statusBox.innerText.replace('немає ✅', '').trim();
+                                database.ref(`students/${id}/${sub}/${cat}/${key}/val`).set(newV);
+                                database.ref(`students/${id}/lastChange`).set(new Date().toLocaleDateString('uk-UA'));
+                            };
+                        }
+
+                        row.appendChild(dateBox);
+                        row.appendChild(statusBox);
+                        
+                        if(canEdit) {
+                            let del = document.createElement('button');
+                            del.innerText = "×";
+                            del.style.width = "30px"; del.style.padding = "2px"; del.style.background = "#fee2e2"; del.style.color = "red";
+                            del.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${key}`).remove();
+                            row.appendChild(del);
+                        }
+                        section.appendChild(row);
+                    }
+                    if (canEdit) {
+                        let addB = document.createElement('button');
+                        addB.className = 'add-btn';
+                        addB.innerText = "+ додати";
+                        addB.onclick = () => {
+                            const newK = database.ref().child('students').push().key;
+                            database.ref(`students/${id}/${sub}/${cat}/${newK}`).set({date: "02.03", val: ""});
+                        };
+                        section.appendChild(addB);
+                    }
+                });
+                list.appendChild(section);
+            }
+        });
+    }
+</script>
+
 </body>
 </html>
