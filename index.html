@@ -11,6 +11,7 @@
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; }
         .admin-panel { background: #fdfaff; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
         
+        /* ЗАЛІЗНА СІТКА - ПРІЗВИЩА */
         .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; margin-bottom: 10px; max-height: 200px; overflow-y: auto; }
         .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4b1681; cursor: pointer; border: 1px solid #f0e6f7; padding: 5px; border-radius: 8px; }
 
@@ -18,7 +19,7 @@
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
         
-        /* ВІКНО РЕДАГУВАННЯ */
+        /* МОДАЛЬНЕ ВІКНО */
         #editModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 10000; }
         .modal-content { background: white; padding: 25px; border-radius: 25px; width: 90%; max-width: 380px; }
 
@@ -45,10 +46,10 @@
 
 <div id="editModal">
     <div class="modal-content">
-        <h3 style="color:#61309e; margin-top:0;">Редагувати запис</h3>
+        <h3 style="color:#61309e; margin-top:0;">Редагувати</h3>
         <label style="font-size:12px; font-weight:bold;">Змінити дату:</label>
         <input type="date" id="modalDate">
-        <label style="font-size:12px; font-weight:bold;">Назва роботи:</label>
+        <label style="font-size:12px; font-weight:bold;">Назва:</label>
         <input type="text" id="modalTask" onkeypress="if(event.key==='Enter') saveEdit()">
         <div style="display:flex; gap:10px; margin-top:10px;">
             <button onclick="saveEdit()" style="background:#61309e;">Зберегти</button>
@@ -78,7 +79,7 @@
         <div id="view2" class="hidden"><div id="journalArea">Завантаження...</div></div>
     </div>
     <div id="loginForm">
-        <select id="uSel"><option value="">-- Оберіть учня --</option></select>
+        <select id="uSel"><option value="">-- Учень --</option></select>
         <input type="text" id="pInp" placeholder="Код" onkeypress="if(event.key==='Enter') login()">
         <button onclick="login()">Увійти</button>
     </div>
@@ -122,7 +123,7 @@
         "Дизайн і технології": ["Творча робота"]
     };
 
-    let currentEditSet = null;
+    let curEdit = null;
 
     Object.keys(students).forEach(id => {
         document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
@@ -175,7 +176,7 @@
                         for (let tid in data[sid][sub][cat]) {
                             const t = data[sid][sub][cat][tid];
                             const key = `${sub}|${cat}|${t.val}|${t.date}`;
-                            if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, fullDate: t.fullDate || '', list: [] };
+                            if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, full: t.fullDate || '', list: [] };
                             sum[key].list.push({sid, tid});
                         }
                     }
@@ -184,41 +185,39 @@
             Object.values(sum).reverse().forEach(item => {
                 const itemData = JSON.stringify(item);
                 area.innerHTML += `<div class="journal-card">
-                    <span class="journal-header" onclick='openEditModal(${itemData})'>✏️ ${item.date} - ${item.sub}: ${item.task}</span>
+                    <span class="journal-header" onclick='openEdit(${itemData})'>✏️ ${item.date} - ${item.sub}: ${item.task}</span>
                     ${item.list.map(l => `<span class="debtor-tag" onclick="delOne('${l.sid}','${item.sub}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}
                 </div>`;
             });
         });
     }
 
-    function openEditModal(item) {
-        currentEditSet = item;
+    function openEdit(item) {
+        curEdit = item;
         document.getElementById('modalTask').value = item.task;
-        document.getElementById('modalDate').value = item.fullDate || '';
+        document.getElementById('modalDate').value = item.full || '';
         document.getElementById('editModal').style.display = 'flex';
     }
 
     function saveEdit() {
         const newTask = document.getElementById('modalTask').value.trim();
         const newRaw = document.getElementById('modalDate').value;
-        if (!newTask || !newRaw) return alert("Заповніть!");
+        if (!newTask || !newRaw) return;
         const d = new Date(newRaw);
         const fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
         const sKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
-        
-        let updates = {};
-        currentEditSet.list.forEach(l => {
-            updates[`students/${l.sid}/${currentEditSet.sub}/${currentEditSet.cat}/${l.tid}/val`] = newTask;
-            updates[`students/${l.sid}/${currentEditSet.sub}/${currentEditSet.cat}/${l.tid}/date`] = fDate;
-            updates[`students/${l.sid}/${currentEditSet.sub}/${currentEditSet.cat}/${l.tid}/sortDate`] = sKey;
-            updates[`students/${l.sid}/${currentEditSet.sub}/${currentEditSet.cat}/${l.tid}/fullDate`] = newRaw;
+        let up = {};
+        curEdit.list.forEach(l => {
+            up[`students/${l.sid}/${curEdit.sub}/${curEdit.cat}/${l.tid}/val`] = newTask;
+            up[`students/${l.sid}/${curEdit.sub}/${curEdit.cat}/${l.tid}/date`] = fDate;
+            up[`students/${l.sid}/${curEdit.sub}/${curEdit.cat}/${l.tid}/sortDate`] = sKey;
+            up[`students/${l.sid}/${curEdit.sub}/${curEdit.cat}/${l.tid}/fullDate`] = newRaw;
         });
-        db.ref().update(updates).then(() => { closeModal(); alert("Оновлено!"); });
+        db.ref().update(up).then(() => { closeModal(); alert("Оновлено!"); });
     }
 
     function closeModal() { document.getElementById('editModal').style.display = 'none'; }
-
-    function delOne(sid, sub, cat, tid) { if (confirm("Видалити цей борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove(); }
+    function delOne(sid, sub, cat, tid) { if (confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove(); }
 
     function loadData(id) {
         document.getElementById('sNameTitle').innerText = students[id].name;
