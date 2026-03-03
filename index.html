@@ -7,57 +7,77 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.jpg') no-repeat center center fixed; background-size: cover; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
-        .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.jpg') no-repeat center center fixed; background-size: cover; margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 550px; }
         .admin-panel { background: #fdfaff; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
-        .student-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 10px; max-height: 160px; overflow-y: auto; margin-bottom: 10px; }
-        .student-selector label { display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer; color: #4b1681; white-space: nowrap; overflow: hidden; }
-        .student-selector input { width: 16px; height: 16px; flex-shrink: 0; }
-        .quick-access { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
-        .quick-btn { background: #e9dcf5; border: 1px solid #61309e; padding: 5px 8px; border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: bold; }
-        h1 { color: #1a012b; text-align: center; font-size: 24px; margin: 0 0 15px 0; }
-        select, input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; font-size: 15px; }
+        
+        /* ТАБЛИЧНИЙ СПИСОК УЧНІВ - НЕ З'ЇЖДЖАЄ */
+        .student-grid { 
+            display: flex; flex-wrap: wrap; gap: 5px; 
+            background: white; padding: 10px; border: 1px solid #ddd; 
+            border-radius: 10px; max-height: 180px; overflow-y: auto; 
+        }
+        .student-grid label { 
+            width: 47%; display: flex; align-items: center; gap: 8px; 
+            font-size: 13px; color: #4b1681; cursor: pointer; padding: 2px;
+        }
+        .student-grid input { width: 18px; height: 18px; cursor: pointer; }
+
+        .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
+        .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; }
+        .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
+
+        .journal-item { background: white; border: 1px solid #e9dcf5; padding: 10px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; }
+        .journal-header { display: flex; justify-content: space-between; font-weight: bold; color: #61309e; border-bottom: 1px solid #f3ebf9; padding-bottom: 5px; }
+        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 2px 8px; border-radius: 10px; margin: 2px; cursor: pointer; }
+        .debtor-tag:hover { background: #ffcccc; color: red; text-decoration: line-through; }
+
+        h1 { color: #1a012b; text-align: center; font-size: 24px; margin-bottom: 10px; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .report-box { background: white; border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 13px; max-height: 200px; overflow-y: auto; }
-        .subject-group { border: 1px solid #eee; padding: 10px; margin-top: 10px; border-radius: 10px; background: #fff; }
-        .multi-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 14px; }
-        .date-cell { background: #8352b2; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .status-debt { color: #c0392b; font-weight: bold; flex-grow: 1; border-bottom: 1px dotted #ccc; cursor: pointer; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 <div class="card">
     <h1>Шкільний монітор</h1>
+
     <div id="adminPanel" class="admin-panel hidden">
-        <div id="cnt" style="font-size:11px; color:#61309e; font-weight:bold;">Обрано: 0</div>
-        <div class="student-selector" id="chkBox"></div>
-        <div style="display:flex; gap:5px; margin-bottom:10px;">
-            <button style="padding:5px; font-size:11px;" onclick="tgl(true)">Усі</button>
-            <button style="padding:5px; font-size:11px;" onclick="tgl(false)">Скинути</button>
+        <div class="tab-menu">
+            <div id="tab1" class="tab active" onclick="showTab(1)">➕ Додати борг</div>
+            <div id="tab2" class="tab" onclick="showTab(2)">📓 Журнал розсилок</div>
         </div>
-        <div class="quick-access">
-            <div class="quick-btn" onclick="sq('Математика|Самостійна робота')">Мат СР</div>
-            <div class="quick-btn" onclick="sq('Українська мова|Діагностична робота')">Укр ДР</div>
-            <div class="quick-btn" onclick="sq('Літературне читання|Вірш')">Вірш</div>
+
+        <div id="view1">
+            <label style="font-size:12px; font-weight:bold;">Кому додати? (Обрано: <span id="cnt">0</span>)</label>
+            <div class="student-grid" id="chkBox"></div>
+            <div style="display:flex; gap:5px; margin: 10px 0;">
+                <button style="padding:5px; font-size:11px;" onclick="tgl(true)">Усі</button>
+                <button style="padding:5px; font-size:11px;" onclick="tgl(false)">Скинути</button>
+            </div>
+            <select id="mSub"><option value="">-- Оберіть предмет --</option></select>
+            <input type="text" id="mTask" placeholder="Назва роботи">
+            <button onclick="addW()">Розіслати борг</button>
         </div>
-        <select id="mSub"><option value="">-- Предмет --</option></select>
-        <input type="text" id="mTask" placeholder="Назва роботи">
-        <button onclick="addW()">Додати обраним</button>
-        <button onclick="rep()" style="background:#27ae60; margin-top:10px; font-size:13px; padding:8px;">📊 Звіт по боргах</button>
-        <div id="rArea" class="report-box hidden"></div>
+
+        <div id="view2" class="hidden">
+            <div id="journalList">Завантаження журналу...</div>
+        </div>
     </div>
+
     <div id="lgn">
-        <select id="sSel"><option value="">-- Оберіть учня --</option></select>
-        <input type="text" id="pCod" placeholder="Введіть код" onkeypress="if(event.key==='Enter') chk()">
+        <select id="sSel"><option value="">-- Учень --</option></select>
+        <input type="text" id="pCod" placeholder="Код">
         <button onclick="chk()">Увійти</button>
     </div>
+
     <div id="res" class="hidden">
-        <button onclick="location.reload()" style="width:auto; padding:5px 10px; font-size:12px;">⬅ Назад</button>
-        <h3 id="sName" style="text-align:center; color:#4b1681; font-size:18px;"></h3>
+        <button onclick="location.reload()" style="width:auto; padding:5px 10px;">⬅ Назад</button>
+        <h3 id="sName" style="text-align:center;"></h3>
         <div id="dList"></div>
     </div>
 </div>
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyCaf5Zwl4mIxdReLgdoUCkzi1KWEMzeEpA",
@@ -71,114 +91,136 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const sts = {
-        "id1": { code: "26.12", name: "Астахова Євгенія" }, "id2": { code: "01.04", name: "Бабенко Поліна" },
-        "id3": { code: "13.02", name: "Водолазька Соломія" }, "id4": { code: "15.02", name: "Гомонюк Софія" },
-        "id5": { code: "01.10", name: "Деміденко Аріна" }, "id6": { code: "11.12", name: "Єлісеєв Дмитро" },
-        "id7": { code: "05.07", name: "Іванець Тімур" }, "id8": { code: "12.02", name: "Калантаєва Анастасія" },
-        "id9": { code: "31.01", name: "Лисих Ліана" }, "id10": { code: "17.06", name: "Оковитий Максим" },
-        "id11": { code: "26.04", name: "Павлов Тимур" }, "id12": { code: "25.04", name: "Радченко Владислава" },
-        "id13": { code: "15.01", name: "Скабардіна Мілослава" }, "id14": { code: "27.10", name: "Удовіка Макар" },
-        "id15": { code: "24.06", name: "Філатова Ульяна" }, "id16": { code: "04.03", name: "Холматова Віолетта" },
-        "id17": { code: "04.05", name: "Шаповал Тимур" }
+        "id1": "Астахова", "id2": "Бабенко", "id3": "Водолазька", "id4": "Гомонюк", "id5": "Деміденко",
+        "id6": "Єлісеєв", "id7": "Іванець", "id8": "Калантаєва", "id9": "Лисих", "id10": "Оковитий",
+        "id11": "Павлов", "id12": "Радченко", "id13": "Скабардіна", "id14": "Удовіка", "id15": "Філатова",
+        "id16": "Холматова", "id17": "Шаповал"
     };
-    const str = {
-        "Літературне читання": ["Діагностична робота", "Вірш", "Творча робота"],
-        "Українська мова": ["Діагностична робота", "Свій вид діяльності"],
-        "Математика": ["Діагностична робота", "Самостійна робота"],
-        "Я досліджую світ": ["Діагностична робота", "Свій вид діяльності"],
-        "Дизайн і технології": ["Творча робота"]
-    };
+    const codes = {"id1":"26.12","id2":"01.04","id3":"13.02","id4":"15.02","id5":"01.10","id6":"11.12","id7":"05.07","id8":"12.02","id9":"31.01","id10":"17.06","id11":"26.04","id12":"25.04","id13":"15.01","id14":"27.10","id15":"24.06","id16":"04.03","id17":"04.05"};
+    const str = {"Літ. читання":["Діагн. робота","Вірш","Творча"],"Укр. мова":["Діагн. робота","Інше"],"Математика":["Діагн. робота","Самост. робота"],"ЯДС":["Діагн. робота","Інше"],"Дизайн":["Творча"]};
 
     for (let id in sts) {
-        document.getElementById('sSel').innerHTML += `<option value="${id}">${sts[id].name}</option>`;
-        document.getElementById('chkBox').innerHTML += `<label><input type="checkbox" value="${id}" onchange="upd()"> ${sts[id].name.split(' ')[0]}</label>`;
+        document.getElementById('sSel').innerHTML += `<option value="${id}">${sts[id]}</option>`;
+        document.getElementById('chkBox').innerHTML += `<label><input type="checkbox" value="${id}" onchange="upd()"> ${sts[id]}</label>`;
     }
     for (let s in str) str[s].forEach(c => document.getElementById('mSub').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
 
-    function upd() { document.getElementById('cnt').innerText = "Обрано: " + document.querySelectorAll('#chkBox input:checked').length; }
-    function sq(v) { document.getElementById('mSub').value = v; }
+    function showTab(n) {
+        document.getElementById('view1').classList.toggle('hidden', n!==1);
+        document.getElementById('view2').classList.toggle('hidden', n!==2);
+        document.getElementById('tab1').classList.toggle('active', n===1);
+        document.getElementById('tab2').classList.toggle('active', n===2);
+        if(n===2) loadJournal();
+    }
+
+    function upd() { document.getElementById('cnt').innerText = document.querySelectorAll('#chkBox input:checked').length; }
     function tgl(v) { document.querySelectorAll('#chkBox input').forEach(c => c.checked = v); upd(); }
-    
+
     function chk() {
         const id = document.getElementById('sSel').value;
         const code = document.getElementById('pCod').value.trim();
-        if (code === "21.08") {
-            document.getElementById('lgn').classList.add('hidden');
-            document.getElementById('adminPanel').classList.remove('hidden');
-            if (id) { document.getElementById('res').classList.remove('hidden'); load(id, true); }
-        } else if (id && sts[id].code === code) {
-            document.getElementById('lgn').classList.add('hidden');
-            document.getElementById('res').classList.remove('hidden');
-            load(id, false);
-        } else alert("Помилка!");
+        if (code === "21.08") { document.getElementById('lgn').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); if(id){document.getElementById('res').classList.remove('hidden'); load(id,true);} }
+        else if (id && codes[id] === code) { document.getElementById('lgn').classList.add('hidden'); document.getElementById('res').classList.remove('hidden'); load(id,false); }
+        else alert("Помилка!");
     }
 
     function addW() {
         const sel = Array.from(document.querySelectorAll('#chkBox input:checked')).map(c => c.value);
-        const subVal = document.getElementById('mSub').value;
+        const sub = document.getElementById('mSub').value.split('|');
         const task = document.getElementById('mTask').value.trim();
-        if (!subVal || !task || sel.length === 0) { alert("Заповніть усе!"); return; }
-        const s = subVal.split('|');
+        if (!task || sel.length === 0) return alert("Заповніть усе!");
         const d = new Date().toLocaleDateString('uk-UA').slice(0, 5);
+        const jKey = db.ref('journal').push().key;
+        let updates = {};
         sel.forEach(sid => {
             const k = db.ref().child('students').push().key;
-            db.ref(`students/${sid}/${s[0]}/${s[1]}/${k}`).set({date: d, val: task});
+            updates[`students/${sid}/${sub[0]}/${sub[1]}/${k}`] = {date: d, val: task, jKey: jKey};
         });
-        alert("Готово!"); tgl(false); document.getElementById('mTask').value = "";
+        updates[`journal/${jKey}`] = {date: d, task: task, sub: sub[0], cat: sub[1], students: sel};
+        db.ref().update(updates).then(() => { alert("Розіслано!"); tgl(false); document.getElementById('mTask').value=""; });
     }
 
-    async function rep() {
-        const a = document.getElementById('rArea'); a.classList.remove('hidden'); a.innerHTML = "⏳...";
-        const snap = await db.ref('students').once('value');
-        const data = snap.val() || {};
-        let h = "";
-        for (let s in str) {
-            str[s].forEach(c => {
-                let dbs = {};
-                for (let sid in sts) {
-                    const d = (data[sid] && data[sid][s] && data[sid][s][c]) ? data[sid][s][c] : {};
-                    for (let k in d) if (d[k].val) {
-                        if (!dbs[d[k].val]) dbs[d[k].val] = [];
-                        dbs[d[k].val].push(sts[sid].name.split(' ')[0]);
-                    }
+    function loadJournal() {
+        db.ref('journal').on('value', snap => {
+            const list = document.getElementById('journalList');
+            list.innerHTML = "";
+            const data = snap.val();
+            if (!data) { list.innerText = "Порожньо"; return; }
+            Object.keys(data).reverse().forEach(jKey => {
+                const j = data[jKey];
+                let html = `<div class="journal-item"><div class="journal-header"><span onclick="editJ('${jKey}','${j.task}')">✏️ ${j.sub}: ${j.task}</span><span style="color:red;cursor:pointer" onclick="delJ('${jKey}')">🗑</span></div><div style="margin-top:5px;">`;
+                if(j.students) {
+                    j.students.forEach(sid => {
+                        html += `<span class="debtor-tag" onclick="removeOne('${jKey}','${sid}')">${sts[sid]} ×</span>`;
+                    });
                 }
-                for (let t in dbs) h += `● ${s} (${t}): <span style="color:red">${dbs[t].join(', ')}</span><br>`;
+                html += `</div></div>`;
+                list.innerHTML += html;
             });
-        }
-        a.innerHTML = h || "✅ Боргів немає";
+        });
+    }
+
+    function editJ(key, cur) {
+        const n = prompt("Нова назва:", cur);
+        if(!n) return;
+        db.ref(`journal/${key}`).once('value', s => {
+            const j = s.val();
+            let up = {};
+            up[`journal/${key}/task`] = n;
+            j.students.forEach(sid => {
+                db.ref(`students/${sid}/${j.sub}/${j.cat}`).once('value', st => {
+                    const tasks = st.val();
+                    for(let k in tasks) if(tasks[k].jKey === key) up[`students/${sid}/${j.sub}/${j.cat}/${k}/val`] = n;
+                    db.ref().update(up);
+                });
+            });
+        });
+    }
+
+    function removeOne(jKey, sid) {
+        if(!confirm(`Учень здав роботу? Видалити борг для ${sts[sid]}?`)) return;
+        db.ref(`journal/${jKey}`).once('value', s => {
+            const j = s.val();
+            const newSts = j.students.filter(id => id !== sid);
+            db.ref(`journal/${jKey}/students`).set(newSts);
+            db.ref(`students/${sid}/${j.sub}/${j.cat}`).once('value', st => {
+                const tasks = st.val();
+                for(let k in tasks) if(tasks[k].jKey === jKey) db.ref(`students/${sid}/${j.sub}/${j.cat}/${k}`).remove();
+            });
+        });
+    }
+
+    function delJ(key) {
+        if(!confirm("Видалити всю розсилку для всіх учнів?")) return;
+        db.ref(`journal/${key}`).once('value', s => {
+            const j = s.val();
+            j.students.forEach(sid => {
+                db.ref(`students/${sid}/${j.sub}/${j.cat}`).once('value', st => {
+                    const tasks = st.val();
+                    for(let k in tasks) if(tasks[k].jKey === key) db.ref(`students/${sid}/${j.sub}/${j.cat}/${k}`).remove();
+                });
+            });
+            db.ref(`journal/${key}`).remove();
+        });
     }
 
     function load(id, edit) {
-        document.getElementById('sName').innerText = sts[id].name;
+        document.getElementById('sName').innerText = sts[id];
         db.ref('students/' + id).on('value', snap => {
             const data = snap.val() || {};
             const list = document.getElementById('dList'); list.innerHTML = "";
             for (let s in str) {
-                let div = document.createElement('div'); div.className = 'subject-group';
+                let div = document.createElement('div'); div.style.border="1px solid #eee"; div.style.padding="10px"; div.style.marginTop="10px";
                 div.innerHTML = `<h4 style="margin:0; color:#61309e;">${s}</h4>`;
-                str[s].forEach(c => {
-                    const items = (data[s] && data[s][c]) ? data[s][c] : {};
+                str[s].forEach(cat => {
+                    const items = (data[s] && data[s][cat]) ? data[s][cat] : {};
                     for (let k in items) {
-                        if (!edit && !items[k].val) continue;
-                        let row = document.createElement('div'); row.className = 'multi-row';
-                        row.innerHTML = `<span class="date-cell">${items[k].date}</span>
-                                         <span class="${edit?'status-debt':''}" onclick="${edit?`ed('${id}','${s}','${c}','${k}','${items[k].val}')`:''}">${items[k].val || 'немає ✅'}</span>`;
-                        if(edit) {
-                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="25px"; b.style.padding="2px"; b.style.background="none"; b.style.color="red"; b.style.border="none";
-                            b.onclick = () => db.ref(`students/${id}/${s}/${c}/${k}`).remove();
-                            row.appendChild(b);
-                        }
-                        div.appendChild(row);
+                        if (items[k].val) div.innerHTML += `<p style="font-size:14px;"><span style="background:#8352b2;color:#fff;padding:2px 5px;border-radius:4px;">${items[k].date}</span> <b>${items[k].val}</b></p>`;
                     }
                 });
                 list.appendChild(div);
             }
         });
-    }
-
-    function ed(sid, s, c, k, cur) {
-        let v = prompt("Змінити назву:", cur);
-        if (v !== null) db.ref(`students/${sid}/${s}/${c}/${k}/val`).set(v);
     }
 </script>
 </body>
