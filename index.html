@@ -12,26 +12,31 @@
         .card { background: rgba(255, 255, 255, 0.98); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(75, 22, 129, 0.4); width: 100%; max-width: 550px; position: relative; box-sizing: border-box; }
         .admin-panel { background: #f3ebf9; border: 2px solid #61309e; padding: 20px; border-radius: 15px; margin-bottom: 25px; }
         
-        .student-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: white; padding: 12px; border-radius: 10px; border: 1px solid #cbb2eb; margin-bottom: 15px; max-height: 200px; overflow-y: auto; }
-        .student-selector label { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 14px; color: #4b1681; margin: 0; cursor: pointer; }
-        .student-selector input { width: auto; margin: 0; cursor: pointer; }
+        .student-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; padding: 12px; border-radius: 10px; border: 1px solid #cbb2eb; margin-bottom: 15px; max-height: 180px; overflow-y: auto; }
+        .student-selector label { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 13px; color: #4b1681; cursor: pointer; }
+        
+        /* ПАНЕЛЬ ШВИДКОГО ДОСТУПУ */
+        .quick-access { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .quick-btn { background: #e9dcf5; color: #61309e; border: 1px solid #61309e; padding: 8px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .quick-btn:hover { background: #61309e; color: white; }
+        .quick-btn.active { background: #61309e; color: white; }
 
-        .report-box { background: white; border: 1px solid #cbb2eb; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 14px; max-height: 300px; overflow-y: auto; }
+        .history-box { background: #fff; border: 1px solid #cbb2eb; border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 150px; overflow-y: auto; font-size: 11px; color: #4b1681; }
+        .history-item { border-bottom: 1px solid #f3ebf9; padding: 5px 0; }
+
         h1 { color: #1a012b; text-align: center; margin-top: 0; }
         .subtitle { color: #8352b2; text-align: center; margin-bottom: 25px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #4b1681; font-size: 18px; }
-        select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 18px; box-sizing: border-box; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #4b1681; font-size: 16px; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 16px; box-sizing: border-box; margin-bottom: 15px; }
         button { width: 100%; padding: 15px; background-color: #61309e; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         
-        .btn-small { padding: 8px; font-size: 13px; width: 48%; display: inline-block; background: #cbb2eb; color: #4b1681; margin-bottom: 15px; }
-        
+        .btn-small { padding: 8px; font-size: 12px; width: 48%; display: inline-block; background: #cbb2eb; color: #4b1681; margin-bottom: 15px; }
         .subject-group { background: #fdfaff; border-radius: 15px; padding: 15px; margin-top: 20px; border: 1px solid #e9dcf5; }
         .subject-group h4 { color: #61309e; margin: 0; border-bottom: 2px solid #cbb2eb; }
         .multi-row { display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #f3ebf9; }
         .date-cell { background: #8352b2; color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; }
         .status-debt { color: #c0392b; font-weight: bold; flex-grow: 1; }
         .hidden { display: none; }
-        .editable-cat { color: #4b1681; font-weight: 800; cursor: pointer; text-decoration: underline dotted; }
     </style>
 </head>
 <body>
@@ -50,13 +55,24 @@
             <button class="btn-small" onclick="toggleAll(false)">Скинути</button>
         </div>
 
-        <label style="font-size:14px;">Предмет та робота:</label>
+        <label style="font-size:14px;">Швидкий вибір предмета:</label>
+        <div class="quick-access">
+            <div class="quick-btn" onclick="setQuick('Математика|Самостійна робота')">Матем. (СР)</div>
+            <div class="quick-btn" onclick="setQuick('Математика|Діагностична робота')">Матем. (ДР)</div>
+            <div class="quick-btn" onclick="setQuick('Українська мова|Діагностична робота')">Укр. мова (ДР)</div>
+            <div class="quick-btn" onclick="setQuick('Літературне читання|Вірш')">Читання (Вірш)</div>
+            <div class="quick-btn" onclick="setQuick('Я досліджую світ|Діагностична робота')">ЯДС (ДР)</div>
+            <div class="quick-btn" onclick="setQuick('Дизайн і технології|Творча робота')">Дизайн (Творча)</div>
+        </div>
+
         <select id="massSub" style="padding:8px; font-size:14px;">
-            <option value="">-- Оберіть предмет --</option>
+            <option value="">-- Або оберіть зі списку --</option>
         </select>
-        <input type="text" id="massTask" placeholder="Назва боргу" style="padding:8px; font-size:14px;">
+        <input type="text" id="massTask" placeholder="Назва боргу (напр. Стор. 12)" style="padding:8px; font-size:14px;">
         
         <button id="addBtn" onclick="addSelectedWork()" style="background:#4b1681;">Додати обраним</button>
+        
+        <div id="historyList" class="history-box">Історія...</div>
         <hr style="border:1px solid #cbb2eb; margin:15px 0;">
         <button onclick="generateReport()" style="background:#27ae60; padding:10px; font-size:14px;">📊 Звіт по боргах</button>
         <div id="reportArea" class="report-box hidden"></div>
@@ -64,9 +80,7 @@
 
     <div id="loginSection">
         <label>Оберіть учня:</label>
-        <select id="studentSelect">
-            <option value="">-- Список учнів --</option>
-        </select>
+        <select id="studentSelect"><option value="">-- Список учнів --</option></select>
         <label>Введіть код:</label>
         <input type="text" id="passCode" placeholder="Наприклад: 00.00" onkeypress="if(event.key==='Enter') checkData()">
         <button onclick="checkData()">Увійти</button>
@@ -127,6 +141,14 @@
         });
     }
 
+    function setQuick(val) {
+        document.getElementById('massSub').value = val;
+        document.querySelectorAll('.quick-btn').forEach(b => {
+            b.classList.remove('active');
+            if(b.innerText.includes(val.split('|')[0].substring(0,4))) b.classList.add('active');
+        });
+    }
+
     function toggleAll(val) {
         document.querySelectorAll('#massCheckboxes input').forEach(c => c.checked = val);
     }
@@ -137,45 +159,52 @@
         if (code === "21.08") {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('adminPanel').classList.remove('hidden');
+            loadHistory();
             if (id) { document.getElementById('result').classList.remove('hidden'); loadData(id, true); }
             else { document.getElementById('studentNameDisplay').innerText = "Панель вчителя"; }
         } else if (id && students[id] && students[id].code === code) {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('result').classList.remove('hidden');
             loadData(id, false);
-        } else { alert("Невірний код!"); }
+        } else { alert("Помилка!"); }
     }
 
     function addSelectedWork() {
-        const selected = Array.from(document.querySelectorAll('#massCheckboxes input:checked')).map(c => c.value);
+        const selectedIds = Array.from(document.querySelectorAll('#massCheckboxes input:checked')).map(c => c.value);
         const subVal = document.getElementById('massSub').value;
         const task = document.getElementById('massTask').value.trim();
-        
-        if (!subVal || !task || selected.length === 0) { 
-            alert("Оберіть учнів, предмет та впишіть назву роботи!"); 
-            return; 
-        }
-        
+        if (!subVal || !task || selectedIds.length === 0) { alert("Заповніть поля!"); return; }
         const val = subVal.split('|');
-        
-        if (confirm(`Додати борг "${task}" для ${selected.length} учнів?`)) {
-            const date = new Date().toLocaleDateString('uk-UA').slice(0, 5);
-            selected.forEach(sid => {
+        const date = new Date().toLocaleDateString('uk-UA').slice(0, 5);
+        if (confirm(`Додати борг "${task}" для ${selectedIds.length} учнів?`)) {
+            selectedIds.forEach(sid => {
                 const key = database.ref().child('students').push().key;
                 database.ref(`students/${sid}/${val[0]}/${val[1]}/${key}`).set({date: date, val: task});
             });
-            
-            // ОЧИЩЕННЯ ПІСЛЯ ЗБЕРЕЖЕННЯ
-            alert("Готово! Дані оновлено.");
-            toggleAll(false); // Скинути всі галочки
-            document.getElementById('massTask').value = ""; // Очистити назву роботи
-            document.getElementById('massSub').value = ""; // Повернути вибір предмета на початок
+            database.ref('history').push({ date: date, task: task, subject: val[0], students: selectedIds.map(id => students[id].name.split(' ')[0]).join(', ') });
+            alert("Виконано!");
+            toggleAll(false);
+            document.getElementById('massTask').value = "";
+            document.getElementById('massSub').value = "";
+            document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
         }
+    }
+
+    function loadHistory() {
+        database.ref('history').limitToLast(8).on('value', snap => {
+            const list = document.getElementById('historyList');
+            list.innerHTML = "";
+            const data = snap.val();
+            if (!data) { list.innerText = "Історія порожня"; return; }
+            Object.values(data).reverse().forEach(h => {
+                list.innerHTML += `<div class="history-item"><b>${h.date}</b> - ${h.subject}: ${h.task}</div>`;
+            });
+        });
     }
 
     async function generateReport() {
         const area = document.getElementById('reportArea');
-        area.classList.remove('hidden'); area.innerHTML = "⏳ Оновлення...";
+        area.classList.remove('hidden'); area.innerHTML = "⏳...";
         const snap = await database.ref('students').once('value');
         const allData = snap.val() || {};
         let html = "<strong>Звіт:</strong><br>";
@@ -218,7 +247,7 @@
                         row.className = 'multi-row';
                         row.innerHTML = `<span class="date-cell">${items[k].date}</span><span class="${items[k].val ? 'status-debt':'status-ok'}">${items[k].val || 'немає ✅'}</span>`;
                         if(canEdit) {
-                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.style.background="none"; b.style.color="red"; b.style.border="none"; b.style.fontSize="20px";
+                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.style.background="none"; b.style.color="red"; b.style.border="none";
                             b.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${k}`).remove();
                             row.appendChild(b);
                         }
