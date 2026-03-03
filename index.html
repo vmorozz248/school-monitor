@@ -24,12 +24,13 @@
         .date-cell { background: #8352b2; color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; }
         .status-debt { color: #c0392b; font-weight: bold; flex-grow: 1; }
         .hidden { display: none; }
+        .editable-cat { color: #4b1681; font-weight: 800; cursor: pointer; text-decoration: underline dotted; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="help-btn" onclick="alert('Код 21.08 дає доступ до панелі вчителя.')">?</div>
+    <div class="help-btn" onclick="alert('Для батьків код — це дата народження. Для вчителя — персональний пароль.')">?</div>
     <h1>Шкільний монітор</h1>
     <p class="subtitle">Керування заборгованістю</p>
 
@@ -68,7 +69,7 @@
         </select>
 
         <label>Введіть код:</label>
-        <input type="text" id="passCode" placeholder="Наприклад: 21.08" onkeypress="if(event.key==='Enter') checkData()">
+        <input type="text" id="passCode" placeholder="Наприклад: 00.00" onkeypress="if(event.key==='Enter') checkData()">
 
         <button onclick="checkData()">Увійти</button>
     </div>
@@ -99,11 +100,11 @@
         "id3": { code: "13.02", name: "Водолазьку Соломію" }, "id4": { code: "15.02", name: "Гомонюк Софію" },
         "id5": { code: "01.10", name: "Деміденко Аріну" }, "id6": { code: "11.12", name: "Єлісеєва Дмитра" },
         "id7": { code: "05.07", name: "Іванця Тімура" }, "id8": { code: "12.02", name: "Калантаєву Анастасію" },
-        "id9": { code: "31.01", name: "Лисих Ліана" }, "id10": { code: "17.06", name: "Оковитого Максима" },
+        "id9": { code: "31.01", name: "Лисих Ліану" }, "id10": { code: "17.06", name: "Оковитого Максима" },
         "id11": { code: "26.04", name: "Павлова Тимура" }, "id12": { code: "25.04", name: "Радченко Владиславу" },
         "id13": { code: "15.01", name: "Скабардіна Мілослава" }, "id14": { code: "27.10", name: "Удовіка Макара" },
-        "id15": { code: "24.06", name: "Філатову Ульяну" }, "id16": { code: "04.03", name: "Холматову Віолетту" },
-        "id17": { code: "04.05", name: "Шаповала Тимура" }
+        "id15": { code: "24.06", name: "Філатову Ульяну" }, "id16": { code: "04.03", name: "Холматова Віолетта" },
+        "id17": { code: "04.05", name: "Шаповал Тимура" }
     };
 
     const structure = {
