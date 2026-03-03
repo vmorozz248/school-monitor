@@ -6,63 +6,34 @@
     <title>Шкільний монітор</title>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-image: url('background.jpg'); background-size: cover; background-position: center; background-attachment: fixed; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
-        .card { background: rgba(255, 255, 255, 0.98); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(75, 22, 129, 0.4); width: 100%; max-width: 550px; position: relative; box-sizing: border-box; }
-        .admin-panel { background: #f3ebf9; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f0f9; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); width: 100%; max-width: 500px; box-sizing: border-box; }
+        .admin-panel { background: #f9f5ff; border: 2px solid #61309e; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
         
-        /* СУВОРА СІТКА ДЛЯ СПИСКУ УЧНІВ */
+        /* СУВОРА СІТКА ДЛЯ СПИСКУ */
         .student-selector { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            background: white; 
-            padding: 15px; 
-            border-radius: 10px; 
-            border: 1px solid #cbb2eb; 
-            margin-bottom: 15px; 
-            max-height: 200px; 
-            overflow-y: scroll; /* Завжди показувати прокрутку для стабільності */
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
+            background: white; padding: 10px; border: 1px solid #ddd; 
+            border-radius: 8px; max-height: 180px; overflow-y: auto; margin-bottom: 10px;
         }
-        .student-selector label { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            font-weight: normal; 
-            font-size: 14px; 
-            color: #4b1681;
-            margin: 0;
-            cursor: pointer;
-            white-space: nowrap; /* Прізвища в один рядок */
-        }
-        .student-selector input[type="checkbox"] { 
-            width: 18px; 
-            height: 18px; 
-            margin: 0; 
-            cursor: pointer; 
-            flex-shrink: 0; 
-        }
+        .student-selector label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+        .student-selector input { width: 18px; height: 18px; margin: 0; }
 
-        .quick-access { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-        .quick-btn { background: #e9dcf5; color: #61309e; border: 1px solid #61309e; padding: 6px 10px; border-radius: 15px; font-size: 11px; cursor: pointer; font-weight: bold; }
+        .quick-access { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+        .quick-btn { background: #eee; border: 1px solid #ccc; padding: 5px 8px; border-radius: 10px; font-size: 11px; cursor: pointer; }
         .quick-btn.active { background: #61309e; color: white; }
 
-        .history-box { background: #fff; border: 1px solid #cbb2eb; border-radius: 8px; padding: 10px; margin-top: 10px; max-height: 120px; overflow-y: auto; font-size: 11px; }
-        .history-item { border-bottom: 1px solid #f3ebf9; padding: 4px 0; color: #4b1681; }
-
-        h1 { color: #1a012b; text-align: center; margin: 0 0 5px 0; font-size: 26px; }
-        .subtitle { color: #8352b2; text-align: center; margin-bottom: 20px; font-size: 16px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #4b1681; font-size: 15px; }
-        select, input { width: 100%; padding: 10px; border: 2px solid #e9dcf5; border-radius: 10px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px; }
-        button { width: 100%; padding: 14px; background-color: #61309e; color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: bold; cursor: pointer; }
+        h1 { color: #1a012b; text-align: center; font-size: 24px; margin: 0; }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 14px; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }
+        button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         
-        .btn-small { padding: 6px; font-size: 12px; width: 48%; display: inline-block; background: #cbb2eb; color: #4b1681; margin-bottom: 10px; }
-        .subject-group { background: #fdfaff; border-radius: 12px; padding: 12px; margin-top: 15px; border: 1px solid #e9dcf5; }
-        .subject-group h4 { color: #61309e; margin: 0 0 8px 0; border-bottom: 2px solid #cbb2eb; }
-        .multi-row { display: flex; align-items: center; gap: 8px; background: white; padding: 8px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #f3ebf9; }
-        .date-cell { background: #8352b2; color: white; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 13px; }
-        .status-debt { color: #c0392b; font-weight: bold; flex-grow: 1; font-size: 14px; }
+        .history-box { font-size: 11px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 5px; }
+        .subject-group { border: 1px solid #eee; padding: 10px; margin-top: 10px; border-radius: 8px; }
+        .multi-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; font-size: 14px; }
+        .date-cell { background: #8352b2; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        .status-debt { color: red; font-weight: bold; }
         .hidden { display: none; }
     </style>
 </head>
@@ -70,50 +41,32 @@
 
 <div class="card">
     <h1>Шкільний монітор</h1>
-    <p class="subtitle">Керування заборгованістю</p>
-
     <div id="adminPanel" class="admin-panel hidden">
-        <h3 style="color:#61309e; margin:0 0 10px 0; font-size: 18px;">Панель вчителя 👩‍🏫</h3>
-        
-        <label>Кому додати борг?</label>
         <div class="student-selector" id="massCheckboxes"></div>
-        <div style="display: flex; justify-content: space-between;">
-            <button class="btn-small" onclick="toggleAll(true)">Обрати всіх</button>
-            <button class="btn-small" onclick="toggleAll(false)">Скинути</button>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <button style="padding:5px; font-size:12px;" onclick="toggleAll(true)">Обрати всіх</button>
+            <button style="padding:5px; font-size:12px;" onclick="toggleAll(false)">Скинути</button>
         </div>
-
-        <label>Швидкий предмет:</label>
         <div class="quick-access">
-            <div class="quick-btn" onclick="setQuick('Математика|Самостійна робота')">Матем. (СР)</div>
-            <div class="quick-btn" onclick="setQuick('Математика|Діагностична робота')">Матем. (ДР)</div>
-            <div class="quick-btn" onclick="setQuick('Українська мова|Діагностична робота')">Укр. мова (ДР)</div>
-            <div class="quick-btn" onclick="setQuick('Літературне читання|Вірш')">Читання (Вірш)</div>
-            <div class="quick-btn" onclick="setQuick('Я досліджую світ|Діагностична робота')">ЯДС (ДР)</div>
-            <div class="quick-btn" onclick="setQuick('Дизайн і технології|Творча робота')">Дизайн</div>
+            <div class="quick-btn" onclick="setQuick('Математика|Самостійна робота')">Мат (СР)</div>
+            <div class="quick-btn" onclick="setQuick('Українська мова|Діагностична робота')">Укр (ДР)</div>
+            <div class="quick-btn" onclick="setQuick('Літературне читання|Вірш')">Вірш</div>
         </div>
-
         <select id="massSub"><option value="">-- Предмет --</option></select>
-        <input type="text" id="massTask" placeholder="Назва (напр. Стор. 12)">
-        
-        <button id="addBtn" onclick="addSelectedWork()" style="background:#4b1681;">Додати обраним</button>
-        
-        <div id="historyList" class="history-box">Історія...</div>
-        <hr style="border:1px solid #cbb2eb; margin:15px 0;">
-        <button onclick="generateReport()" style="background:#27ae60; padding:10px; font-size:14px;">📊 Звіт по боргах</button>
-        <div id="reportArea" class="report-box hidden"></div>
+        <input type="text" id="massTask" placeholder="Назва роботи">
+        <button onclick="addSelectedWork()">Додати обраним</button>
+        <div id="historyList" class="history-box"></div>
     </div>
 
     <div id="loginSection">
-        <label>Оберіть учня:</label>
-        <select id="studentSelect"><option value="">-- Список учнів --</option></select>
-        <label>Код:</label>
-        <input type="text" id="passCode" placeholder="00.00" onkeypress="if(event.key==='Enter') checkData()">
+        <select id="studentSelect"><option value="">-- Учень --</option></select>
+        <input type="text" id="passCode" placeholder="Код" onkeypress="if(event.key==='Enter') checkData()">
         <button onclick="checkData()">Увійти</button>
     </div>
 
     <div id="result" class="hidden">
-        <button onclick="location.reload()" style="background:#e9dcf5; color:#61309e; padding:8px; font-size:13px; margin-bottom:10px; width: auto;">⬅ Назад</button>
-        <h3 id="studentNameDisplay" style="text-align:center; color:#4b1681;"></h3>
+        <button onclick="location.reload()" style="width:auto; padding:5px 10px; margin-bottom:10px;">⬅ Вийти</button>
+        <h3 id="studentNameDisplay"></h3>
         <div id="debtList"></div>
     </div>
 </div>
@@ -128,7 +81,6 @@
         messagingSenderId: "838073337449",
         appId: "1:838073337449:web:33a254365be4761b0544f8"
     };
-
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
@@ -143,7 +95,6 @@
         "id15": { code: "24.06", name: "Філатова Ульяна" }, "id16": { code: "04.03", name: "Холматова Віолетта" },
         "id17": { code: "04.05", name: "Шаповал Тимур" }
     };
-
     const structure = {
         "Літературне читання": ["Діагностична робота", "Вірш", "Творча робота"],
         "Українська мова": ["Діагностична робота", "Свій вид діяльності"],
@@ -158,25 +109,11 @@
         sel.innerHTML += `<option value="${id}">${students[id].name}</option>`;
         chkArea.innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
     }
-
     const mSub = document.getElementById('massSub');
-    for (let s in structure) {
-        structure[s].forEach(c => {
-            mSub.innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`;
-        });
-    }
+    for (let s in structure) structure[s].forEach(c => mSub.innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
 
-    function setQuick(val) {
-        document.getElementById('massSub').value = val;
-        document.querySelectorAll('.quick-btn').forEach(b => {
-            b.classList.remove('active');
-            if(val.includes(b.innerText.split('.')[0])) b.classList.add('active');
-        });
-    }
-
-    function toggleAll(val) {
-        document.querySelectorAll('#massCheckboxes input').forEach(c => c.checked = val);
-    }
+    function setQuick(v) { document.getElementById('massSub').value = v; }
+    function toggleAll(v) { document.querySelectorAll('#massCheckboxes input').forEach(c => c.checked = v); }
 
     function checkData() {
         const id = document.getElementById('studentSelect').value;
@@ -184,102 +121,47 @@
         if (code === "21.08") {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('adminPanel').classList.remove('hidden');
-            loadHistory();
             if (id) { document.getElementById('result').classList.remove('hidden'); loadData(id, true); }
-            else { document.getElementById('studentNameDisplay').innerText = "Панель вчителя"; }
-        } else if (id && students[id] && students[id].code === code) {
+        } else if (id && students[id].code === code) {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('result').classList.remove('hidden');
             loadData(id, false);
-        } else { alert("Невірний код!"); }
+        } else alert("Помилка!");
     }
 
     function addSelectedWork() {
-        const selectedIds = Array.from(document.querySelectorAll('#massCheckboxes input:checked')).map(c => c.value);
-        const subVal = document.getElementById('massSub').value;
+        const selected = Array.from(document.querySelectorAll('#massCheckboxes input:checked')).map(c => c.value);
+        const sub = document.getElementById('massSub').value.split('|');
         const task = document.getElementById('massTask').value.trim();
-        if (!subVal || !task || selectedIds.length === 0) { alert("Заповніть поля!"); return; }
-        const val = subVal.split('|');
+        if (!task || selected.length === 0) return;
         const date = new Date().toLocaleDateString('uk-UA').slice(0, 5);
-        if (confirm(`Додати борг "${task}" для ${selectedIds.length} учнів?`)) {
-            selectedIds.forEach(sid => {
-                const key = database.ref().child('students').push().key;
-                database.ref(`students/${sid}/${val[0]}/${val[1]}/${key}`).set({date: date, val: task});
-            });
-            database.ref('history').push({ date: date, task: task, subject: val[0] });
-            alert("Виконано!");
-            toggleAll(false);
-            document.getElementById('massTask').value = "";
-            document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
-        }
-    }
-
-    function loadHistory() {
-        database.ref('history').limitToLast(5).on('value', snap => {
-            const list = document.getElementById('historyList');
-            list.innerHTML = "";
-            const data = snap.val();
-            if (!data) { list.innerText = "Історія порожня"; return; }
-            Object.values(data).reverse().forEach(h => {
-                list.innerHTML += `<div class="history-item"><b>${h.date}</b> - ${h.subject}: ${h.task}</div>`;
-            });
+        selected.forEach(sid => {
+            const k = database.ref().child('students').push().key;
+            database.ref(`students/${sid}/${sub[0]}/${sub[1]}/${k}`).set({date: date, val: task});
         });
+        alert("Додано!");
+        toggleAll(false); document.getElementById('massTask').value = "";
     }
 
-    async function generateReport() {
-        const area = document.getElementById('reportArea');
-        area.classList.remove('hidden'); area.innerHTML = "⏳ Оновлення...";
-        const snap = await database.ref('students').once('value');
-        const allData = snap.val() || {};
-        let html = "<strong>Звіт:</strong><br>";
-        for (let sub in structure) {
-            structure[sub].forEach(cat => {
-                let debts = {};
-                for (let sid in students) {
-                    const d = (allData[sid] && allData[sid][sub] && allData[sid][sub][cat]) ? allData[sid][sub][cat] : {};
-                    for (let k in d) if (d[k].val) {
-                        if (!debts[d[k].val]) debts[d[k].val] = [];
-                        debts[d[k].val].push(students[sid].name.split(' ')[0]);
-                    }
-                }
-                for (let t in debts) html += `● ${sub} (${t}): <span style="color:red">${debts[t].join(', ')}</span><br>`;
-            });
-        }
-        area.innerHTML = html || "✅ Боргів немає";
-    }
-
-    function loadData(id, canEdit) {
+    function loadData(id, edit) {
         document.getElementById('studentNameDisplay').innerText = students[id].name;
         database.ref('students/' + id).on('value', snap => {
             const data = snap.val() || {};
-            const list = document.getElementById('debtList');
-            list.innerHTML = "";
+            const list = document.getElementById('debtList'); list.innerHTML = "";
             for (let sub in structure) {
-                let div = document.createElement('div');
-                div.className = 'subject-group';
+                let div = document.createElement('div'); div.className = 'subject-group';
                 div.innerHTML = `<h4>${sub}</h4>`;
                 structure[sub].forEach(cat => {
-                    const name = (data.config && data.config[sub] && data.config[sub][cat]) ? data.config[sub][cat] : cat;
-                    let p = document.createElement('p'); p.style.margin = "5px 0";
-                    p.innerHTML = `<span style="font-weight:bold; color:#4b1681;">${name}</span>`;
-                    div.appendChild(p);
                     const items = (data[sub] && data[sub][cat]) ? data[sub][cat] : {};
                     for (let k in items) {
-                        if (!canEdit && !items[k].val) continue;
-                        let row = document.createElement('div');
-                        row.className = 'multi-row';
-                        row.innerHTML = `<span class="date-cell">${items[k].date}</span><span class="${items[k].val ? 'status-debt':'status-ok'}">${items[k].val || 'немає ✅'}</span>`;
-                        if(canEdit) {
-                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.style.background="none"; b.style.color="red"; b.style.border="none"; b.style.fontSize="18px";
-                            b.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${k}`).remove();
+                        if (!edit && !items[k].val) continue;
+                        let row = document.createElement('div'); row.className = 'multi-row';
+                        row.innerHTML = `<span class="date-cell">${items[k].date}</span><span class="${items[k].val?'status-debt':''}">${items[k].val || 'немає ✅'}</span>`;
+                        if(edit) {
+                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${k}`).remove();
                             row.appendChild(b);
                         }
                         div.appendChild(row);
-                    }
-                    if (canEdit) {
-                        let add = document.createElement('button'); add.innerText = "+"; add.style.padding="2px"; add.style.width="35px";
-                        add.onclick = () => { const k = database.ref().child('students').push().key; database.ref(`students/${id}/${sub}/${cat}/${k}`).set({date: new Date().toLocaleDateString('uk-UA').slice(0,5), val: ""}); };
-                        div.appendChild(add);
                     }
                 });
                 list.appendChild(div);
