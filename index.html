@@ -8,33 +8,21 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.jpg') no-repeat center center fixed; background-size: cover; margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 550px; }
+        .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 550px; box-sizing: border-box; }
         .admin-panel { background: #fdfaff; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
-        
-        /* ТАБЛИЧНИЙ СПИСОК УЧНІВ - НЕ З'ЇЖДЖАЄ */
-        .student-grid { 
-            display: flex; flex-wrap: wrap; gap: 5px; 
-            background: white; padding: 10px; border: 1px solid #ddd; 
-            border-radius: 10px; max-height: 180px; overflow-y: auto; 
-        }
-        .student-grid label { 
-            width: 47%; display: flex; align-items: center; gap: 8px; 
-            font-size: 13px; color: #4b1681; cursor: pointer; padding: 2px;
-        }
-        .student-grid input { width: 18px; height: 18px; cursor: pointer; }
-
+        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 10px; max-height: 180px; overflow-y: auto; }
+        .student-grid label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b1681; cursor: pointer; }
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
-        .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; }
+        .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
-
         .journal-item { background: white; border: 1px solid #e9dcf5; padding: 10px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; }
-        .journal-header { display: flex; justify-content: space-between; font-weight: bold; color: #61309e; border-bottom: 1px solid #f3ebf9; padding-bottom: 5px; }
-        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 2px 8px; border-radius: 10px; margin: 2px; cursor: pointer; }
-        .debtor-tag:hover { background: #ffcccc; color: red; text-decoration: line-through; }
-
+        .journal-header { display: flex; justify-content: space-between; font-weight: bold; color: #61309e; border-bottom: 1px solid #f3ebf9; padding-bottom: 5px; margin-bottom: 5px; }
+        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 2px 8px; border-radius: 10px; margin: 2px; cursor: pointer; font-size: 11px; }
+        .debtor-tag:hover { background: #ffcccc; color: red; }
         h1 { color: #1a012b; text-align: center; font-size: 24px; margin-bottom: 10px; }
-        select, input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 10px; border-radius: 10px; margin-top: 10px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -45,36 +33,36 @@
     <div id="adminPanel" class="admin-panel hidden">
         <div class="tab-menu">
             <div id="tab1" class="tab active" onclick="showTab(1)">➕ Додати борг</div>
-            <div id="tab2" class="tab" onclick="showTab(2)">📓 Журнал розсилок</div>
+            <div id="tab2" class="tab" onclick="showTab(2)">📓 Журнал / Звіт</div>
         </div>
 
         <div id="view1">
-            <label style="font-size:12px; font-weight:bold;">Кому додати? (Обрано: <span id="cnt">0</span>)</label>
-            <div class="student-grid" id="chkBox"></div>
-            <div style="display:flex; gap:5px; margin: 10px 0;">
-                <button style="padding:5px; font-size:11px;" onclick="tgl(true)">Усі</button>
-                <button style="padding:5px; font-size:11px;" onclick="tgl(false)">Скинути</button>
+            <label style="font-size:12px; font-weight:bold; color:#61309e;">Оберіть учнів:</label>
+            <div class="student-grid" id="chkBoxArea"></div>
+            <div style="display:flex; gap:10px; margin: 10px 0;">
+                <button style="padding:5px; font-size:12px; background:#cbb2eb; color:#4b1681;" onclick="selectAll(true)">Усі</button>
+                <button style="padding:5px; font-size:12px; background:#cbb2eb; color:#4b1681;" onclick="selectAll(false)">Скинути</button>
             </div>
-            <select id="mSub"><option value="">-- Оберіть предмет --</option></select>
-            <input type="text" id="mTask" placeholder="Назва роботи">
-            <button onclick="addW()">Розіслати борг</button>
+            <select id="massSubSelect"><option value="">-- Предмет --</option></select>
+            <input type="text" id="massTaskInput" placeholder="Назва роботи">
+            <button onclick="sendMassDebt()">Розіслати борг</button>
         </div>
 
         <div id="view2" class="hidden">
-            <div id="journalList">Завантаження журналу...</div>
+            <div id="journalListArea">Завантаження...</div>
         </div>
     </div>
 
-    <div id="lgn">
-        <select id="sSel"><option value="">-- Учень --</option></select>
-        <input type="text" id="pCod" placeholder="Код">
-        <button onclick="chk()">Увійти</button>
+    <div id="loginForm">
+        <select id="userSelect"><option value="">-- Оберіть учня --</option></select>
+        <input type="text" id="passInput" placeholder="Код (дата народження)" onkeypress="handleEnter(event)">
+        <button onclick="tryLogin()">Увійти</button>
     </div>
 
-    <div id="res" class="hidden">
-        <button onclick="location.reload()" style="width:auto; padding:5px 10px;">⬅ Назад</button>
-        <h3 id="sName" style="text-align:center;"></h3>
-        <div id="dList"></div>
+    <div id="resultView" class="hidden">
+        <button onclick="location.reload()" style="width:auto; padding:5px 15px; margin-bottom:15px;">⬅ Назад</button>
+        <h3 id="displayStudentName" style="text-align:center; color:#4b1681;"></h3>
+        <div id="individualDebtList"></div>
     </div>
 </div>
 
@@ -90,136 +78,179 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const sts = {
-        "id1": "Астахова", "id2": "Бабенко", "id3": "Водолазька", "id4": "Гомонюк", "id5": "Деміденко",
-        "id6": "Єлісеєв", "id7": "Іванець", "id8": "Калантаєва", "id9": "Лисих", "id10": "Оковитий",
-        "id11": "Павлов", "id12": "Радченко", "id13": "Скабардіна", "id14": "Удовіка", "id15": "Філатова",
-        "id16": "Холматова", "id17": "Шаповал"
-    };
-    const codes = {"id1":"26.12","id2":"01.04","id3":"13.02","id4":"15.02","id5":"01.10","id6":"11.12","id7":"05.07","id8":"12.02","id9":"31.01","id10":"17.06","id11":"26.04","id12":"25.04","id13":"15.01","id14":"27.10","id15":"24.06","id16":"04.03","id17":"04.05"};
-    const str = {"Літ. читання":["Діагн. робота","Вірш","Творча"],"Укр. мова":["Діагн. робота","Інше"],"Математика":["Діагн. робота","Самост. робота"],"ЯДС":["Діагн. робота","Інше"],"Дизайн":["Творча"]};
 
-    for (let id in sts) {
-        document.getElementById('sSel').innerHTML += `<option value="${id}">${sts[id]}</option>`;
-        document.getElementById('chkBox').innerHTML += `<label><input type="checkbox" value="${id}" onchange="upd()"> ${sts[id]}</label>`;
+    const students = {
+        "id1": { name: "Астахова Є.", code: "26.12" }, "id2": { name: "Бабенко П.", code: "01.04" },
+        "id3": { name: "Водолазька С.", code: "13.02" }, "id4": { name: "Гомонюк С.", code: "15.02" },
+        "id5": { name: "Деміденко А.", code: "01.10" }, "id6": { name: "Єлісеєв Д.", code: "11.12" },
+        "id7": { name: "Іванець Т.", code: "05.07" }, "id8": { name: "Калантаєва А.", code: "12.02" },
+        "id9": { name: "Лисих Л.", code: "31.01" }, "id10": { name: "Оковитий М.", code: "17.06" },
+        "id11": { name: "Павлов Т.", code: "26.04" }, "id12": { name: "Радченко В.", code: "25.04" },
+        "id13": { name: "Скабардіна М.", code: "15.01" }, "id14": { name: "Удовіка М.", code: "27.10" },
+        "id15": { name: "Філатова У.", code: "24.06" }, "id16": { name: "Холматова В.", code: "04.03" },
+        "id17": { name: "Шаповал Т.", code: "04.05" }
+    };
+
+    const subjects = {
+        "Літературне читання": ["Діагностична робота", "Вірш", "Творча робота"],
+        "Українська мова": ["Діагностична робота", "Інше"],
+        "Математика": ["Діагностична робота", "Самостійна робота"],
+        "Я досліджую світ": ["Діагностична робота", "Інше"],
+        "Дизайн і технології": ["Творча робота"]
+    };
+
+    // Ініціалізація списків
+    const uSel = document.getElementById('userSelect');
+    const chkArea = document.getElementById('chkBoxArea');
+    for (let id in students) {
+        uSel.innerHTML += `<option value="${id}">${students[id].name}</option>`;
+        chkArea.innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
     }
-    for (let s in str) str[s].forEach(c => document.getElementById('mSub').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
+    const mSub = document.getElementById('massSubSelect');
+    for (let s in subjects) subjects[s].forEach(c => mSub.innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
+
+    function handleEnter(e) { if (e.key === 'Enter') tryLogin(); }
 
     function showTab(n) {
-        document.getElementById('view1').classList.toggle('hidden', n!==1);
-        document.getElementById('view2').classList.toggle('hidden', n!==2);
-        document.getElementById('tab1').classList.toggle('active', n===1);
-        document.getElementById('tab2').classList.toggle('active', n===2);
-        if(n===2) loadJournal();
+        document.getElementById('view1').classList.toggle('hidden', n !== 1);
+        document.getElementById('view2').classList.toggle('hidden', n !== 2);
+        document.getElementById('tab1').classList.toggle('active', n === 1);
+        document.getElementById('tab2').classList.toggle('active', n === 2);
+        if (n === 2) loadJournal();
     }
 
-    function upd() { document.getElementById('cnt').innerText = document.querySelectorAll('#chkBox input:checked').length; }
-    function tgl(v) { document.querySelectorAll('#chkBox input').forEach(c => c.checked = v); upd(); }
+    function selectAll(v) { document.querySelectorAll('#chkBoxArea input').forEach(c => c.checked = v); }
 
-    function chk() {
-        const id = document.getElementById('sSel').value;
-        const code = document.getElementById('pCod').value.trim();
-        if (code === "21.08") { document.getElementById('lgn').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); if(id){document.getElementById('res').classList.remove('hidden'); load(id,true);} }
-        else if (id && codes[id] === code) { document.getElementById('lgn').classList.add('hidden'); document.getElementById('res').classList.remove('hidden'); load(id,false); }
-        else alert("Помилка!");
+    function tryLogin() {
+        const id = document.getElementById('userSelect').value;
+        const code = document.getElementById('passInput').value.trim();
+        if (code === "21.08") {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            if (id) { document.getElementById('resultView').classList.remove('hidden'); loadIndividualData(id, true); }
+        } else if (id && students[id].code === code) {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('resultView').classList.remove('hidden');
+            loadIndividualData(id, false);
+        } else alert("Невірний код!");
     }
 
-    function addW() {
-        const sel = Array.from(document.querySelectorAll('#chkBox input:checked')).map(c => c.value);
-        const sub = document.getElementById('mSub').value.split('|');
-        const task = document.getElementById('mTask').value.trim();
-        if (!task || sel.length === 0) return alert("Заповніть усе!");
-        const d = new Date().toLocaleDateString('uk-UA').slice(0, 5);
-        const jKey = db.ref('journal').push().key;
+    function sendMassDebt() {
+        const selected = Array.from(document.querySelectorAll('#chkBoxArea input:checked')).map(c => c.value);
+        const subData = document.getElementById('massSubSelect').value.split('|');
+        const task = document.getElementById('massTaskInput').value.trim();
+        if (!task || selected.length === 0 || !subData[0]) return alert("Заповніть усе!");
+        
+        const date = new Date().toLocaleDateString('uk-UA').slice(0, 5);
+        const journalKey = db.ref('journal').push().key;
         let updates = {};
-        sel.forEach(sid => {
-            const k = db.ref().child('students').push().key;
-            updates[`students/${sid}/${sub[0]}/${sub[1]}/${k}`] = {date: d, val: task, jKey: jKey};
+        
+        selected.forEach(sid => {
+            const taskKey = db.ref().child('students').push().key;
+            updates[`students/${sid}/${subData[0]}/${subData[1]}/${taskKey}`] = {date: date, val: task, jKey: journalKey};
         });
-        updates[`journal/${jKey}`] = {date: d, task: task, sub: sub[0], cat: sub[1], students: sel};
-        db.ref().update(updates).then(() => { alert("Розіслано!"); tgl(false); document.getElementById('mTask').value=""; });
+        
+        updates[`journal/${journalKey}`] = {date: date, task: task, sub: subData[0], cat: subData[1], students: selected};
+        
+        db.ref().update(updates).then(() => {
+            alert("Успішно додано!");
+            selectAll(false);
+            document.getElementById('massTaskInput').value = "";
+        });
     }
 
     function loadJournal() {
         db.ref('journal').on('value', snap => {
-            const list = document.getElementById('journalList');
-            list.innerHTML = "";
+            const area = document.getElementById('journalListArea');
+            area.innerHTML = "";
             const data = snap.val();
-            if (!data) { list.innerText = "Порожньо"; return; }
+            if (!data) { area.innerText = "Активних розсилок немає."; return; }
+            
             Object.keys(data).reverse().forEach(jKey => {
-                const j = data[jKey];
-                let html = `<div class="journal-item"><div class="journal-header"><span onclick="editJ('${jKey}','${j.task}')">✏️ ${j.sub}: ${j.task}</span><span style="color:red;cursor:pointer" onclick="delJ('${jKey}')">🗑</span></div><div style="margin-top:5px;">`;
-                if(j.students) {
-                    j.students.forEach(sid => {
-                        html += `<span class="debtor-tag" onclick="removeOne('${jKey}','${sid}')">${sts[sid]} ×</span>`;
+                const item = data[jKey];
+                let html = `<div class="journal-item">
+                    <div class="journal-header">
+                        <span onclick="renameJournal('${jKey}', '${item.task}')">✏️ ${item.sub}: ${item.task}</span>
+                        <span style="color:red; cursor:pointer" onclick="deleteFullJournal('${jKey}')">🗑</span>
+                    </div>`;
+                if (item.students) {
+                    item.students.forEach(sid => {
+                        html += `<span class="debtor-tag" onclick="removeStudentFromDebt('${jKey}', '${sid}')">${students[sid].name.split(' ')[0]} ×</span>`;
                     });
                 }
-                html += `</div></div>`;
-                list.innerHTML += html;
+                html += `</div>`;
+                area.innerHTML += html;
             });
         });
     }
 
-    function editJ(key, cur) {
-        const n = prompt("Нова назва:", cur);
-        if(!n) return;
-        db.ref(`journal/${key}`).once('value', s => {
-            const j = s.val();
-            let up = {};
-            up[`journal/${key}/task`] = n;
-            j.students.forEach(sid => {
-                db.ref(`students/${sid}/${j.sub}/${j.cat}`).once('value', st => {
-                    const tasks = st.val();
-                    for(let k in tasks) if(tasks[k].jKey === key) up[`students/${sid}/${j.sub}/${j.cat}/${k}/val`] = n;
-                    db.ref().update(up);
-                });
-            });
-        });
-    }
-
-    function removeOne(jKey, sid) {
-        if(!confirm(`Учень здав роботу? Видалити борг для ${sts[sid]}?`)) return;
+    function removeStudentFromDebt(jKey, sid) {
+        if (!confirm(`Дитина здала роботу? Видалити борг для ${students[sid].name}?`)) return;
         db.ref(`journal/${jKey}`).once('value', s => {
             const j = s.val();
-            const newSts = j.students.filter(id => id !== sid);
-            db.ref(`journal/${jKey}/students`).set(newSts);
+            const newList = j.students.filter(id => id !== sid);
+            db.ref(`journal/${jKey}/students`).set(newList);
+            
             db.ref(`students/${sid}/${j.sub}/${j.cat}`).once('value', st => {
                 const tasks = st.val();
-                for(let k in tasks) if(tasks[k].jKey === jKey) db.ref(`students/${sid}/${j.sub}/${j.cat}/${k}`).remove();
+                for (let k in tasks) if (tasks[k].jKey === jKey) db.ref(`students/${sid}/${j.sub}/${j.cat}/${k}`).remove();
             });
         });
     }
 
-    function delJ(key) {
-        if(!confirm("Видалити всю розсилку для всіх учнів?")) return;
-        db.ref(`journal/${key}`).once('value', s => {
+    function renameJournal(jKey, oldName) {
+        const newName = prompt("Введіть нову назву роботи:", oldName);
+        if (!newName) return;
+        db.ref(`journal/${jKey}`).once('value', s => {
+            const j = s.val();
+            let up = {};
+            up[`journal/${jKey}/task`] = newName;
+            j.students.forEach(sid => {
+                db.ref(`students/${sid}/${j.sub}/${j.cat}`).once('value', st => {
+                    const tasks = st.val();
+                    for (let k in tasks) if (tasks[k].jKey === jKey) db.ref(`students/${sid}/${j.sub}/${j.cat}/${k}/val`).set(newName);
+                });
+            });
+            db.ref().update(up);
+        });
+    }
+
+    function deleteFullJournal(jKey) {
+        if (!confirm("Видалити цю роботу у всіх учнів списком?")) return;
+        db.ref(`journal/${jKey}`).once('value', s => {
             const j = s.val();
             j.students.forEach(sid => {
                 db.ref(`students/${sid}/${j.sub}/${j.cat}`).once('value', st => {
                     const tasks = st.val();
-                    for(let k in tasks) if(tasks[k].jKey === key) db.ref(`students/${sid}/${j.sub}/${j.cat}/${k}`).remove();
+                    for (let k in tasks) if (tasks[k].jKey === jKey) db.ref(`students/${sid}/${j.sub}/${j.cat}/${k}`).remove();
                 });
             });
-            db.ref(`journal/${key}`).remove();
+            db.ref(`journal/${jKey}`).remove();
         });
     }
 
-    function load(id, edit) {
-        document.getElementById('sName').innerText = sts[id];
+    function loadIndividualData(id, isTeacher) {
+        document.getElementById('displayStudentName').innerText = students[id].name;
         db.ref('students/' + id).on('value', snap => {
             const data = snap.val() || {};
-            const list = document.getElementById('dList'); list.innerHTML = "";
-            for (let s in str) {
-                let div = document.createElement('div'); div.style.border="1px solid #eee"; div.style.padding="10px"; div.style.marginTop="10px";
-                div.innerHTML = `<h4 style="margin:0; color:#61309e;">${s}</h4>`;
-                str[s].forEach(cat => {
-                    const items = (data[s] && data[s][cat]) ? data[s][cat] : {};
-                    for (let k in items) {
-                        if (items[k].val) div.innerHTML += `<p style="font-size:14px;"><span style="background:#8352b2;color:#fff;padding:2px 5px;border-radius:4px;">${items[k].date}</span> <b>${items[k].val}</b></p>`;
+            const list = document.getElementById('individualDebtList');
+            list.innerHTML = "";
+            for (let sub in subjects) {
+                let div = document.createElement('div');
+                div.className = 'subject-group';
+                div.innerHTML = `<h4 style="margin:0; color:#61309e;">${sub}</h4>`;
+                subjects[sub].forEach(cat => {
+                    const tasks = data[sub] && data[sub][cat] ? data[sub][cat] : {};
+                    for (let k in tasks) {
+                        list.innerHTML += `<p style="font-size:14px; margin:5px 0;">
+                            <span style="background:#8352b2; color:white; padding:2px 5px; border-radius:4px;">${tasks[k].date}</span> 
+                            <b>${tasks[k].val}</b>
+                        </p>`;
                     }
                 });
-                list.appendChild(div);
+                if (div.children.length > 1) list.appendChild(div);
             }
+            if (list.innerHTML === "") list.innerHTML = "<p style='text-align:center;'>✅ Боргів немає!</p>";
         });
     }
 </script>
