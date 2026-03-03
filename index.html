@@ -9,33 +9,60 @@
     
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-image: url('background.jpg'); background-size: cover; background-position: center; background-attachment: fixed; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
-        .card { background: rgba(255, 255, 255, 0.98); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(75, 22, 129, 0.4); width: 100%; max-width: 550px; position: relative; box-sizing: border-box; }
-        .admin-panel { background: #f3ebf9; border: 2px solid #61309e; padding: 20px; border-radius: 15px; margin-bottom: 25px; }
+        .card { background: rgba(255, 255, 255, 0.98); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(75, 22, 129, 0.4); width: 100%; max-width: 550px; position: relative; box-sizing: border-box; }
+        .admin-panel { background: #f3ebf9; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
         
-        .student-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; padding: 12px; border-radius: 10px; border: 1px solid #cbb2eb; margin-bottom: 15px; max-height: 180px; overflow-y: auto; }
-        .student-selector label { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 13px; color: #4b1681; cursor: pointer; }
-        
-        /* ПАНЕЛЬ ШВИДКОГО ДОСТУПУ */
-        .quick-access { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .quick-btn { background: #e9dcf5; color: #61309e; border: 1px solid #61309e; padding: 8px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .quick-btn:hover { background: #61309e; color: white; }
+        /* СУВОРА СІТКА ДЛЯ СПИСКУ УЧНІВ */
+        .student-selector { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            background: white; 
+            padding: 15px; 
+            border-radius: 10px; 
+            border: 1px solid #cbb2eb; 
+            margin-bottom: 15px; 
+            max-height: 200px; 
+            overflow-y: scroll; /* Завжди показувати прокрутку для стабільності */
+        }
+        .student-selector label { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-weight: normal; 
+            font-size: 14px; 
+            color: #4b1681;
+            margin: 0;
+            cursor: pointer;
+            white-space: nowrap; /* Прізвища в один рядок */
+        }
+        .student-selector input[type="checkbox"] { 
+            width: 18px; 
+            height: 18px; 
+            margin: 0; 
+            cursor: pointer; 
+            flex-shrink: 0; 
+        }
+
+        .quick-access { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .quick-btn { background: #e9dcf5; color: #61309e; border: 1px solid #61309e; padding: 6px 10px; border-radius: 15px; font-size: 11px; cursor: pointer; font-weight: bold; }
         .quick-btn.active { background: #61309e; color: white; }
 
-        .history-box { background: #fff; border: 1px solid #cbb2eb; border-radius: 10px; padding: 10px; margin-top: 15px; max-height: 150px; overflow-y: auto; font-size: 11px; color: #4b1681; }
-        .history-item { border-bottom: 1px solid #f3ebf9; padding: 5px 0; }
+        .history-box { background: #fff; border: 1px solid #cbb2eb; border-radius: 8px; padding: 10px; margin-top: 10px; max-height: 120px; overflow-y: auto; font-size: 11px; }
+        .history-item { border-bottom: 1px solid #f3ebf9; padding: 4px 0; color: #4b1681; }
 
-        h1 { color: #1a012b; text-align: center; margin-top: 0; }
-        .subtitle { color: #8352b2; text-align: center; margin-bottom: 25px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #4b1681; font-size: 16px; }
-        select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 16px; box-sizing: border-box; margin-bottom: 15px; }
-        button { width: 100%; padding: 15px; background-color: #61309e; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        h1 { color: #1a012b; text-align: center; margin: 0 0 5px 0; font-size: 26px; }
+        .subtitle { color: #8352b2; text-align: center; margin-bottom: 20px; font-size: 16px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #4b1681; font-size: 15px; }
+        select, input { width: 100%; padding: 10px; border: 2px solid #e9dcf5; border-radius: 10px; font-size: 16px; box-sizing: border-box; margin-bottom: 12px; }
+        button { width: 100%; padding: 14px; background-color: #61309e; color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: bold; cursor: pointer; }
         
-        .btn-small { padding: 8px; font-size: 12px; width: 48%; display: inline-block; background: #cbb2eb; color: #4b1681; margin-bottom: 15px; }
-        .subject-group { background: #fdfaff; border-radius: 15px; padding: 15px; margin-top: 20px; border: 1px solid #e9dcf5; }
-        .subject-group h4 { color: #61309e; margin: 0; border-bottom: 2px solid #cbb2eb; }
-        .multi-row { display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #f3ebf9; }
-        .date-cell { background: #8352b2; color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; }
-        .status-debt { color: #c0392b; font-weight: bold; flex-grow: 1; }
+        .btn-small { padding: 6px; font-size: 12px; width: 48%; display: inline-block; background: #cbb2eb; color: #4b1681; margin-bottom: 10px; }
+        .subject-group { background: #fdfaff; border-radius: 12px; padding: 12px; margin-top: 15px; border: 1px solid #e9dcf5; }
+        .subject-group h4 { color: #61309e; margin: 0 0 8px 0; border-bottom: 2px solid #cbb2eb; }
+        .multi-row { display: flex; align-items: center; gap: 8px; background: white; padding: 8px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #f3ebf9; }
+        .date-cell { background: #8352b2; color: white; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 13px; }
+        .status-debt { color: #c0392b; font-weight: bold; flex-grow: 1; font-size: 14px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -46,29 +73,27 @@
     <p class="subtitle">Керування заборгованістю</p>
 
     <div id="adminPanel" class="admin-panel hidden">
-        <h3 style="color:#61309e; margin:0 0 10px 0;">Панель вчителя 👩‍🏫</h3>
+        <h3 style="color:#61309e; margin:0 0 10px 0; font-size: 18px;">Панель вчителя 👩‍🏫</h3>
         
-        <label style="font-size:14px;">Кому додати борг?</label>
+        <label>Кому додати борг?</label>
         <div class="student-selector" id="massCheckboxes"></div>
         <div style="display: flex; justify-content: space-between;">
             <button class="btn-small" onclick="toggleAll(true)">Обрати всіх</button>
             <button class="btn-small" onclick="toggleAll(false)">Скинути</button>
         </div>
 
-        <label style="font-size:14px;">Швидкий вибір предмета:</label>
+        <label>Швидкий предмет:</label>
         <div class="quick-access">
             <div class="quick-btn" onclick="setQuick('Математика|Самостійна робота')">Матем. (СР)</div>
             <div class="quick-btn" onclick="setQuick('Математика|Діагностична робота')">Матем. (ДР)</div>
             <div class="quick-btn" onclick="setQuick('Українська мова|Діагностична робота')">Укр. мова (ДР)</div>
             <div class="quick-btn" onclick="setQuick('Літературне читання|Вірш')">Читання (Вірш)</div>
             <div class="quick-btn" onclick="setQuick('Я досліджую світ|Діагностична робота')">ЯДС (ДР)</div>
-            <div class="quick-btn" onclick="setQuick('Дизайн і технології|Творча робота')">Дизайн (Творча)</div>
+            <div class="quick-btn" onclick="setQuick('Дизайн і технології|Творча робота')">Дизайн</div>
         </div>
 
-        <select id="massSub" style="padding:8px; font-size:14px;">
-            <option value="">-- Або оберіть зі списку --</option>
-        </select>
-        <input type="text" id="massTask" placeholder="Назва боргу (напр. Стор. 12)" style="padding:8px; font-size:14px;">
+        <select id="massSub"><option value="">-- Предмет --</option></select>
+        <input type="text" id="massTask" placeholder="Назва (напр. Стор. 12)">
         
         <button id="addBtn" onclick="addSelectedWork()" style="background:#4b1681;">Додати обраним</button>
         
@@ -81,13 +106,13 @@
     <div id="loginSection">
         <label>Оберіть учня:</label>
         <select id="studentSelect"><option value="">-- Список учнів --</option></select>
-        <label>Введіть код:</label>
-        <input type="text" id="passCode" placeholder="Наприклад: 00.00" onkeypress="if(event.key==='Enter') checkData()">
+        <label>Код:</label>
+        <input type="text" id="passCode" placeholder="00.00" onkeypress="if(event.key==='Enter') checkData()">
         <button onclick="checkData()">Увійти</button>
     </div>
 
     <div id="result" class="hidden">
-        <button onclick="location.reload()" style="background:#e9dcf5; color:#61309e; padding:8px; font-size:14px; margin-bottom:15px; width: auto;">⬅ Вийти</button>
+        <button onclick="location.reload()" style="background:#e9dcf5; color:#61309e; padding:8px; font-size:13px; margin-bottom:10px; width: auto;">⬅ Назад</button>
         <h3 id="studentNameDisplay" style="text-align:center; color:#4b1681;"></h3>
         <div id="debtList"></div>
     </div>
@@ -145,7 +170,7 @@
         document.getElementById('massSub').value = val;
         document.querySelectorAll('.quick-btn').forEach(b => {
             b.classList.remove('active');
-            if(b.innerText.includes(val.split('|')[0].substring(0,4))) b.classList.add('active');
+            if(val.includes(b.innerText.split('.')[0])) b.classList.add('active');
         });
     }
 
@@ -166,7 +191,7 @@
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('result').classList.remove('hidden');
             loadData(id, false);
-        } else { alert("Помилка!"); }
+        } else { alert("Невірний код!"); }
     }
 
     function addSelectedWork() {
@@ -181,17 +206,16 @@
                 const key = database.ref().child('students').push().key;
                 database.ref(`students/${sid}/${val[0]}/${val[1]}/${key}`).set({date: date, val: task});
             });
-            database.ref('history').push({ date: date, task: task, subject: val[0], students: selectedIds.map(id => students[id].name.split(' ')[0]).join(', ') });
+            database.ref('history').push({ date: date, task: task, subject: val[0] });
             alert("Виконано!");
             toggleAll(false);
             document.getElementById('massTask').value = "";
-            document.getElementById('massSub').value = "";
             document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
         }
     }
 
     function loadHistory() {
-        database.ref('history').limitToLast(8).on('value', snap => {
+        database.ref('history').limitToLast(5).on('value', snap => {
             const list = document.getElementById('historyList');
             list.innerHTML = "";
             const data = snap.val();
@@ -204,7 +228,7 @@
 
     async function generateReport() {
         const area = document.getElementById('reportArea');
-        area.classList.remove('hidden'); area.innerHTML = "⏳...";
+        area.classList.remove('hidden'); area.innerHTML = "⏳ Оновлення...";
         const snap = await database.ref('students').once('value');
         const allData = snap.val() || {};
         let html = "<strong>Звіт:</strong><br>";
@@ -236,9 +260,8 @@
                 div.innerHTML = `<h4>${sub}</h4>`;
                 structure[sub].forEach(cat => {
                     const name = (data.config && data.config[sub] && data.config[sub][cat]) ? data.config[sub][cat] : cat;
-                    let p = document.createElement('p');
-                    p.innerHTML = `<span class="${canEdit ? 'editable-cat' : ''}">${name}</span>`;
-                    if (canEdit) p.onclick = () => { let n = prompt("Змінити назву:", name); if(n) database.ref(`students/${id}/config/${sub}/${cat}`).set(n); };
+                    let p = document.createElement('p'); p.style.margin = "5px 0";
+                    p.innerHTML = `<span style="font-weight:bold; color:#4b1681;">${name}</span>`;
                     div.appendChild(p);
                     const items = (data[sub] && data[sub][cat]) ? data[sub][cat] : {};
                     for (let k in items) {
@@ -247,14 +270,14 @@
                         row.className = 'multi-row';
                         row.innerHTML = `<span class="date-cell">${items[k].date}</span><span class="${items[k].val ? 'status-debt':'status-ok'}">${items[k].val || 'немає ✅'}</span>`;
                         if(canEdit) {
-                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.style.background="none"; b.style.color="red"; b.style.border="none";
+                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.style.background="none"; b.style.color="red"; b.style.border="none"; b.style.fontSize="18px";
                             b.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${k}`).remove();
                             row.appendChild(b);
                         }
                         div.appendChild(row);
                     }
                     if (canEdit) {
-                        let add = document.createElement('button'); add.innerText = "+"; add.style.padding="2px"; add.style.width="40px";
+                        let add = document.createElement('button'); add.innerText = "+"; add.style.padding="2px"; add.style.width="35px";
                         add.onclick = () => { const k = database.ref().child('students').push().key; database.ref(`students/${id}/${sub}/${cat}/${k}`).set({date: new Date().toLocaleDateString('uk-UA').slice(0,5), val: ""}); };
                         div.appendChild(add);
                     }
