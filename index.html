@@ -10,8 +10,8 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-image: url('background.jpg'); background-size: cover; background-position: center; background-attachment: fixed; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
         .card { background: rgba(255, 255, 255, 0.98); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(75, 22, 129, 0.4); width: 100%; max-width: 550px; position: relative; }
-        .help-btn { position: absolute; top: 20px; right: 20px; width: 35px; height: 35px; background: #e9dcf5; color: #61309e; border: 2px solid #61309e; border-radius: 50%; font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .admin-panel { background: #f3ebf9; border: 2px solid #61309e; padding: 20px; border-radius: 15px; margin-bottom: 25px; }
+        .student-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: white; padding: 10px; border-radius: 10px; border: 1px solid #cbb2eb; margin-bottom: 15px; max-height: 150px; overflow-y: auto; font-size: 13px; }
         .report-box { background: white; border: 1px solid #cbb2eb; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 14px; max-height: 300px; overflow-y: auto; }
         h1 { color: #1a012b; text-align: center; margin-top: 0; }
         .subtitle { color: #8352b2; text-align: center; margin-bottom: 25px; }
@@ -30,52 +30,39 @@
 <body>
 
 <div class="card">
-    <div class="help-btn" onclick="alert('Для батьків код — це дата народження. Для вчителя — персональний пароль.')">?</div>
     <h1>Шкільний монітор</h1>
     <p class="subtitle">Керування заборгованістю</p>
 
     <div id="adminPanel" class="admin-panel hidden">
-        <h3 style="color:#61309e; margin:0 0 15px 0;">Панель вчителя 👩‍🏫</h3>
-        <label style="font-size:14px;">Масове додавання всім:</label>
+        <h3 style="color:#61309e; margin:0 0 10px 0;">Панель вчителя 👩‍🏫</h3>
+        
+        <label style="font-size:14px;">Кому додати борг?</label>
+        <div class="student-selector" id="massCheckboxes"></div>
+        <button onclick="toggleAll(true)" style="padding:5px; font-size:11px; width:48%; display:inline-block;">Обрати всіх</button>
+        <button onclick="toggleAll(false)" style="padding:5px; font-size:11px; width:48%; display:inline-block;">Скинути</button>
+
+        <label style="font-size:14px; margin-top:10px;">Предмет та робота:</label>
         <select id="massSub" style="padding:8px; font-size:14px;"></select>
         <input type="text" id="massTask" placeholder="Назва боргу" style="padding:8px; font-size:14px;">
-        <button onclick="addMassWork()" style="background:#4b1681; padding:10px; font-size:14px;">Додати всім 17 учням</button>
-        <hr style="border:1px solid #cbb2eb; margin:15px 0;">
+        
+        <button onclick="addSelectedWork()" style="background:#4b1681; padding:12px; font-size:15px;">Додати обраним учням</button>
+        <hr style="border:1px solid #cbb2eb; margin:10px 0;">
         <button onclick="generateReport()" style="background:#27ae60; padding:10px; font-size:14px;">📊 Звіт по боргах</button>
         <div id="reportArea" class="report-box hidden"></div>
     </div>
 
     <div id="loginSection">
-        <label>Оберіть учня (необов'язково для вчителя):</label>
+        <label>Оберіть учня:</label>
         <select id="studentSelect">
             <option value="">-- Список учнів --</option>
-            <option value="id1">Астахова Євгенія</option>
-            <option value="id2">Бабенко Поліна</option>
-            <option value="id3">Водолазька Соломія</option>
-            <option value="id4">Гомонюк Софія</option>
-            <option value="id5">Деміденко Аріна</option>
-            <option value="id6">Єлісеєв Дмитро</option>
-            <option value="id7">Іванець Тімур</option>
-            <option value="id8">Калантаєва Анастасія</option>
-            <option value="id9">Лисих Ліана</option>
-            <option value="id10">Оковитий Максим</option>
-            <option value="id11">Павлов Тимур</option>
-            <option value="id12">Радченко Владислава</option>
-            <option value="id13">Скабардіна Мілослава</option>
-            <option value="id14">Удовіка Макар</option>
-            <option value="id15">Філатова Ульяна</option>
-            <option value="id16">Холматова Віолетта</option>
-            <option value="id17">Шаповал Тимур</option>
         </select>
-
         <label>Введіть код:</label>
         <input type="text" id="passCode" placeholder="Наприклад: 00.00" onkeypress="if(event.key==='Enter') checkData()">
-
         <button onclick="checkData()">Увійти</button>
     </div>
 
     <div id="result" class="hidden">
-        <button onclick="location.reload()" style="background:#e9dcf5; color:#61309e; padding:5px; font-size:12px; margin-bottom:10px;">⬅ Вийти / Змінити учня</button>
+        <button onclick="location.reload()" style="background:#e9dcf5; color:#61309e; padding:5px; font-size:12px; margin-bottom:10px;">⬅ Вийти</button>
         <h3 id="studentNameDisplay" style="text-align:center; color:#4b1681;"></h3>
         <div id="debtList"></div>
     </div>
@@ -96,15 +83,15 @@
     const database = firebase.database();
 
     const students = {
-        "id1": { code: "26.12", name: "Астахову Євгенію" }, "id2": { code: "01.04", name: "Бабенко Поліну" },
-        "id3": { code: "13.02", name: "Водолазьку Соломію" }, "id4": { code: "15.02", name: "Гомонюк Софію" },
-        "id5": { code: "01.10", name: "Деміденко Аріну" }, "id6": { code: "11.12", name: "Єлісеєва Дмитра" },
-        "id7": { code: "05.07", name: "Іванця Тімура" }, "id8": { code: "12.02", name: "Калантаєву Анастасію" },
-        "id9": { code: "31.01", name: "Лисих Ліану" }, "id10": { code: "17.06", name: "Оковитого Максима" },
-        "id11": { code: "26.04", name: "Павлова Тимура" }, "id12": { code: "25.04", name: "Радченко Владиславу" },
-        "id13": { code: "15.01", name: "Скабардіна Мілослава" }, "id14": { code: "27.10", name: "Удовіка Макара" },
-        "id15": { code: "24.06", name: "Філатову Ульяну" }, "id16": { code: "04.03", name: "Холматова Віолетта" },
-        "id17": { code: "04.05", name: "Шаповал Тимура" }
+        "id1": { code: "26.12", name: "Астахова Євгенія" }, "id2": { code: "01.04", name: "Бабенко Поліна" },
+        "id3": { code: "13.02", name: "Водолазька Соломія" }, "id4": { code: "15.02", name: "Гомонюк Софія" },
+        "id5": { code: "01.10", name: "Деміденко Аріна" }, "id6": { code: "11.12", name: "Єлісеєв Дмитро" },
+        "id7": { code: "05.07", name: "Іванець Тімур" }, "id8": { code: "12.02", name: "Калантаєва Анастасія" },
+        "id9": { code: "31.01", name: "Лисих Ліана" }, "id10": { code: "17.06", name: "Оковитий Максим" },
+        "id11": { code: "26.04", name: "Павлов Тимур" }, "id12": { code: "25.04", name: "Радченко Владислава" },
+        "id13": { code: "15.01", name: "Скабардіна Мілослава" }, "id14": { code: "27.10", name: "Удовіка Макар" },
+        "id15": { code: "24.06", name: "Філатова Ульяна" }, "id16": { code: "04.03", name: "Холматова Віолетта" },
+        "id17": { code: "04.05", name: "Шаповал Тимур" }
     };
 
     const structure = {
@@ -115,85 +102,81 @@
         "Дизайн і технології": ["Творча робота"]
     };
 
+    // Наповнення випадаючого списку та чекбоксів
+    const sel = document.getElementById('studentSelect');
+    const chkArea = document.getElementById('massCheckboxes');
+    for (let id in students) {
+        sel.innerHTML += `<option value="${id}">${students[id].name}</option>`;
+        chkArea.innerHTML += `<label style="font-weight:normal; font-size:12px;"><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
+    }
+
     const mSub = document.getElementById('massSub');
     for (let s in structure) {
         structure[s].forEach(c => {
-            let opt = document.createElement('option');
-            opt.value = s + "|" + c; opt.innerText = s + " - " + c;
-            mSub.appendChild(opt);
+            mSub.innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`;
         });
+    }
+
+    function toggleAll(val) {
+        document.querySelectorAll('#massCheckboxes input').forEach(c => c.checked = val);
     }
 
     function checkData() {
         const id = document.getElementById('studentSelect').value;
         const code = document.getElementById('passCode').value.trim();
-        const adminP = document.getElementById('adminPanel');
-        const loginS = document.getElementById('loginSection');
-        const res = document.getElementById('result');
-
         if (code === "21.08") {
-            loginS.classList.add('hidden');
-            adminP.classList.remove('hidden');
-            if (id) {
-                res.classList.remove('hidden');
-                loadData(id, true);
-            } else {
-                document.getElementById('studentNameDisplay').innerText = "Режим вчителя (масові зміни)";
-            }
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            if (id) { document.getElementById('result').classList.remove('hidden'); loadData(id, true); }
+            else { document.getElementById('studentNameDisplay').innerText = "Режим вчителя"; }
         } else if (id && students[id] && students[id].code === code) {
-            loginS.classList.add('hidden');
-            res.classList.remove('hidden');
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
             loadData(id, false);
-        } else {
-            alert("Помилка! Перевірте код або оберіть учня.");
+        } else { alert("Помилка!"); }
+    }
+
+    function addSelectedWork() {
+        const selected = Array.from(document.querySelectorAll('#massCheckboxes input:checked')).map(c => c.value);
+        const val = document.getElementById('massSub').value.split('|');
+        const task = document.getElementById('massTask').value.trim();
+        if (!task || selected.length === 0) { alert("Оберіть учнів та впишіть назву!"); return; }
+        
+        if (confirm(`Додати борг "${task}" для ${selected.length} учнів?`)) {
+            const date = new Date().toLocaleDateString('uk-UA').slice(0, 5);
+            selected.forEach(sid => {
+                const key = database.ref().child('students').push().key;
+                database.ref(`students/${sid}/${val[0]}/${val[1]}/${key}`).set({date: date, val: task});
+            });
+            alert("Виконано!");
         }
     }
 
     async function generateReport() {
         const area = document.getElementById('reportArea');
-        area.classList.remove('hidden'); area.innerHTML = "⏳ Завантаження...";
+        area.classList.remove('hidden'); area.innerHTML = "⏳...";
         const snap = await database.ref('students').once('value');
         const allData = snap.val() || {};
-        let reportHtml = "<strong>Звіт по боргах:</strong><br><br>";
-        let hasDebts = false;
+        let html = "<strong>Звіт:</strong><br>";
         for (let sub in structure) {
             structure[sub].forEach(cat => {
-                let debtGroup = {};
+                let debts = {};
                 for (let sid in students) {
-                    const studentDebts = (allData[sid] && allData[sid][sub] && allData[sid][sub][cat]) ? allData[sid][sub][cat] : {};
-                    for (let dKey in studentDebts) {
-                        if (studentDebts[dKey].val) {
-                            if (!debtGroup[studentDebts[dKey].val]) debtGroup[studentDebts[dKey].val] = [];
-                            debtGroup[studentDebts[dKey].val].push(students[sid].name.split(' ')[0]);
-                        }
+                    const d = (allData[sid] && allData[sid][sub] && allData[sid][sub][cat]) ? allData[sid][sub][cat] : {};
+                    for (let k in d) if (d[k].val) {
+                        if (!debts[d[k].val]) debts[d[k].val] = [];
+                        debts[d[k].val].push(students[sid].name.split(' ')[0]);
                     }
                 }
-                for (let task in debtGroup) {
-                    hasDebts = true;
-                    reportHtml += `● ${sub} (${task}): <span style="color:red">${debtGroup[task].join(', ')}</span><br>`;
-                }
+                for (let t in debts) html += `● ${sub} (${t}): <span style="color:red">${debts[t].join(', ')}</span><br>`;
             });
         }
-        area.innerHTML = hasDebts ? reportHtml : "✅ Усі роботи здані!";
-    }
-
-    function addMassWork() {
-        const val = document.getElementById('massSub').value.split('|');
-        const task = document.getElementById('massTask').value.trim();
-        if (!task) return;
-        if (confirm(`Додати всім борг: ${task}?`)) {
-            const date = new Date().toLocaleDateString('uk-UA').slice(0, 5);
-            for (let sid in students) {
-                const key = database.ref().child('students').push().key;
-                database.ref(`students/${sid}/${val[0]}/${val[1]}/${key}`).set({date: date, val: task});
-            }
-            alert("Виконано!");
-        }
+        area.innerHTML = html || "✅ Боргів немає";
     }
 
     function loadData(id, canEdit) {
         document.getElementById('studentNameDisplay').innerText = students[id].name;
-        database.ref('students/' + id).on('value', (snap) => {
+        database.ref('students/' + id).on('value', snap => {
             const data = snap.val() || {};
             const list = document.getElementById('debtList');
             list.innerHTML = "";
@@ -202,30 +185,28 @@
                 div.className = 'subject-group';
                 div.innerHTML = `<h4>${sub}</h4>`;
                 structure[sub].forEach(cat => {
-                    const customCatName = (data.config && data.config[sub] && data.config[sub][cat]) ? data.config[sub][cat] : cat;
+                    const name = (data.config && data.config[sub] && data.config[sub][cat]) ? data.config[sub][cat] : cat;
                     let p = document.createElement('p');
-                    p.innerHTML = `<span class="${canEdit ? 'editable-cat' : ''}">${customCatName}</span>`;
-                    if (canEdit) p.onclick = () => { let n = prompt("Змінити назву:", customCatName); if(n) database.ref(`students/${id}/config/${sub}/${cat}`).set(n); };
+                    p.innerHTML = `<span class="${canEdit ? 'editable-cat' : ''}">${name}</span>`;
+                    if (canEdit) p.onclick = () => { let n = prompt("Змінити назву:", name); if(n) database.ref(`students/${id}/config/${sub}/${cat}`).set(n); };
                     div.appendChild(p);
                     const items = (data[sub] && data[sub][cat]) ? data[sub][cat] : {};
-                    for (let key in items) {
-                        if (!canEdit && !items[key].val) continue;
+                    for (let k in items) {
+                        if (!canEdit && !items[k].val) continue;
                         let row = document.createElement('div');
                         row.className = 'multi-row';
-                        row.innerHTML = `<span class="date-cell">${items[key].date}</span><span class="${items[key].val ? 'status-debt':'status-ok'}">${items[key].val || 'немає ✅'}</span>`;
+                        row.innerHTML = `<span class="date-cell">${items[k].date}</span><span class="${items[k].val ? 'status-debt':'status-ok'}">${items[k].val || 'немає ✅'}</span>`;
                         if(canEdit) {
-                            let del = document.createElement('button');
-                            del.innerText = "×"; del.style.width="30px"; del.style.background="none"; del.style.color="red"; del.style.border="none";
-                            del.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${key}`).remove();
-                            row.appendChild(del);
+                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.style.background="none"; b.style.color="red"; b.style.border="none";
+                            b.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${k}`).remove();
+                            row.appendChild(b);
                         }
                         div.appendChild(row);
                     }
                     if (canEdit) {
-                        let addB = document.createElement('button');
-                        addB.style.padding="5px"; addB.style.fontSize="12px"; addB.innerText = "+ додати";
-                        addB.onclick = (e) => { e.stopPropagation(); const k = database.ref().child('students').push().key; database.ref(`students/${id}/${sub}/${cat}/${k}`).set({date: new Date().toLocaleDateString('uk-UA').slice(0,5), val: ""}); };
-                        div.appendChild(addB);
+                        let add = document.createElement('button'); add.innerText = "+"; add.style.padding="2px"; add.style.width="40px";
+                        add.onclick = () => { const k = database.ref().child('students').push().key; database.ref(`students/${id}/${sub}/${cat}/${k}`).set({date: new Date().toLocaleDateString('uk-UA').slice(0,5), val: ""}); };
+                        div.appendChild(add);
                     }
                 });
                 list.appendChild(div);
