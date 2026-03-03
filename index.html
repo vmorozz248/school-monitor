@@ -8,32 +8,33 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f0f9; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); width: 100%; max-width: 500px; box-sizing: border-box; }
-        .admin-panel { background: #f9f5ff; border: 2px solid #61309e; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); width: 100%; max-width: 520px; box-sizing: border-box; }
+        .admin-panel { background: #fdfaff; border: 2px solid #61309e; padding: 18px; border-radius: 15px; margin-bottom: 20px; }
         
         /* СУВОРА СІТКА ДЛЯ СПИСКУ */
         .student-selector { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
-            background: white; padding: 10px; border: 1px solid #ddd; 
-            border-radius: 8px; max-height: 180px; overflow-y: auto; margin-bottom: 10px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
+            background: white; padding: 12px; border: 1px solid #e9dcf5; 
+            border-radius: 10px; max-height: 180px; overflow-y: auto; margin-bottom: 10px;
         }
-        .student-selector label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
-        .student-selector input { width: 18px; height: 18px; margin: 0; }
+        .student-selector label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4b1681; cursor: pointer; white-space: nowrap; }
+        .student-selector input { width: 18px; height: 18px; cursor: pointer; margin: 0; }
 
-        .quick-access { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-        .quick-btn { background: #eee; border: 1px solid #ccc; padding: 5px 8px; border-radius: 10px; font-size: 11px; cursor: pointer; }
+        .quick-access { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .quick-btn { background: #e9dcf5; border: 1px solid #61309e; color: #61309e; padding: 6px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; font-weight: bold; }
         .quick-btn.active { background: #61309e; color: white; }
 
-        h1 { color: #1a012b; text-align: center; font-size: 24px; margin: 0; }
-        label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 14px; }
-        select, input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }
-        button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        h1 { color: #1a012b; text-align: center; font-size: 28px; margin-bottom: 20px; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; color: #4b1681; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 10px; box-sizing: border-box; font-size: 16px; margin-bottom: 10px; }
+        button { width: 100%; padding: 15px; background: #61309e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; }
         
-        .history-box { font-size: 11px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 5px; }
-        .subject-group { border: 1px solid #eee; padding: 10px; margin-top: 10px; border-radius: 8px; }
-        .multi-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; font-size: 14px; }
-        .date-cell { background: #8352b2; color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
-        .status-debt { color: red; font-weight: bold; }
+        .counter-info { font-size: 12px; color: #8352b2; margin-bottom: 5px; font-weight: bold; }
+        .history-box { font-size: 11px; margin-top: 15px; border-top: 1px solid #e9dcf5; padding-top: 10px; color: #4b1681; max-height: 100px; overflow-y: auto; }
+        .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; margin-top: 15px; border-radius: 12px; }
+        .multi-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 15px; }
+        .date-cell { background: #8352b2; color: white; padding: 3px 8px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+        .status-debt { color: #c0392b; font-weight: bold; flex-grow: 1; }
         .hidden { display: none; }
     </style>
 </head>
@@ -41,32 +42,43 @@
 
 <div class="card">
     <h1>Шкільний монітор</h1>
+    
     <div id="adminPanel" class="admin-panel hidden">
+        <div id="countDisplay" class="counter-info">Обрано учнів: 0</div>
         <div class="student-selector" id="massCheckboxes"></div>
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <button style="padding:5px; font-size:12px;" onclick="toggleAll(true)">Обрати всіх</button>
-            <button style="padding:5px; font-size:12px;" onclick="toggleAll(false)">Скинути</button>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button style="padding:8px; font-size:12px; background:#cbb2eb; color:#4b1681;" onclick="toggleAll(true)">Обрати всіх</button>
+            <button style="padding:8px; font-size:12px; background:#cbb2eb; color:#4b1681;" onclick="toggleAll(false)">Скинути</button>
         </div>
+
+        <label>Швидкий предмет:</label>
         <div class="quick-access">
             <div class="quick-btn" onclick="setQuick('Математика|Самостійна робота')">Мат (СР)</div>
             <div class="quick-btn" onclick="setQuick('Українська мова|Діагностична робота')">Укр (ДР)</div>
             <div class="quick-btn" onclick="setQuick('Літературне читання|Вірш')">Вірш</div>
+            <div class="quick-btn" onclick="setQuick('Я досліджую світ|Діагностична робота')">ЯДС (ДР)</div>
         </div>
+
         <select id="massSub"><option value="">-- Предмет --</option></select>
-        <input type="text" id="massTask" placeholder="Назва роботи">
-        <button onclick="addSelectedWork()">Додати обраним</button>
+        <input type="text" id="massTask" placeholder="Назва (напр. Стор. 12)">
+        <button onclick="addSelectedWork()" style="background:#4b1681;">Додати обраним</button>
         <div id="historyList" class="history-box"></div>
+        <hr style="border:1px solid #e9dcf5; margin:15px 0;">
+        <button onclick="generateReport()" style="background:#27ae60; padding:10px; font-size:14px;">📊 Звіт по боргах</button>
+        <div id="reportArea" class="hidden" style="background:#fff; padding:10px; border:1px solid #e9dcf5; border-radius:10px; margin-top:10px; font-size:13px;"></div>
     </div>
 
     <div id="loginSection">
+        <label>Оберіть учня:</label>
         <select id="studentSelect"><option value="">-- Учень --</option></select>
-        <input type="text" id="passCode" placeholder="Код" onkeypress="if(event.key==='Enter') checkData()">
+        <label>Код:</label>
+        <input type="text" id="passCode" placeholder="00.00" onkeypress="if(event.key==='Enter') checkData()">
         <button onclick="checkData()">Увійти</button>
     </div>
 
     <div id="result" class="hidden">
-        <button onclick="location.reload()" style="width:auto; padding:5px 10px; margin-bottom:10px;">⬅ Вийти</button>
-        <h3 id="studentNameDisplay"></h3>
+        <button onclick="location.reload()" style="width:auto; padding:8px 15px; margin-bottom:15px; font-size:14px;">⬅ Вийти</button>
+        <h3 id="studentNameDisplay" style="text-align:center; color:#4b1681;"></h3>
         <div id="debtList"></div>
     </div>
 </div>
@@ -95,6 +107,7 @@
         "id15": { code: "24.06", name: "Філатова Ульяна" }, "id16": { code: "04.03", name: "Холматова Віолетта" },
         "id17": { code: "04.05", name: "Шаповал Тимур" }
     };
+
     const structure = {
         "Літературне читання": ["Діагностична робота", "Вірш", "Творча робота"],
         "Українська мова": ["Діагностична робота", "Свій вид діяльності"],
@@ -107,13 +120,21 @@
     const chkArea = document.getElementById('massCheckboxes');
     for (let id in students) {
         sel.innerHTML += `<option value="${id}">${students[id].name}</option>`;
-        chkArea.innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
+        chkArea.innerHTML += `<label><input type="checkbox" value="${id}" onchange="updateCount()"> ${students[id].name.split(' ')[0]}</label>`;
     }
     const mSub = document.getElementById('massSub');
     for (let s in structure) structure[s].forEach(c => mSub.innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
 
+    function updateCount() {
+        const count = document.querySelectorAll('#massCheckboxes input:checked').length;
+        document.getElementById('countDisplay').innerText = `Обрано учнів: ${count}`;
+    }
+
     function setQuick(v) { document.getElementById('massSub').value = v; }
-    function toggleAll(v) { document.querySelectorAll('#massCheckboxes input').forEach(c => c.checked = v); }
+    function toggleAll(v) { 
+        document.querySelectorAll('#massCheckboxes input').forEach(c => c.checked = v);
+        updateCount();
+    }
 
     function checkData() {
         const id = document.getElementById('studentSelect').value;
@@ -121,6 +142,7 @@
         if (code === "21.08") {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('adminPanel').classList.remove('hidden');
+            loadHistory();
             if (id) { document.getElementById('result').classList.remove('hidden'); loadData(id, true); }
         } else if (id && students[id].code === code) {
             document.getElementById('loginSection').classList.add('hidden');
@@ -133,14 +155,44 @@
         const selected = Array.from(document.querySelectorAll('#massCheckboxes input:checked')).map(c => c.value);
         const sub = document.getElementById('massSub').value.split('|');
         const task = document.getElementById('massTask').value.trim();
-        if (!task || selected.length === 0) return;
+        if (!task || selected.length === 0 || !sub[0]) { alert("Заповніть усі поля!"); return; }
         const date = new Date().toLocaleDateString('uk-UA').slice(0, 5);
         selected.forEach(sid => {
             const k = database.ref().child('students').push().key;
             database.ref(`students/${sid}/${sub[0]}/${sub[1]}/${k}`).set({date: date, val: task});
         });
+        database.ref('history').push({ date: date, task: task, subject: sub[0] });
         alert("Додано!");
-        toggleAll(false); document.getElementById('massTask').value = "";
+        toggleAll(false); document.getElementById('massTask').value = ""; document.getElementById('massSub').value = "";
+    }
+
+    function loadHistory() {
+        database.ref('history').limitToLast(5).on('value', snap => {
+            const list = document.getElementById('historyList'); list.innerHTML = "<b>Історія:</b><br>";
+            const data = snap.val(); if (!data) return;
+            Object.values(data).reverse().forEach(h => list.innerHTML += `${h.date} - ${h.subject}: ${h.task}<br>`);
+        });
+    }
+
+    async function generateReport() {
+        const area = document.getElementById('reportArea'); area.classList.remove('hidden'); area.innerHTML = "⏳ Оновлення...";
+        const snap = await database.ref('students').once('value');
+        const allData = snap.val() || {};
+        let html = "<strong>Звіт:</strong><br>";
+        for (let sub in structure) {
+            structure[sub].forEach(cat => {
+                let debts = {};
+                for (let sid in students) {
+                    const d = (allData[sid] && allData[sid][sub] && allData[sid][sub][cat]) ? allData[sid][sub][cat] : {};
+                    for (let k in d) if (d[k].val) {
+                        if (!debts[d[k].val]) debts[d[k].val] = [];
+                        debts[d[k].val].push(students[sid].name.split(' ')[0]);
+                    }
+                }
+                for (let t in debts) html += `● ${sub} (${t}): <span style="color:red">${debts[t].join(', ')}</span><br>`;
+            });
+        }
+        area.innerHTML = html || "✅ Боргів немає";
     }
 
     function loadData(id, edit) {
@@ -158,7 +210,7 @@
                         let row = document.createElement('div'); row.className = 'multi-row';
                         row.innerHTML = `<span class="date-cell">${items[k].date}</span><span class="${items[k].val?'status-debt':''}">${items[k].val || 'немає ✅'}</span>`;
                         if(edit) {
-                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${k}`).remove();
+                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.style.padding="2px"; b.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${k}`).remove();
                             row.appendChild(b);
                         }
                         div.appendChild(row);
