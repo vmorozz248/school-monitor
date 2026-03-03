@@ -12,29 +12,8 @@
         .card { background: rgba(255, 255, 255, 0.98); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(75, 22, 129, 0.4); width: 100%; max-width: 550px; position: relative; box-sizing: border-box; }
         .admin-panel { background: #f3ebf9; border: 2px solid #61309e; padding: 20px; border-radius: 15px; margin-bottom: 25px; }
         
-        /* ВИПРАВЛЕНИЙ СПИСОК УЧНІВ */
-        .student-selector { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-            background: white; 
-            padding: 12px; 
-            border-radius: 10px; 
-            border: 1px solid #cbb2eb; 
-            margin-bottom: 15px; 
-            max-height: 200px; 
-            overflow-y: auto; 
-        }
-        .student-selector label { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            font-weight: normal; 
-            font-size: 14px; 
-            color: #4b1681;
-            margin: 0;
-            cursor: pointer;
-        }
+        .student-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: white; padding: 12px; border-radius: 10px; border: 1px solid #cbb2eb; margin-bottom: 15px; max-height: 200px; overflow-y: auto; }
+        .student-selector label { display: flex; align-items: center; gap: 8px; font-weight: normal; font-size: 14px; color: #4b1681; margin: 0; cursor: pointer; }
         .student-selector input { width: auto; margin: 0; cursor: pointer; }
 
         .report-box { background: white; border: 1px solid #cbb2eb; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 14px; max-height: 300px; overflow-y: auto; }
@@ -72,10 +51,12 @@
         </div>
 
         <label style="font-size:14px;">Предмет та робота:</label>
-        <select id="massSub" style="padding:8px; font-size:14px;"></select>
+        <select id="massSub" style="padding:8px; font-size:14px;">
+            <option value="">-- Оберіть предмет --</option>
+        </select>
         <input type="text" id="massTask" placeholder="Назва боргу" style="padding:8px; font-size:14px;">
         
-        <button onclick="addSelectedWork()" style="background:#4b1681;">Додати обраним</button>
+        <button id="addBtn" onclick="addSelectedWork()" style="background:#4b1681;">Додати обраним</button>
         <hr style="border:1px solid #cbb2eb; margin:15px 0;">
         <button onclick="generateReport()" style="background:#27ae60; padding:10px; font-size:14px;">📊 Звіт по боргах</button>
         <div id="reportArea" class="report-box hidden"></div>
@@ -167,9 +148,15 @@
 
     function addSelectedWork() {
         const selected = Array.from(document.querySelectorAll('#massCheckboxes input:checked')).map(c => c.value);
-        const val = document.getElementById('massSub').value.split('|');
+        const subVal = document.getElementById('massSub').value;
         const task = document.getElementById('massTask').value.trim();
-        if (!task || selected.length === 0) { alert("Оберіть учнів та впишіть назву!"); return; }
+        
+        if (!subVal || !task || selected.length === 0) { 
+            alert("Оберіть учнів, предмет та впишіть назву роботи!"); 
+            return; 
+        }
+        
+        const val = subVal.split('|');
         
         if (confirm(`Додати борг "${task}" для ${selected.length} учнів?`)) {
             const date = new Date().toLocaleDateString('uk-UA').slice(0, 5);
@@ -177,7 +164,12 @@
                 const key = database.ref().child('students').push().key;
                 database.ref(`students/${sid}/${val[0]}/${val[1]}/${key}`).set({date: date, val: task});
             });
-            alert("Готово!");
+            
+            // ОЧИЩЕННЯ ПІСЛЯ ЗБЕРЕЖЕННЯ
+            alert("Готово! Дані оновлено.");
+            toggleAll(false); // Скинути всі галочки
+            document.getElementById('massTask').value = ""; // Очистити назву роботи
+            document.getElementById('massSub').value = ""; // Повернути вибір предмета на початок
         }
     }
 
@@ -226,7 +218,7 @@
                         row.className = 'multi-row';
                         row.innerHTML = `<span class="date-cell">${items[k].date}</span><span class="${items[k].val ? 'status-debt':'status-ok'}">${items[k].val || 'немає ✅'}</span>`;
                         if(canEdit) {
-                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.style.background="none"; b.style.color="red"; b.style.border="none";
+                            let b = document.createElement('button'); b.innerText = "×"; b.style.width="30px"; b.style.background="none"; b.style.color="red"; b.style.border="none"; b.style.fontSize="20px";
                             b.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${k}`).remove();
                             row.appendChild(b);
                         }
