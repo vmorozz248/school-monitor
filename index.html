@@ -11,9 +11,10 @@
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; }
         .admin-panel { background: #fdfaff; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
         
-        /* СТАБІЛЬНА СІТКА ПРІЗВИЩ */
-        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; margin-bottom: 10px; max-height: 200px; overflow-y: auto; }
-        .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4b1681; cursor: pointer; border: 1px solid #f0e6f7; padding: 5px; border-radius: 8px; }
+        /* АЛФАВІТНА СІТКА УЧНІВ */
+        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; margin-bottom: 10px; max-height: 220px; overflow-y: auto; }
+        .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4b1681; cursor: pointer; border: 1px solid #f0e6f7; padding: 5px; border-radius: 8px; transition: 0.2s; }
+        .student-grid label:hover { background: #fdfaff; border-color: #61309e; }
 
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
@@ -25,10 +26,9 @@
         .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
         .journal-header { font-weight: bold; color: #61309e; font-size: 14px; cursor: pointer; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
-        .debtor-tag:hover { background: #ffcccc; color: #c0392b; text-decoration: line-through; }
 
         .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; }
-        .subject-group h4 { color: #61309e; margin: 0 0 10px 0; border-bottom: 2px solid #e9dcf5; padding-bottom: 5px; }
+        .subject-group h4 { color: #61309e; margin: 0 0 10px 0; border-bottom: 2px solid #e9dcf5; padding-bottom: 5px; font-size: 16px; }
         .debt-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
         .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 42px; text-align: center; box-shadow: 0 2px 0 #3e1d66; }
         
@@ -48,7 +48,6 @@
         <h3 style="color:#61309e; margin-top:0;">Редагувати</h3>
         <label style="font-size:12px; font-weight:bold;">Змінити дату:</label>
         <input type="date" id="modalDate">
-        <label style="font-size:12px; font-weight:bold;">Назва:</label>
         <input type="text" id="modalTask" onkeypress="if(event.key==='Enter') saveEdit()">
         <div style="display:flex; gap:10px; margin-top:10px;">
             <button onclick="saveEdit()" style="background:#61309e;">Зберегти</button>
@@ -78,7 +77,7 @@
         <div id="view2" class="hidden"><div id="journalArea">Завантаження...</div></div>
     </div>
     <div id="loginForm">
-        <select id="uSel"><option value="">-- Учень --</option></select>
+        <select id="uSel"><option value="">-- Оберіть учня --</option></select>
         <input type="text" id="pInp" placeholder="Код" onkeypress="if(event.key==='Enter') login()">
         <button onclick="login()">Увійти</button>
     </div>
@@ -124,7 +123,10 @@
 
     let curEdit = null;
 
-    Object.keys(students).forEach(id => {
+    // СОРТУВАННЯ УЧНІВ ЗА АЛФАВІТОМ ПЕРЕД ВИВОДОМ
+    const sortedIds = Object.keys(students).sort((a, b) => students[a].name.localeCompare(students[b].name));
+
+    sortedIds.forEach(id => {
         document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
         document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
@@ -133,8 +135,6 @@
     function showTab(n) {
         document.getElementById('view1').classList.toggle('hidden', n !== 1);
         document.getElementById('view2').classList.toggle('hidden', n !== 2);
-        document.getElementById('tab1').classList.toggle('active', n === 1);
-        document.getElementById('tab2').classList.toggle('active', n === 2);
         if (n === 2) loadJournal();
     }
 
@@ -152,9 +152,7 @@
         const sel = Array.from(document.querySelectorAll('#chkArea input:checked')).map(c => c.value);
         const sub = document.getElementById('subSel').value.split('|'), task = document.getElementById('taskInp').value.trim(), raw = document.getElementById('dateInp').value;
         if (!task || sel.length === 0 || !sub[0] || !raw) return alert("Заповніть!");
-        const d = new Date(raw);
-        const fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
-        const sKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
+        const d = new Date(raw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0'), sKey = raw.replace(/-/g, "");
         sel.forEach(sid => {
             const k = db.ref().child('students').push().key;
             db.ref(`students/${sid}/${sub[0]}/${sub[1]}/${k}`).set({ date: fDate, val: task, sortDate: sKey, fullDate: raw });
@@ -168,7 +166,6 @@
             area.innerHTML = ""; let sum = {};
             for (let sid in data) {
                 for (let sub in data[sid]) {
-                    if (sub === "config") continue;
                     for (let cat in data[sid][sub]) {
                         for (let tid in data[sid][sub][cat]) {
                             const t = data[sid][sub][cat][tid];
@@ -179,11 +176,9 @@
                     }
                 }
             }
-            // СОРТУВАННЯ ЖУРНАЛУ: НОВІ ЗВЕРХУ
-            Object.values(sum).sort((a,b) => b.sKey - a.sKey).forEach(item => {
-                const itemData = JSON.stringify(item);
+            Object.values(sum).sort((a,b) => b.sKey.localeCompare(a.sKey)).forEach(item => {
                 area.innerHTML += `<div class="journal-card">
-                    <span class="journal-header" onclick='openEdit(${itemData})'>✏️ ${item.date} - ${item.sub}: ${item.task}</span>
+                    <span class="journal-header" onclick='openEdit(${JSON.stringify(item)})'>✏️ ${item.date} - ${item.sub}: ${item.task}</span>
                     ${item.list.map(l => `<span class="debtor-tag" onclick="delOne('${l.sid}','${item.sub}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}
                 </div>`;
             });
@@ -195,7 +190,7 @@
     function saveEdit() {
         const newTask = document.getElementById('modalTask').value.trim(), newRaw = document.getElementById('modalDate').value;
         if (!newTask || !newRaw) return;
-        const d = new Date(newRaw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0'), sKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
+        const d = new Date(newRaw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0'), sKey = newRaw.replace(/-/g, "");
         let up = {};
         curEdit.list.forEach(l => {
             up[`students/${l.sid}/${curEdit.sub}/${curEdit.cat}/${l.tid}/val`] = newTask;
@@ -205,7 +200,6 @@
         });
         db.ref().update(up).then(() => { closeModal(); alert("Оновлено!"); });
     }
-
     function delOne(sid, sub, cat, tid) { if (confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove(); }
 
     function loadData(id) {
@@ -219,17 +213,26 @@
                         for (let k in data[sub][cat]) debts.push({ ...data[sub][cat][k], cat });
                     }
                 });
-                // СОРТУВАННЯ У УЧНЯ: НОВІ ЗВЕРХУ (b - a)
-                debts.sort((a, b) => (b.sortDate || "0") - (a.sortDate || "0"));
+                
+                // НОВІ ЗВЕРХУ У КОЖНОМУ ПРЕДМЕТІ
+                debts.sort((a, b) => (b.sortDate || "").localeCompare(a.sortDate || ""));
+                
                 if (debts.length > 0) {
                     let div = `<div class="subject-group"><h4>${sub}</h4>`;
                     debts.forEach(d => {
                         const cls = d.cat.includes('Діагностична') ? 'c-diag' : d.cat.includes('Творча') ? 'c-creat' : d.cat.includes('Вірш') ? 'c-poem' : 'c-other';
-                        div += `<div class="debt-row"><div class="date-bubble">${d.date}</div><div><span class="cat-tag ${cls}">${d.cat}</span><br><b>${d.val}</b></div></div>`;
+                        div += `<div class="debt-row">
+                            <div class="date-bubble">${d.date}</div>
+                            <div>
+                                <span class="cat-tag ${cls}">${d.cat}</span><br>
+                                <b>${d.val}</b>
+                            </div>
+                        </div>`;
                     });
                     area.innerHTML += div + `</div>`;
                 }
             }
+            if (!area.innerHTML) area.innerHTML = "<p style='text-align:center;'>✅ Боргів немає!</p>";
         });
     }
     function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); }
