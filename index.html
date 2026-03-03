@@ -8,35 +8,42 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.jpg') no-repeat center center fixed; background-size: cover; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; }
+        .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; position: relative; }
         .admin-panel { background: #fdfaff; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
+        
         .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin-bottom: 10px; max-height: 180px; overflow-y: auto; }
         .student-grid label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4b1681; cursor: pointer; }
+
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
+        
+        /* ПОЛАГОДЖЕНЕ ВІКНО */
         #editModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 10000; }
-        .modal-content { background: white; padding: 25px; border-radius: 25px; width: 90%; max-width: 380px; }
+        .modal-content { background: white; padding: 25px; border-radius: 25px; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+
         .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
         .journal-header { font-weight: bold; color: #61309e; font-size: 14px; cursor: pointer; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 8px; }
         .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .debtor-tag:hover { background: #ffcccc; color: #c0392b; text-decoration: line-through; }
+
         .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; }
         .subject-group h4 { color: #61309e; margin: 0 0 10px 0; border-bottom: 2px solid #e9dcf5; padding-bottom: 5px; }
+        
+        /* БУЛЬБАШКИ ТА МІТКИ */
         .debt-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
         .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 45px; text-align: center; flex-shrink: 0; box-shadow: 0 2px 0 #3e1d66; }
         
-        /* КОЛЬОРИ КАТЕГОРІЙ */
         .cat-badge { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; color: white; display: inline-block; margin-bottom: 3px; }
-        .cat-diag { background: #e74c3c; } /* Червоний */
-        .cat-creative { background: #27ae60; } /* Зелений */
-        .cat-poem { background: #2980b9; } /* Синій */
-        .cat-other { background: #8e44ad; } /* Фіолетовий */
+        .cat-diag { background: #e74c3c; }
+        .cat-creative { background: #27ae60; }
+        .cat-poem { background: #2980b9; }
+        .cat-other { background: #8e44ad; }
 
         h1 { color: #1a012b; text-align: center; font-size: 24px; margin: 0 0 10px 0; }
         select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
-        #counter { font-size: 13px; color: #61309e; font-weight: bold; margin-bottom: 8px; display: block; }
     </style>
 </head>
 <body>
@@ -44,13 +51,12 @@
 <div id="editModal">
     <div class="modal-content">
         <h3 style="color:#61309e; margin-top:0;">Редагувати запис</h3>
-        <p id="modalCategoryDisplay" style="font-size: 12px; font-weight: bold; margin-bottom: 10px;"></p>
-        <label style="font-size:12px; font-weight:bold; display: block; margin-bottom: 5px;">Оберіть дату:</label>
+        <p id="modalCatDisp" style="margin-bottom:10px;"></p>
+        <label style="font-size:12px; font-weight:bold;">Змінити дату:</label>
         <div style="display:flex; gap:5px; margin-bottom:10px;">
             <input type="date" id="modalDate" style="margin-bottom:0;">
             <button onclick="document.getElementById('modalDate').valueAsDate = new Date()" style="width:auto; padding:10px; font-size:12px; background:#27ae60;">Сьогодні</button>
         </div>
-        <label style="font-size:12px; font-weight:bold; display: block; margin-bottom: 5px;">Назва роботи:</label>
         <input type="text" id="modalTask" onkeypress="if(event.key==='Enter') saveEdit()">
         <div style="display:flex; gap:10px; margin-top:10px;">
             <button onclick="saveEdit()" style="background:#61309e;">Зберегти</button>
@@ -67,7 +73,7 @@
             <div id="tab2" class="tab" onclick="showTab(2)">📓 Журнал</div>
         </div>
         <div id="view1">
-            <span id="counter">Обрано: 0</span>
+            <span id="counter" style="font-size:13px; font-weight:bold; color:#61309e;">Обрано: 0</span>
             <div class="student-grid" id="chkArea"></div>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <button style="padding:6px; font-size:12px; background:#cbb2eb; color:#4b1681;" onclick="selectAll(true)">Усі</button>
@@ -142,6 +148,7 @@
     }
 
     function updateCounter() { document.getElementById('counter').innerText = "Обрано: " + document.querySelectorAll('#chkArea input:checked').length; }
+    
     function showTab(n) {
         document.getElementById('view1').classList.toggle('hidden', n !== 1);
         document.getElementById('view2').classList.toggle('hidden', n !== 2);
@@ -149,7 +156,6 @@
         document.getElementById('tab2').classList.toggle('active', n === 2);
         if (n === 2) loadJournal();
     }
-    function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); updateCounter(); }
 
     function login() {
         const id = document.getElementById('uSel').value, code = document.getElementById('pInp').value.trim();
@@ -172,7 +178,7 @@
             const k = db.ref().child('students').push().key;
             db.ref(`students/${sid}/${sub[0]}/${sub[1]}/${k}`).set({ date: fDate, val: task, sortDate: sKey, fullDate: raw });
         });
-        alert("Розіслано!"); selectAll(false); document.getElementById('taskInp').value = "";
+        alert("Розіслано!"); document.querySelectorAll('#chkArea input').forEach(c => c.checked = false); updateCounter(); document.getElementById('taskInp').value = "";
     }
 
     function loadJournal() {
@@ -202,12 +208,11 @@
     }
 
     function openEditModal(sub, cat, task, fullDate) {
-        currentEdit = { sub, cat, oldTask: task, fullDate };
+        currentEdit = { sub, cat, oldTask: task };
         document.getElementById('modalTask').value = task;
         document.getElementById('modalDate').value = fullDate || '';
-        const display = document.getElementById('modalCategoryDisplay');
-        display.innerText = cat;
-        display.className = 'cat-badge ' + getCatClass(cat);
+        const disp = document.getElementById('modalCatDisp');
+        disp.innerText = cat; disp.className = 'cat-badge ' + getCatClass(cat);
         document.getElementById('editModal').style.display = 'flex';
     }
 
@@ -220,13 +225,11 @@
         const d = new Date(newRaw);
         const fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
         const sKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
-        
         db.ref('students').once('value', snap => {
             const data = snap.val(); let up = {};
             for (let sid in data) {
                 if (data[sid][currentEdit.sub] && data[sid][currentEdit.sub][currentEdit.cat]) {
                     for (let tid in data[sid][currentEdit.sub][currentEdit.cat]) {
-                        // Пошук за точною назвою та початковою датою
                         if (data[sid][currentEdit.sub][currentEdit.cat][tid].val === currentEdit.oldTask) {
                             up[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/val`] = newTask;
                             up[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/date`] = fDate;
@@ -271,6 +274,8 @@
             if (!area.innerHTML) area.innerHTML = "<p style='text-align:center;'>✅ Боргів немає!</p>";
         });
     }
+
+    function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); updateCounter(); }
 </script>
 </body>
 </html>
