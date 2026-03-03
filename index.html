@@ -36,6 +36,13 @@
             border-radius: 50%; font-weight: bold; font-size: 20px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
         }
+        #modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 20px; max-width: 450px; width: 90%; max-height: 80vh; overflow-y: auto;
+        }
         .admin-panel {
             background: #f3ebf9; border: 2px solid #61309e; padding: 20px; border-radius: 15px; margin-bottom: 25px;
         }
@@ -63,22 +70,28 @@
 </head>
 <body>
 
+<div id="modal">
+    <div class="modal-content">
+        <span style="float:right; cursor:pointer;" onclick="toggleHelp()">×</span>
+        <h2 style="color:#61309e;">📘 Інструкція</h2>
+        <p>1. Оберіть учня. 2. Введіть код (наприклад, 01.01). 3. Натисніть «Перевірити» або Enter.</p>
+        <p>✅ — здано. <span style="color:red">Червоний текст</span> — борг.</p>
+    </div>
+</div>
+
 <div class="card">
-    <div class="help-btn" onclick="alert('Інструкція: 1. Оберіть учня. 2. Введіть код. 3. Перевірте борги.')">?</div>
+    <div class="help-btn" onclick="toggleHelp()">?</div>
     <h1>Шкільний монітор</h1>
     <p class="subtitle">Система обліку робіт</p>
 
     <div id="adminPanel" class="admin-panel hidden">
         <h3 style="color:#61309e; margin:0 0 15px 0;">Панель вчителя 👩‍🏫</h3>
-        
         <label style="font-size:14px;">Масове додавання:</label>
         <select id="massSub" style="padding:8px; font-size:14px;"></select>
         <input type="text" id="massTask" placeholder="Назва нової роботи" style="padding:8px; font-size:14px;">
         <button onclick="addMassWork()" style="background:#4b1681; padding:10px; font-size:14px;">Додати всім учням</button>
-        
         <hr style="border:1px solid #cbb2eb; margin:15px 0;">
-        
-        <button onclick="generateReport()" style="background:#27ae60; padding:10px; font-size:14px;">📊 Згенерувати звіт по боргах</button>
+        <button onclick="generateReport()" style="background:#27ae60; padding:10px; font-size:14px;">📊 Звіт по боргах</button>
         <div id="reportArea" class="report-box hidden"></div>
     </div>
 
@@ -105,14 +118,16 @@
     </select>
 
     <label>Код доступу:</label>
-    <input type="text" id="passCode" placeholder="Наприклад: 01.01">
+    <input type="text" id="passCode" placeholder="Наприклад: 01.01" onkeypress="handleEnter(event)">
 
-    <button onclick="checkData()">Увійти в кабінет</button>
+    <button onclick="checkData()">Перевірити</button>
 
     <div id="result" class="hidden">
         <h3 id="studentNameDisplay" style="text-align:center; color:#4b1681;"></h3>
+        <p id="updateTime" style="text-align:center; font-style:italic; color:#8352b2; font-size:14px;"></p>
         <div id="debtList"></div>
     </div>
+    <p id="errorMsg" style="color:red; text-align:center;" class="hidden">Невірний код!</p>
 </div>
 
 <script>
@@ -130,15 +145,15 @@
     const database = firebase.database();
 
     const students = {
-        "id1": { code: "26.12", name: "Астахова Євгенія" }, "id2": { code: "01.04", name: "Бабенко Поліна" },
-        "id3": { code: "13.02", name: "Водолазька Соломія" }, "id4": { code: "15.02", name: "Гомонюк Софія" },
-        "id5": { code: "01.10", name: "Деміденко Аріна" }, "id6": { code: "11.12", name: "Єлісеєв Дмитро" },
-        "id7": { code: "05.07", name: "Іванець Тімур" }, "id8": { code: "12.02", name: "Калантаєва Анастасія" },
-        "id9": { code: "31.01", name: "Лисих Ліана" }, "id10": { code: "17.06", name: "Оковитий Максим" },
-        "id11": { code: "26.04", name: "Павлов Тимур" }, "id12": { code: "25.04", name: "Радченко Владислава" },
-        "id13": { code: "15.01", name: "Скабардіна Мілослава" }, "id14": { code: "27.10", name: "Удовіка Макар" },
-        "id15": { code: "24.06", name: "Філатова Ульяна" }, "id16": { code: "04.03", name: "Холматова Віолетта" },
-        "id17": { code: "04.05", name: "Шаповал Тимур" }
+        "id1": { code: "26.12", name: "Астахову Євгенію" }, "id2": { code: "01.04", name: "Бабенко Поліну" },
+        "id3": { code: "13.02", name: "Водолазьку Соломію" }, "id4": { code: "15.02", name: "Гомонюк Софію" },
+        "id5": { code: "01.10", name: "Деміденко Аріну" }, "id6": { code: "11.12", name: "Єлісеєва Дмитра" },
+        "id7": { code: "05.07", name: "Іванця Тімура" }, "id8": { code: "12.02", name: "Калантаєву Анастасію" },
+        "id9": { code: "31.01", name: "Лисих Ліану" }, "id10": { code: "17.06", name: "Оковитого Максима" },
+        "id11": { code: "26.04", name: "Павлова Тимура" }, "id12": { code: "25.04", name: "Радченко Владиславу" },
+        "id13": { code: "15.01", name: "Скабардіна Мілославу" }, "id14": { code: "27.10", name: "Удовіка Макара" },
+        "id15": { code: "24.06", name: "Філатову Ульяну" }, "id16": { code: "04.03", name: "Холматову Віолетту" },
+        "id17": { code: "04.05", name: "Шаповала Тимура" }
     };
 
     const structure = {
@@ -158,33 +173,45 @@
         });
     }
 
+    function toggleHelp() {
+        const modal = document.getElementById('modal');
+        modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    // Функція для обробки Enter
+    function handleEnter(event) {
+        if (event.key === "Enter") {
+            checkData();
+        }
+    }
+
     function checkData() {
         const id = document.getElementById('studentSelect').value;
         const code = document.getElementById('passCode').value.trim();
+        const res = document.getElementById('result');
+        const err = document.getElementById('errorMsg');
         const adminP = document.getElementById('adminPanel');
 
+        if (!id) { alert("Оберіть учня!"); return; }
+
         if (code === "21.08") {
-            adminP.classList.remove('hidden');
-            if(id) { loadData(id, true); document.getElementById('result').classList.remove('hidden'); }
-        } else if (id && students[id].code === code) {
-            adminP.classList.add('hidden');
-            document.getElementById('result').classList.remove('hidden');
+            err.classList.add('hidden'); res.classList.remove('hidden'); adminP.classList.remove('hidden');
+            loadData(id, true);
+        } else if (students[id] && students[id].code === code) {
+            err.classList.add('hidden'); res.classList.remove('hidden'); adminP.classList.add('hidden');
             loadData(id, false);
         } else {
-            alert("Невірний код!");
+            res.classList.add('hidden'); err.classList.remove('hidden');
         }
     }
 
     async function generateReport() {
         const area = document.getElementById('reportArea');
-        area.classList.remove('hidden');
-        area.innerHTML = "⏳ Завантаження звіту...";
-        
+        area.classList.remove('hidden'); area.innerHTML = "⏳ Завантаження...";
         const snap = await database.ref('students').once('value');
         const allData = snap.val() || {};
-        let reportHtml = "<strong>Звіт по заборгованостях:</strong><br><br>";
+        let reportHtml = "<strong>Звіт:</strong><br><br>";
         let hasDebts = false;
-
         for (let sub in structure) {
             structure[sub].forEach(cat => {
                 let debtGroup = {};
@@ -194,18 +221,17 @@
                         const taskName = studentDebts[dKey].val;
                         if (taskName) {
                             if (!debtGroup[taskName]) debtGroup[taskName] = [];
-                            debtGroup[taskName].push(students[sid].name);
+                            debtGroup[taskName].push(students[sid].name.replace('Астахову', 'Астахова').replace('Бабенко', 'Бабенко').replace('Водолазьку', 'Водолазька').replace('Гомонюк', 'Гомонюк').replace('Деміденко', 'Деміденко').replace('Лисих', 'Лисих').replace('Радченко', 'Радченко').replace('Скабардіна', 'Скабардіна').replace('Філатову', 'Філатова').replace('Холматову', 'Холматова'));
                         }
                     }
                 }
-                
                 for (let task in debtGroup) {
                     hasDebts = true;
                     reportHtml += `● <u>${sub} (${task})</u>: <span style="color:red">${debtGroup[task].join(', ')}</span><br><br>`;
                 }
             });
         }
-        area.innerHTML = hasDebts ? reportHtml : "✅ Боргів немає у жодного учня!";
+        area.innerHTML = hasDebts ? reportHtml : "✅ Боргів немає!";
     }
 
     function addMassWork() {
@@ -213,9 +239,10 @@
         const task = document.getElementById('massTask').value.trim();
         if (!task) return;
         if (confirm(`Додати всім: ${task}?`)) {
+            const date = new Date().toLocaleDateString('uk-UA').slice(0, 5);
             for (let sid in students) {
                 const key = database.ref().child('students').push().key;
-                database.ref(`students/${sid}/${val[0]}/${val[1]}/${key}`).set({date: "02.03", val: task});
+                database.ref(`students/${sid}/${val[0]}/${val[1]}/${key}`).set({date: date, val: task});
             }
             alert("Додано!");
         }
@@ -226,25 +253,49 @@
         database.ref('students/' + id).on('value', (snap) => {
             const data = snap.val() || {};
             const list = document.getElementById('debtList');
+            const upTime = document.getElementById('updateTime');
             list.innerHTML = "";
+            upTime.innerText = data.lastChange ? "Останнє оновлення: " + data.lastChange : "";
             for (let sub in structure) {
                 let div = document.createElement('div');
                 div.className = 'subject-group';
                 div.innerHTML = `<h4>${sub}</h4>`;
                 structure[sub].forEach(cat => {
+                    let p = document.createElement('p');
+                    p.style.margin = "10px 0 5px";
+                    const customCatName = (data.config && data.config[sub] && data.config[sub][cat]) ? data.config[sub][cat] : cat;
+                    p.innerHTML = `<span class="${canEdit ? 'editable-cat' : ''}">${customCatName}</span>`;
+                    if (canEdit) {
+                        p.onclick = () => {
+                            let newName = prompt("Введіть назву категорії:", customCatName);
+                            if (newName) database.ref(`students/${id}/config/${sub}/${cat}`).set(newName);
+                        };
+                    }
+                    div.appendChild(p);
                     const items = (data[sub] && data[sub][cat]) ? data[sub][cat] : {};
                     for (let key in items) {
-                        if (!canEdit && !items[key].val) continue;
+                        const v = items[key].val || "";
+                        if (!canEdit && !v) continue;
                         let row = document.createElement('div');
                         row.className = 'multi-row';
-                        row.innerHTML = `<span class="date-cell">${items[key].date}</span><span class="${items[key].val ? 'status-debt':'status-ok'}">${items[key].val || 'немає ✅'}</span>`;
+                        row.innerHTML = `<span class="date-cell">${items[key].date}</span><span class="${v ? 'status-debt':'status-ok'}">${v || 'немає ✅'}</span>`;
                         if(canEdit) {
                             let del = document.createElement('button');
-                            del.innerText = "×"; del.style.width="30px"; del.style.background="none"; del.style.color="red"; del.style.border="none";
+                            del.innerText = "×"; del.style.width="30px"; del.style.background="none"; del.style.color="red"; del.style.border="none"; del.style.fontSize="20px";
                             del.onclick = () => database.ref(`students/${id}/${sub}/${cat}/${key}`).remove();
                             row.appendChild(del);
                         }
                         div.appendChild(row);
+                    }
+                    if (canEdit) {
+                        let addB = document.createElement('button');
+                        addB.className = 'add-btn'; addB.innerText = "+ додати";
+                        addB.onclick = (e) => {
+                            e.stopPropagation();
+                            const k = database.ref().child('students').push().key;
+                            database.ref(`students/${id}/${sub}/${cat}/${k}`).set({date: new Date().toLocaleDateString('uk-UA').slice(0,5), val: ""});
+                        };
+                        div.appendChild(addB);
                     }
                 });
                 list.appendChild(div);
