@@ -17,17 +17,15 @@
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
         
-        /* ЖУРНАЛ */
+        /* МОДАЛЬНЕ ВІКНО — ТЕПЕР ПРАВИЛЬНО ПРИХОВАНЕ */
+        #editModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        .modal-content { background: white; padding: 25px; border-radius: 25px; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+
         .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
         .journal-header { font-weight: bold; color: #61309e; font-size: 14px; cursor: pointer; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 8px; }
         .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
         .debtor-tag:hover { background: #ffcccc; color: #c0392b; text-decoration: line-through; }
 
-        /* ВІКНО РЕДАГУВАННЯ */
-        #editModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
-
-        /* КАРТКИ В УЧНЯ */
         .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; }
         .subject-group h4 { color: #61309e; margin: 0 0 10px 0; border-bottom: 2px solid #e9dcf5; padding-bottom: 5px; }
         .debt-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
@@ -44,16 +42,19 @@
 </head>
 <body>
 
-<div id="editModal" class="hidden">
+<div id="editModal">
     <div class="modal-content">
-        <h3 style="color:#61309e; margin-top:0;">Редагувати роботу</h3>
-        <label style="font-size:12px;">Змінити дату:</label>
-        <input type="date" id="modalDate">
-        <label style="font-size:12px;">Назва роботи:</label>
-        <input type="text" id="modalTask">
-        <div style="display:flex; gap:10px;">
-            <button onclick="saveEdit()" style="background:#27ae60;">Зберегти</button>
-            <button onclick="closeModal()" style="background:#888;">Скасувати</button>
+        <h3 style="color:#61309e; margin-top:0;">Редагувати запис</h3>
+        <label style="font-size:12px; font-weight:bold;">Календар:</label>
+        <div style="display:flex; gap:5px; align-items:center; margin-bottom:10px;">
+            <input type="date" id="modalDate" style="margin-bottom:0;">
+            <button onclick="document.getElementById('modalDate').valueAsDate = new Date()" style="width:auto; padding:10px; font-size:12px; background:#27ae60;">Сьогодні</button>
+        </div>
+        <label style="font-size:12px; font-weight:bold;">Назва (без дати):</label>
+        <input type="text" id="modalTask" placeholder="Наприклад: стор. 45">
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button onclick="saveEdit()" style="background:#61309e;">Зберегти</button>
+            <button onclick="closeModal()" style="background:#888;">Закрити</button>
         </div>
     </div>
 </div>
@@ -77,12 +78,10 @@
             <input type="text" id="taskInp" placeholder="Назва роботи">
             <button onclick="sendDebt()">Розіслати борг</button>
         </div>
-        <div id="view2" class="hidden">
-            <div id="journalArea">Завантаження...</div>
-        </div>
+        <div id="view2" class="hidden"><div id="journalArea">Завантаження...</div></div>
     </div>
     <div id="loginForm">
-        <select id="uSel"><option value="">-- Оберіть учня --</option></select>
+        <select id="uSel"><option value="">-- Учень --</option></select>
         <input type="text" id="pInp" placeholder="Код" onkeypress="if(event.key==='Enter') login()">
         <button onclick="login()">Увійти</button>
     </div>
@@ -129,14 +128,13 @@
     let currentEdit = null; 
 
     const table = document.getElementById('chkTable');
-    let row;
+    let r;
     Object.keys(students).forEach((id, idx) => {
-        if (idx % 2 === 0) row = table.insertRow();
-        row.insertCell().innerHTML = `<label><input type="checkbox" value="${id}" onchange="updateCounter()"> ${students[id].name.split(' ')[0]}</label>`;
+        if (idx % 2 === 0) r = table.insertRow();
+        r.insertCell().innerHTML = `<label><input type="checkbox" value="${id}" onchange="updateCounter()"> ${students[id].name.split(' ')[0]}</label>`;
         document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
-    const subSel = document.getElementById('subSel');
-    for (let s in structure) structure[s].forEach(c => subSel.innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
+    for (let s in structure) structure[s].forEach(c => document.getElementById('subSel').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
 
     function updateCounter() { document.getElementById('counter').innerText = "Обрано: " + document.querySelectorAll('#chkTable input:checked').length; }
     function showTab(n) {
@@ -159,16 +157,15 @@
     }
 
     function sendDebt() {
-        const selected = Array.from(document.querySelectorAll('#chkTable input:checked')).map(c => c.value);
-        const subData = document.getElementById('subSel').value.split('|'), task = document.getElementById('taskInp').value.trim(), rawDate = document.getElementById('dateInp').value;
-        if (!task || selected.length === 0 || !subData[0] || !rawDate) return alert("Заповніть усе!");
-        const d = new Date(rawDate);
-        const formattedDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
-        const sortKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
-        
-        selected.forEach(sid => {
-            const tKey = db.ref().child('students').push().key;
-            db.ref(`students/${sid}/${subData[0]}/${subData[1]}/${tKey}`).set({ date: formattedDate, val: task, sortDate: sortKey, fullDate: rawDate });
+        const sel = Array.from(document.querySelectorAll('#chkTable input:checked')).map(c => c.value);
+        const sub = document.getElementById('subSel').value.split('|'), task = document.getElementById('taskInp').value.trim(), raw = document.getElementById('dateInp').value;
+        if (!task || sel.length === 0 || !sub[0] || !raw) return alert("Заповніть усе!");
+        const d = new Date(raw);
+        const fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
+        const sKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
+        sel.forEach(sid => {
+            const k = db.ref().child('students').push().key;
+            db.ref(`students/${sid}/${sub[0]}/${sub[1]}/${k}`).set({ date: fDate, val: task, sortDate: sKey, fullDate: raw });
         });
         alert("Розіслано!"); selectAll(false); document.getElementById('taskInp').value = "";
     }
@@ -176,7 +173,7 @@
     function loadJournal() {
         db.ref('students').on('value', snap => {
             const data = snap.val() || {}, area = document.getElementById('journalArea');
-            area.innerHTML = ""; let summary = {};
+            area.innerHTML = ""; let sum = {};
             for (let sid in data) {
                 for (let sub in data[sid]) {
                     if (sub === "config") continue;
@@ -184,13 +181,13 @@
                         for (let tid in data[sid][sub][cat]) {
                             const t = data[sid][sub][cat][tid];
                             const key = `${sub}|${cat}|${t.val}|${t.date}`;
-                            if (!summary[key]) summary[key] = { sub, cat, task: t.val, date: t.date, fullDate: t.fullDate || '', students: [] };
-                            summary[key].students.push({sid, tid});
+                            if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, fullDate: t.fullDate || '', students: [] };
+                            sum[key].students.push({sid, tid});
                         }
                     }
                 }
             }
-            Object.values(summary).reverse().forEach(item => {
+            Object.values(sum).reverse().forEach(item => {
                 area.innerHTML += `<div class="journal-card">
                     <span class="journal-header" onclick="openEditModal('${item.sub}','${item.cat}','${item.task}','${item.fullDate}')">✏️ ${item.date} - ${item.sub}: ${item.task}</span>
                     ${item.students.map(st => `<span class="debtor-tag" onclick="delOne('${st.sid}','${item.sub}','${item.cat}','${st.tid}')">${students[st.sid].name.split(' ')[0]}</span>`).join('')}
@@ -202,36 +199,34 @@
     function openEditModal(sub, cat, task, fullDate) {
         currentEdit = { sub, cat, oldTask: task };
         document.getElementById('modalTask').value = task;
-        document.getElementById('modalDate').value = fullDate || new Date().toISOString().split('T')[0];
-        document.getElementById('editModal').classList.remove('hidden');
+        document.getElementById('modalDate').value = fullDate || '';
+        document.getElementById('editModal').style.display = 'flex';
     }
 
-    function closeModal() { document.getElementById('editModal').classList.add('hidden'); }
+    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
     function saveEdit() {
         const newTask = document.getElementById('modalTask').value.trim();
-        const newRawDate = document.getElementById('modalDate').value;
-        if (!newTask || !newRawDate) return alert("Заповніть поля!");
-
-        const d = new Date(newRawDate);
-        const formattedDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
-        const sortKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
-
+        const newRaw = document.getElementById('modalDate').value;
+        if (!newTask || !newRaw) return alert("Оберіть дату та вкажіть назву!");
+        const d = new Date(newRaw);
+        const fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
+        const sKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
         db.ref('students').once('value', snap => {
-            const data = snap.val(); let updates = {};
+            const data = snap.val(); let up = {};
             for (let sid in data) {
                 if (data[sid][currentEdit.sub] && data[sid][currentEdit.sub][currentEdit.cat]) {
                     for (let tid in data[sid][currentEdit.sub][currentEdit.cat]) {
                         if (data[sid][currentEdit.sub][currentEdit.cat][tid].val === currentEdit.oldTask) {
-                            updates[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/val`] = newTask;
-                            updates[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/date`] = formattedDate;
-                            updates[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/sortDate`] = sortKey;
-                            updates[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/fullDate`] = newRawDate;
+                            up[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/val`] = newTask;
+                            up[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/date`] = fDate;
+                            up[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/sortDate`] = sKey;
+                            up[`students/${sid}/${currentEdit.sub}/${currentEdit.cat}/${tid}/fullDate`] = newRaw;
                         }
                     }
                 }
             }
-            db.ref().update(updates).then(() => { closeModal(); alert("Оновлено!"); });
+            db.ref().update(up).then(() => { closeModal(); alert("Оновлено!"); });
         });
     }
 
