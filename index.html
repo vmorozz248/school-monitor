@@ -11,10 +11,8 @@
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; }
         .admin-panel { background: #fdfaff; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
         
-        /* АЛФАВІТНА СІТКА УЧНІВ */
         .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; margin-bottom: 10px; max-height: 220px; overflow-y: auto; }
-        .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4b1681; cursor: pointer; border: 1px solid #f0e6f7; padding: 5px; border-radius: 8px; transition: 0.2s; }
-        .student-grid label:hover { background: #fdfaff; border-color: #61309e; }
+        .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4b1681; cursor: pointer; border: 1px solid #f0e6f7; padding: 5px; border-radius: 8px; }
 
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
@@ -30,7 +28,7 @@
         .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; }
         .subject-group h4 { color: #61309e; margin: 0 0 10px 0; border-bottom: 2px solid #e9dcf5; padding-bottom: 5px; font-size: 16px; }
         .debt-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
-        .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 42px; text-align: center; box-shadow: 0 2px 0 #3e1d66; }
+        .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 42px; text-align: center; }
         
         .cat-tag { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 5px; border-radius: 4px; color: white; display: inline-block; }
         .c-diag { background: #e74c3c; } .c-creat { background: #27ae60; } .c-poem { background: #2980b9; } .c-other { background: #8e44ad; }
@@ -46,7 +44,6 @@
 <div id="editModal">
     <div class="modal-content">
         <h3 style="color:#61309e; margin-top:0;">Редагувати</h3>
-        <label style="font-size:12px; font-weight:bold;">Змінити дату:</label>
         <input type="date" id="modalDate">
         <input type="text" id="modalTask" onkeypress="if(event.key==='Enter') saveEdit()">
         <div style="display:flex; gap:10px; margin-top:10px;">
@@ -121,11 +118,7 @@
         "Дизайн і технології": ["Творча робота"]
     };
 
-    let curEdit = null;
-
-    // СОРТУВАННЯ УЧНІВ ЗА АЛФАВІТОМ ПЕРЕД ВИВОДОМ
-    const sortedIds = Object.keys(students).sort((a, b) => students[a].name.localeCompare(students[b].name));
-
+    const sortedIds = Object.keys(students).sort((a,b) => students[a].name.localeCompare(students[b].name));
     sortedIds.forEach(id => {
         document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
         document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
@@ -148,16 +141,26 @@
         } else alert("Помилка!");
     }
 
+    // ЛОГІКА РОЗУМНОГО СОРТУВАННЯ
+    function getSortKey(dateStr) {
+        if (!dateStr) return "0";
+        const parts = dateStr.split('-'); // 2026-03-04
+        let year = parts[0];
+        let month = parts[1];
+        let day = parts[2];
+        return year + month + day;
+    }
+
     function sendDebt() {
         const sel = Array.from(document.querySelectorAll('#chkArea input:checked')).map(c => c.value);
         const sub = document.getElementById('subSel').value.split('|'), task = document.getElementById('taskInp').value.trim(), raw = document.getElementById('dateInp').value;
         if (!task || sel.length === 0 || !sub[0] || !raw) return alert("Заповніть!");
-        const d = new Date(raw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0'), sKey = raw.replace(/-/g, "");
+        const d = new Date(raw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0'), sKey = getSortKey(raw);
         sel.forEach(sid => {
             const k = db.ref().child('students').push().key;
             db.ref(`students/${sid}/${sub[0]}/${sub[1]}/${k}`).set({ date: fDate, val: task, sortDate: sKey, fullDate: raw });
         });
-        alert("Розіслано!"); selectAll(false); document.getElementById('taskInp').value = "";
+        alert("Розіслано!"); location.reload();
     }
 
     function loadJournal() {
@@ -169,6 +172,7 @@
                     for (let cat in data[sid][sub]) {
                         for (let tid in data[sid][sub][cat]) {
                             const t = data[sid][sub][cat][tid];
+                            if (typeof t !== 'object') continue;
                             const key = `${sub}|${cat}|${t.val}|${t.date}`;
                             if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, full: t.fullDate || '', sKey: t.sortDate || '0', list: [] };
                             sum[key].list.push({sid, tid});
@@ -190,7 +194,7 @@
     function saveEdit() {
         const newTask = document.getElementById('modalTask').value.trim(), newRaw = document.getElementById('modalDate').value;
         if (!newTask || !newRaw) return;
-        const d = new Date(newRaw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0'), sKey = newRaw.replace(/-/g, "");
+        const d = new Date(newRaw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0'), sKey = getSortKey(newRaw);
         let up = {};
         curEdit.list.forEach(l => {
             up[`students/${l.sid}/${curEdit.sub}/${curEdit.cat}/${l.tid}/val`] = newTask;
@@ -210,29 +214,22 @@
                 let debts = [];
                 structure[sub].forEach(cat => {
                     if (data[sub] && data[sub][cat]) {
-                        for (let k in data[sub][cat]) debts.push({ ...data[sub][cat][k], cat });
+                        for (let k in data[sub][cat]) {
+                            const d = data[sub][cat][k];
+                            if (typeof d === 'object') debts.push({ ...d, cat });
+                        }
                     }
                 });
-                
-                // НОВІ ЗВЕРХУ У КОЖНОМУ ПРЕДМЕТІ
                 debts.sort((a, b) => (b.sortDate || "").localeCompare(a.sortDate || ""));
-                
                 if (debts.length > 0) {
                     let div = `<div class="subject-group"><h4>${sub}</h4>`;
                     debts.forEach(d => {
                         const cls = d.cat.includes('Діагностична') ? 'c-diag' : d.cat.includes('Творча') ? 'c-creat' : d.cat.includes('Вірш') ? 'c-poem' : 'c-other';
-                        div += `<div class="debt-row">
-                            <div class="date-bubble">${d.date}</div>
-                            <div>
-                                <span class="cat-tag ${cls}">${d.cat}</span><br>
-                                <b>${d.val}</b>
-                            </div>
-                        </div>`;
+                        div += `<div class="debt-row"><div class="date-bubble">${d.date}</div><div><span class="cat-tag ${cls}">${d.cat}</span><br><b>${d.val}</b></div></div>`;
                     });
                     area.innerHTML += div + `</div>`;
                 }
             }
-            if (!area.innerHTML) area.innerHTML = "<p style='text-align:center;'>✅ Боргів немає!</p>";
         });
     }
     function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); }
