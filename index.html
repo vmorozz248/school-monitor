@@ -10,37 +10,26 @@
         body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.jpg') no-repeat center center fixed; background-size: cover; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; }
         .admin-panel { background: #fdfaff; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
-        
-        /* НОВА СУВОРА СІТКА УЧНІВ */
-        .student-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
-            background: white; border: 1px solid #ddd; border-radius: 12px; 
-            padding: 12px; margin-bottom: 10px; max-height: 180px; overflow-y: auto; 
-        }
-        .student-grid label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4b1681; cursor: pointer; white-space: nowrap; }
-        .student-grid input { width: 18px; height: 18px; flex-shrink: 0; margin: 0; }
-
+        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin-bottom: 10px; max-height: 180px; overflow-y: auto; }
+        .student-grid label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4b1681; cursor: pointer; }
+        .student-grid input { width: 18px; height: 18px; }
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
-        
-        #editModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        #editModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 10000; }
         .modal-content { background: white; padding: 25px; border-radius: 25px; width: 90%; max-width: 380px; }
-
         .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
         .journal-header { font-weight: bold; color: #61309e; font-size: 14px; cursor: pointer; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 8px; }
-        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
-        .debtor-tag:hover { background: #ffcccc; color: #c0392b; text-decoration: line-through; }
-
+        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; }
         .subject-group h4 { color: #61309e; margin: 0 0 10px 0; border-bottom: 2px solid #e9dcf5; padding-bottom: 5px; }
-        .debt-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
-        .date-btn { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 45px; text-align: center; flex-shrink: 0; }
-        
+        .debt-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
+        .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 45px; text-align: center; flex-shrink: 0; box-shadow: 0 2px 0 #3e1d66; }
+        .cat-badge { color: #8352b2; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         h1 { color: #1a012b; text-align: center; font-size: 24px; margin: 0 0 10px 0; }
         select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         #counter { font-size: 13px; color: #61309e; font-weight: bold; margin-bottom: 8px; display: block; }
     </style>
 </head>
@@ -48,10 +37,16 @@
 
 <div id="editModal">
     <div class="modal-content">
-        <h3 style="color:#61309e; margin-top:0;">Редагувати</h3>
-        <input type="date" id="modalDate">
+        <h3 style="color:#61309e; margin-top:0;">Редагувати запис</h3>
+        <p id="modalCategoryDisplay" style="font-size: 12px; color: #8352b2; font-weight: bold; margin-bottom: 10px; background: #f3ebf9; padding: 5px 10px; border-radius: 10px; display: inline-block;"></p>
+        <label style="font-size:12px; font-weight:bold; display: block; margin-bottom: 5px;">Оберіть дату:</label>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <input type="date" id="modalDate" style="margin-bottom:0;">
+            <button onclick="document.getElementById('modalDate').valueAsDate = new Date()" style="width:auto; padding:10px; font-size:12px; background:#27ae60;">Сьогодні</button>
+        </div>
+        <label style="font-size:12px; font-weight:bold; display: block; margin-bottom: 5px;">Назва роботи:</label>
         <input type="text" id="modalTask" onkeypress="if(event.key==='Enter') saveEdit()">
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:10px; margin-top:10px;">
             <button onclick="saveEdit()" style="background:#61309e;">Зберегти</button>
             <button onclick="closeModal()" style="background:#888;">Закрити</button>
         </div>
@@ -68,7 +63,7 @@
         <div id="view1">
             <span id="counter">Обрано: 0</span>
             <div class="student-grid" id="chkArea"></div>
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <button style="padding:6px; font-size:12px; background:#cbb2eb; color:#4b1681;" onclick="selectAll(true)">Усі</button>
                 <button style="padding:6px; font-size:12px; background:#cbb2eb; color:#4b1681;" onclick="selectAll(false)">Скинути</button>
             </div>
@@ -82,7 +77,7 @@
     <div id="loginForm">
         <select id="uSel"><option value="">-- Учень --</option></select>
         <input type="text" id="pInp" placeholder="Код" onkeypress="if(event.key==='Enter') login()">
-        <button onclick="login()">Увійти</button>
+        <button onclick="login()">Уйти</button>
     </div>
     <div id="resultView" class="hidden">
         <button onclick="location.reload()" style="width:auto; padding:5px 15px; margin-bottom:10px; font-size:12px;">⬅ Назад</button>
@@ -177,7 +172,6 @@
                     for (let cat in data[sid][sub]) {
                         for (let tid in data[sid][sub][cat]) {
                             const t = data[sid][sub][cat][tid];
-                            if (!t.val) continue;
                             const key = `${sub}|${cat}|${t.val}|${t.date}`;
                             if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, fullDate: t.fullDate || '', students: [] };
                             sum[key].students.push({sid, tid});
@@ -187,7 +181,7 @@
             }
             Object.values(sum).reverse().forEach(item => {
                 area.innerHTML += `<div class="journal-card">
-                    <span class="journal-header" onclick="openEditModal('${item.sub}','${item.cat}','${item.task}','${item.fullDate}')">✏️ ${item.date} - ${item.sub}: ${item.task}</span>
+                    <span class="journal-header" onclick="openEditModal('${item.sub}','${item.cat}','${item.task}','${item.fullDate}')">✏️ ${item.date} - ${item.sub}: ${item.task} (${item.cat})</span>
                     ${item.students.map(st => `<span class="debtor-tag" onclick="delOne('${st.sid}','${item.sub}','${item.cat}','${st.tid}')">${students[st.sid].name.split(' ')[0]}</span>`).join('')}
                 </div>`;
             });
@@ -198,6 +192,7 @@
         currentEdit = { sub, cat, oldTask: task };
         document.getElementById('modalTask').value = task;
         document.getElementById('modalDate').value = fullDate || '';
+        document.getElementById('modalCategoryDisplay').innerText = "Вид: " + cat;
         document.getElementById('editModal').style.display = 'flex';
     }
 
@@ -245,7 +240,13 @@
                 if (debts.length > 0) {
                     let div = `<div class="subject-group"><h4>${sub}</h4>`;
                     debts.forEach(d => {
-                        div += `<div class="debt-row"><div class="date-btn">${d.date}</div><div style="display:flex; flex-direction:column; gap:2px;"><span class="cat-badge">${d.cat}</span><b class="task-name">${d.val}</b></div></div>`;
+                        div += `<div class="debt-row">
+                                    <div class="date-bubble">${d.date}</div>
+                                    <div style="display:flex; flex-direction:column; gap:2px;">
+                                        <span class="cat-badge">${d.cat}</span>
+                                        <b class="task-name">${d.val}</b>
+                                    </div>
+                                </div>`;
                     });
                     area.innerHTML += div + `</div>`;
                 }
