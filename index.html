@@ -9,15 +9,43 @@
     
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-image: url('background.jpg'); background-size: cover; background-position: center; background-attachment: fixed; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
-        .card { background: rgba(255, 255, 255, 0.98); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(75, 22, 129, 0.4); width: 100%; max-width: 550px; position: relative; }
+        .card { background: rgba(255, 255, 255, 0.98); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(75, 22, 129, 0.4); width: 100%; max-width: 550px; position: relative; box-sizing: border-box; }
         .admin-panel { background: #f3ebf9; border: 2px solid #61309e; padding: 20px; border-radius: 15px; margin-bottom: 25px; }
-        .student-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: white; padding: 10px; border-radius: 10px; border: 1px solid #cbb2eb; margin-bottom: 15px; max-height: 150px; overflow-y: auto; font-size: 13px; }
+        
+        /* ВИПРАВЛЕНИЙ СПИСОК УЧНІВ */
+        .student-selector { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            background: white; 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 1px solid #cbb2eb; 
+            margin-bottom: 15px; 
+            max-height: 200px; 
+            overflow-y: auto; 
+        }
+        .student-selector label { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-weight: normal; 
+            font-size: 14px; 
+            color: #4b1681;
+            margin: 0;
+            cursor: pointer;
+        }
+        .student-selector input { width: auto; margin: 0; cursor: pointer; }
+
         .report-box { background: white; border: 1px solid #cbb2eb; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 14px; max-height: 300px; overflow-y: auto; }
         h1 { color: #1a012b; text-align: center; margin-top: 0; }
         .subtitle { color: #8352b2; text-align: center; margin-bottom: 25px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #4b1681; font-size: 18px; }
         select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 18px; box-sizing: border-box; margin-bottom: 15px; }
         button { width: 100%; padding: 15px; background-color: #61309e; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        
+        .btn-small { padding: 8px; font-size: 13px; width: 48%; display: inline-block; background: #cbb2eb; color: #4b1681; margin-bottom: 15px; }
+        
         .subject-group { background: #fdfaff; border-radius: 15px; padding: 15px; margin-top: 20px; border: 1px solid #e9dcf5; }
         .subject-group h4 { color: #61309e; margin: 0; border-bottom: 2px solid #cbb2eb; }
         .multi-row { display: flex; align-items: center; gap: 10px; background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #f3ebf9; }
@@ -38,15 +66,17 @@
         
         <label style="font-size:14px;">Кому додати борг?</label>
         <div class="student-selector" id="massCheckboxes"></div>
-        <button onclick="toggleAll(true)" style="padding:5px; font-size:11px; width:48%; display:inline-block;">Обрати всіх</button>
-        <button onclick="toggleAll(false)" style="padding:5px; font-size:11px; width:48%; display:inline-block;">Скинути</button>
+        <div style="display: flex; justify-content: space-between;">
+            <button class="btn-small" onclick="toggleAll(true)">Обрати всіх</button>
+            <button class="btn-small" onclick="toggleAll(false)">Скинути</button>
+        </div>
 
-        <label style="font-size:14px; margin-top:10px;">Предмет та робота:</label>
+        <label style="font-size:14px;">Предмет та робота:</label>
         <select id="massSub" style="padding:8px; font-size:14px;"></select>
         <input type="text" id="massTask" placeholder="Назва боргу" style="padding:8px; font-size:14px;">
         
-        <button onclick="addSelectedWork()" style="background:#4b1681; padding:12px; font-size:15px;">Додати обраним учням</button>
-        <hr style="border:1px solid #cbb2eb; margin:10px 0;">
+        <button onclick="addSelectedWork()" style="background:#4b1681;">Додати обраним</button>
+        <hr style="border:1px solid #cbb2eb; margin:15px 0;">
         <button onclick="generateReport()" style="background:#27ae60; padding:10px; font-size:14px;">📊 Звіт по боргах</button>
         <div id="reportArea" class="report-box hidden"></div>
     </div>
@@ -62,7 +92,7 @@
     </div>
 
     <div id="result" class="hidden">
-        <button onclick="location.reload()" style="background:#e9dcf5; color:#61309e; padding:5px; font-size:12px; margin-bottom:10px;">⬅ Вийти</button>
+        <button onclick="location.reload()" style="background:#e9dcf5; color:#61309e; padding:8px; font-size:14px; margin-bottom:15px; width: auto;">⬅ Вийти</button>
         <h3 id="studentNameDisplay" style="text-align:center; color:#4b1681;"></h3>
         <div id="debtList"></div>
     </div>
@@ -102,12 +132,11 @@
         "Дизайн і технології": ["Творча робота"]
     };
 
-    // Наповнення випадаючого списку та чекбоксів
     const sel = document.getElementById('studentSelect');
     const chkArea = document.getElementById('massCheckboxes');
     for (let id in students) {
         sel.innerHTML += `<option value="${id}">${students[id].name}</option>`;
-        chkArea.innerHTML += `<label style="font-weight:normal; font-size:12px;"><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
+        chkArea.innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
     }
 
     const mSub = document.getElementById('massSub');
@@ -128,12 +157,12 @@
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('adminPanel').classList.remove('hidden');
             if (id) { document.getElementById('result').classList.remove('hidden'); loadData(id, true); }
-            else { document.getElementById('studentNameDisplay').innerText = "Режим вчителя"; }
+            else { document.getElementById('studentNameDisplay').innerText = "Панель вчителя"; }
         } else if (id && students[id] && students[id].code === code) {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('result').classList.remove('hidden');
             loadData(id, false);
-        } else { alert("Помилка!"); }
+        } else { alert("Невірний код!"); }
     }
 
     function addSelectedWork() {
@@ -148,13 +177,13 @@
                 const key = database.ref().child('students').push().key;
                 database.ref(`students/${sid}/${val[0]}/${val[1]}/${key}`).set({date: date, val: task});
             });
-            alert("Виконано!");
+            alert("Готово!");
         }
     }
 
     async function generateReport() {
         const area = document.getElementById('reportArea');
-        area.classList.remove('hidden'); area.innerHTML = "⏳...";
+        area.classList.remove('hidden'); area.innerHTML = "⏳ Оновлення...";
         const snap = await database.ref('students').once('value');
         const allData = snap.val() || {};
         let html = "<strong>Звіт:</strong><br>";
