@@ -11,17 +11,26 @@
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; }
         .admin-panel { background: #fdfaff; border: 2px solid #61309e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
         
-        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin-bottom: 10px; max-height: 180px; overflow-y: auto; }
+        /* ЗАЛІЗНА СІТКА УЧНІВ */
+        .student-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            background: white; 
+            border: 1px solid #ddd; 
+            border-radius: 12px; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            max-height: 200px; 
+            overflow-y: auto; 
+        }
         .student-grid label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4b1681; cursor: pointer; }
+        .student-grid input { width: 18px; height: 18px; flex-shrink: 0; }
 
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
         
-        /* ВІКНО РЕДАГУВАННЯ */
-        #editModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 10000; }
-        .modal-content { background: white; padding: 25px; border-radius: 25px; width: 90%; max-width: 380px; }
-
         .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
         .journal-header { font-weight: bold; color: #61309e; font-size: 14px; cursor: pointer; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 8px; }
         .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; cursor: pointer; font-size: 11px; font-weight: bold; }
@@ -30,37 +39,16 @@
         .subject-group h4 { color: #61309e; margin: 0 0 10px 0; border-bottom: 2px solid #e9dcf5; padding-bottom: 5px; }
         .debt-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
         .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 45px; text-align: center; flex-shrink: 0; box-shadow: 0 2px 0 #3e1d66; }
-        
-        .cat-badge { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; color: white; display: inline-block; margin-bottom: 3px; }
-        .cat-diag { background: #e74c3c; }
-        .cat-creative { background: #27ae60; }
-        .cat-poem { background: #2980b9; }
-        .cat-other { background: #8e44ad; }
+        .cat-badge { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #8352b2; margin-bottom: 2px; display: block; }
 
         h1 { color: #1a012b; text-align: center; font-size: 24px; margin: 0 0 10px 0; }
         select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
+        #counter { font-size: 13px; color: #61309e; font-weight: bold; margin-bottom: 5px; display: block; }
     </style>
 </head>
 <body>
-
-<div id="editModal">
-    <div class="modal-content">
-        <h3 style="color:#61309e; margin-top:0;">Редагувати запис</h3>
-        <p id="modalCatDisp" style="margin-bottom:10px;"></p>
-        <label style="font-size:12px; font-weight:bold;">Змінити дату:</label>
-        <div style="display:flex; gap:5px; margin-bottom:10px;">
-            <input type="date" id="modalDate" style="margin-bottom:0;">
-            <button onclick="document.getElementById('modalDate').valueAsDate = new Date()" style="width:auto; padding:10px; font-size:12px; background:#27ae60;">Сьогодні</button>
-        </div>
-        <input type="text" id="modalTask" onkeypress="if(event.key==='Enter') saveEdit()">
-        <div style="display:flex; gap:10px; margin-top:10px;">
-            <button onclick="saveEdit()" style="background:#61309e;">Зберегти</button>
-            <button onclick="closeModal()" style="background:#888;">Закрити</button>
-        </div>
-    </div>
-</div>
 
 <div class="card">
     <h1>Шкільний монітор</h1>
@@ -70,11 +58,11 @@
             <div id="tab2" class="tab" onclick="showTab(2)">📓 Журнал</div>
         </div>
         <div id="view1">
-            <span id="counter" style="font-size:13px; font-weight:bold; color:#61309e;">Обрано: 0</span>
+            <span id="counter">Обрано: 0</span>
             <div class="student-grid" id="chkArea"></div>
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <button style="padding:6px; font-size:12px; background:#cbb2eb; color:#4b1681;" onclick="selectAll(true)">Усі</button>
-                <button style="padding:6px; font-size:12px; background:#cbb2eb; color:#4b1681;" onclick="selectAll(false)">Скинути</button>
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <button style="padding:5px; font-size:11px;" onclick="selectAll(true)">Усі</button>
+                <button style="padding:5px; font-size:11px;" onclick="selectAll(false)">Скинути</button>
             </div>
             <select id="subSel"><option value="">-- Предмет --</option></select>
             <input type="date" id="dateInp">
@@ -128,20 +116,12 @@
         "Дизайн і технології": ["Творча робота"]
     };
 
-    let currentEditParams = null; 
-
+    const chkArea = document.getElementById('chkArea');
     Object.keys(students).forEach(id => {
-        document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}" onchange="updateCounter()"> ${students[id].name.split(' ')[0]}</label>`;
+        chkArea.innerHTML += `<label><input type="checkbox" value="${id}" onchange="updateCounter()"> ${students[id].name.split(' ')[0]}</label>`;
         document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
     for (let s in structure) structure[s].forEach(c => document.getElementById('subSel').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
-
-    function getCatClass(cat) {
-        if (cat.includes('Діагностична')) return 'cat-diag';
-        if (cat.includes('Творча')) return 'cat-creative';
-        if (cat.includes('Вірш')) return 'cat-poem';
-        return 'cat-other';
-    }
 
     function updateCounter() { document.getElementById('counter').innerText = "Обрано: " + document.querySelectorAll('#chkArea input:checked').length; }
     function showTab(n) {
@@ -151,6 +131,7 @@
         document.getElementById('tab2').classList.toggle('active', n === 2);
         if (n === 2) loadJournal();
     }
+    function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); updateCounter(); }
 
     function login() {
         const id = document.getElementById('uSel').value, code = document.getElementById('pInp').value.trim();
@@ -171,7 +152,7 @@
         const sKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
         sel.forEach(sid => {
             const k = db.ref().child('students').push().key;
-            db.ref(`students/${sid}/${sub[0]}/${sub[1]}/${k}`).set({ date: fDate, val: task, sortDate: sKey, fullDate: raw });
+            db.ref(`students/${sid}/${sub[0]}/${sub[1]}/${k}`).set({ date: fDate, val: task, sortDate: sKey });
         });
         alert("Розіслано!"); selectAll(false); document.getElementById('taskInp').value = "";
     }
@@ -187,50 +168,39 @@
                         for (let tid in data[sid][sub][cat]) {
                             const t = data[sid][sub][cat][tid];
                             const key = `${sub}|${cat}|${t.val}|${t.date}`;
-                            if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, fullDate: t.fullDate || '', studentList: [] };
-                            sum[key].studentList.push({sid, tid});
+                            if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, students: [] };
+                            sum[key].students.push({sid, tid});
                         }
                     }
                 }
             }
             Object.values(sum).reverse().forEach(item => {
-                // ПЕРЕДАЄМО СПИСОК УСІХ ПОВ'ЯЗАНИХ ID ДЛЯ РЕДАГУВАННЯ
                 area.innerHTML += `<div class="journal-card">
-                    <span class="journal-header" onclick='openEditModal(${JSON.stringify(item)})'>✏️ ${item.date} - ${item.sub}: ${item.task}</span>
-                    ${item.studentList.map(st => `<span class="debtor-tag" onclick="delOne('${st.sid}','${item.sub}','${item.cat}','${st.tid}')">${students[st.sid].name.split(' ')[0]}</span>`).join('')}
+                    <span class="journal-header" onclick="quickEdit('${item.sub}','${item.cat}','${item.task}')">✏️ ${item.date} - ${item.sub}: ${item.task}</span>
+                    ${item.students.map(st => `<span class="debtor-tag" onclick="delOne('${st.sid}','${item.sub}','${item.cat}','${st.tid}')">${students[st.sid].name.split(' ')[0]}</span>`).join('')}
                 </div>`;
             });
         });
     }
 
-    function openEditModal(item) {
-        currentEditParams = item;
-        document.getElementById('modalTask').value = item.task;
-        document.getElementById('modalDate').value = item.fullDate || '';
-        const disp = document.getElementById('modalCatDisp');
-        disp.innerText = item.cat; disp.className = 'cat-badge ' + getCatClass(item.cat);
-        document.getElementById('editModal').style.display = 'flex';
-    }
-
-    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
-
-    function saveEdit() {
-        const newTask = document.getElementById('modalTask').value.trim();
-        const newRaw = document.getElementById('modalDate').value;
-        if (!newTask || !newRaw) return alert("Заповніть поля!");
-        const d = new Date(newRaw);
-        const fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
-        const sKey = (d.getMonth() + 1).toString().padStart(2, '0') + d.getDate().toString().padStart(2, '0');
-        
-        let up = {};
-        currentEditParams.studentList.forEach(st => {
-            up[`students/${st.sid}/${currentEditParams.sub}/${currentEditParams.cat}/${st.tid}/val`] = newTask;
-            up[`students/${st.sid}/${currentEditParams.sub}/${currentEditParams.cat}/${st.tid}/date`] = fDate;
-            up[`students/${sid}/${currentEditParams.sub}/${currentEditParams.cat}/${st.tid}/sortDate`] = sKey;
-            up[`students/${st.sid}/${currentEditParams.sub}/${currentEditParams.cat}/${st.tid}/fullDate`] = newRaw;
-        });
-
-        db.ref().update(up).then(() => { closeModal(); alert("Оновлено!"); });
+    function quickEdit(sub, cat, oldTask) {
+        const newTask = prompt("Нова назва роботи:", oldTask);
+        if (newTask && newTask !== oldTask) {
+            db.ref('students').once('value', snap => {
+                const data = snap.val();
+                let updates = {};
+                for (let sid in data) {
+                    if (data[sid][sub] && data[sid][sub][cat]) {
+                        for (let tid in data[sid][sub][cat]) {
+                            if (data[sid][sub][cat][tid].val === oldTask) {
+                                updates[`students/${sid}/${sub}/${cat}/${tid}/val`] = newTask;
+                            }
+                        }
+                    }
+                }
+                db.ref().update(updates).then(() => alert("Оновлено!"));
+            });
+        }
     }
 
     function delOne(sid, sub, cat, tid) { if (confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove(); }
@@ -246,20 +216,18 @@
                         for (let k in data[sub][cat]) debts.push({ ...data[sub][cat][k], cat });
                     }
                 });
-                
-                // СУВОРИЙ ПОРЯДОК ЗА ДАТОЮ (ВІД СТАРШИХ ДО НОВИХ)
+                // СОРТУВАННЯ ЗА ДАТОЮ
                 debts.sort((a, b) => (a.sortDate || "9999") - (b.sortDate || "9999"));
-
                 if (debts.length > 0) {
                     let div = `<div class="subject-group"><h4>${sub}</h4>`;
                     debts.forEach(d => {
                         div += `<div class="debt-row">
-                                    <div class="date-bubble">${d.date}</div>
-                                    <div style="display:flex; flex-direction:column; gap:2px;">
-                                        <span class="cat-badge ${getCatClass(d.cat)}">${d.cat}</span>
-                                        <b class="task-name">${d.val}</b>
-                                    </div>
-                                </div>`;
+                            <div class="date-bubble">${d.date}</div>
+                            <div>
+                                <span class="cat-badge">${d.cat}</span>
+                                <b class="task-name">${d.val}</b>
+                            </div>
+                        </div>`;
                     });
                     area.innerHTML += div + `</div>`;
                 }
@@ -267,8 +235,6 @@
             if (!area.innerHTML) area.innerHTML = "<p style='text-align:center;'>✅ Боргів немає!</p>";
         });
     }
-
-    function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); updateCounter(); }
 </script>
 </body>
 </html>
