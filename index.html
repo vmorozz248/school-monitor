@@ -17,19 +17,26 @@
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
+        
         .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
         .journal-header { font-weight: bold; color: #61309e; font-size: 14px; margin-bottom: 8px; cursor: pointer; border-bottom: 1px solid #f3ebf9; padding-bottom: 5px; display: block; }
-        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.2s; }
+        .debtor-tag:hover { background: #ffcccc; color: #c0392b; text-decoration: line-through; opacity: 0.8; }
+
         h1 { color: #1a012b; text-align: center; font-size: 24px; margin: 0 0 10px 0; }
         select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        
         .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; }
         .subject-group h4 { color: #61309e; margin: 0 0 10px 0; border-bottom: 2px solid #e9dcf5; padding-bottom: 5px; }
-        .debt-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 10px; border: 1px solid #f3ebf9; }
-        .debt-meta { display: flex; align-items: center; gap: 8px; }
-        .date-badge { background: #8352b2; color: white; padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; }
-        .cat-badge { background: #f0f0f0; color: #777; padding: 2px 6px; border-radius: 5px; font-size: 10px; text-transform: lowercase; }
-        .task-name { color: #1a012b; font-size: 15px; }
+        
+        /* НОВИЙ СТИЛЬ РЯДКА БОРГУ */
+        .debt-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .date-btn { background: #61309e; color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; box-shadow: 0 2px 0 #3e1d66; flex-shrink: 0; text-align: center; min-width: 45px; }
+        .debt-info { display: flex; flex-direction: column; gap: 2px; }
+        .cat-badge { color: #8352b2; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .task-name { color: #1a012b; font-size: 15px; line-height: 1.2; }
+        
         .hidden { display: none; }
         #counter { font-size: 12px; color: #61309e; font-weight: bold; margin-bottom: 5px; display: block; }
     </style>
@@ -168,7 +175,7 @@
                 let h = `<div class="journal-card">
                     <span class="journal-header" onclick="editTaskName('${item.sub}','${item.cat}','${item.task}')">✏️ ${item.sub}: ${item.task}</span>`;
                 item.students.forEach(st => {
-                    h += `<span class="debtor-tag" onclick="delOne('${st.sid}','${item.sub}','${item.cat}','${st.tid}')">${students[st.sid].name.split(' ')[0]} ×</span>`;
+                    h += `<span class="debtor-tag" onclick="delOne('${st.sid}','${item.sub}','${item.cat}','${st.tid}')">${students[st.sid].name.split(' ')[0]}</span>`;
                 });
                 area.innerHTML += h + `</div>`;
             });
@@ -193,30 +200,47 @@
     function delOne(sid, sub, cat, tid) {
         if (confirm(`Учень здав борг?`)) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove();
     }
+    
+    // ДОПОМІЖНА ФУНКЦІЯ ДЛЯ СОРТУВАННЯ ДАТ
+    function parseDate(dStr) {
+        const [day, month] = dStr.split('.');
+        return new Date(2026, month - 1, day);
+    }
+
     function loadData(id) {
         document.getElementById('sNameTitle').innerText = students[id].name;
         db.ref('students/' + id).on('value', snap => {
             const data = snap.val() || {}, area = document.getElementById('debtListArea'); area.innerHTML = "";
             for (let sub in structure) {
                 let div = document.createElement('div'); div.className = 'subject-group';
-                div.innerHTML = `<h4>${sub}</h4>`; let hasDebt = false;
+                div.innerHTML = `<h4>${sub}</h4>`; 
+                let allSubDebts = [];
+
                 structure[sub].forEach(cat => {
                     const ts = data[sub] && data[sub][cat] ? data[sub][cat] : {};
                     for (let k in ts) { 
                         if (ts[k].val) { 
-                            hasDebt = true; 
-                            div.innerHTML += `
-                                <div class="debt-row">
-                                    <div class="debt-meta">
-                                        <span class="date-badge">${ts[k].date}</span>
-                                        <span class="cat-badge">${cat}</span>
-                                    </div>
-                                    <b class="task-name">${ts[k].val}</b>
-                                </div>`; 
+                            allSubDebts.push({ ...ts[k], cat: cat });
                         } 
                     }
                 });
-                if (hasDebt) area.appendChild(div);
+
+                // СОРТУВАННЯ: ВІД НАЙСТАРІШОГО ДО СЬОГОДНІ
+                allSubDebts.sort((a, b) => parseDate(a.date) - parseDate(b.date));
+
+                if (allSubDebts.length > 0) {
+                    allSubDebts.forEach(debt => {
+                        div.innerHTML += `
+                            <div class="debt-row">
+                                <div class="date-btn">${debt.date}</div>
+                                <div class="debt-info">
+                                    <span class="cat-badge">${debt.cat}</span>
+                                    <b class="task-name">${debt.val}</b>
+                                </div>
+                            </div>`;
+                    });
+                    area.appendChild(div);
+                }
             }
             if (area.innerHTML === "") area.innerHTML = "<p style='text-align:center;'>✅ Боргів немає!</p>";
         });
