@@ -11,61 +11,36 @@
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; position: relative; z-index: 2; }
         
         /* ВЕЛИКИЙ АВАТАР ВЧИТЕЛЬКИ */
-        .teacher-avatar { 
-            position: fixed; 
-            bottom: -20px; 
-            right: -40px; 
-            width: 380px; 
-            z-index: 100; 
-            transition: all 0.4s ease; 
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); 
-            cursor: pointer; 
-        }
+        .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 380px; z-index: 100; transition: all 0.4s ease; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); cursor: pointer; }
         .teacher-avatar:hover { transform: scale(1.03) translate(-10px, -5px); }
-        
-        .speech-bubble { 
-            position: fixed; 
-            bottom: 340px; 
-            right: 220px; 
-            background: white; 
-            padding: 12px 20px; 
-            border-radius: 25px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
-            font-size: 15px; 
-            font-weight: bold; 
-            color: #61309e; 
-            display: none; 
-            z-index: 101; 
-            border: 2px solid #e9dcf5;
-            max-width: 200px;
-            text-align: center;
-        }
+        .speech-bubble { position: fixed; bottom: 340px; right: 220px; background: white; padding: 12px 20px; border-radius: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); font-size: 15px; font-weight: bold; color: #61309e; display: none; z-index: 101; border: 2px solid #e9dcf5; max-width: 200px; text-align: center; }
         .teacher-avatar:hover + .speech-bubble { display: block; animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
-        
         @media (max-width: 1000px) { .teacher-avatar, .speech-bubble { display: none !important; } }
 
-        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin-bottom: 10px; max-height: 220px; overflow-y: auto; }
-        .student-grid label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b1681; cursor: pointer; border: 1px solid #f0e6f7; padding: 6px; border-radius: 8px; }
+        /* ВИПРАВЛЕНА СІТКА УЧНІВ */
+        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; margin-bottom: 10px; max-height: 250px; overflow-y: auto; }
+        .student-grid label { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #4b1681; cursor: pointer; border: 1px solid #f0e6f7; padding: 8px; border-radius: 8px; transition: background 0.2s; min-height: 40px; box-sizing: border-box; }
+        .student-grid label:hover { background: #fdfaff; border-color: #61309e; }
+        .student-grid input { width: auto; margin: 0; cursor: pointer; }
+
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
-        .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
-        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; }
         .debt-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
         .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 42px; text-align: center; }
         .cat-tag { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 5px; border-radius: 4px; color: white; display: inline-block; }
         .c-diag { background: #e74c3c; } .c-creat { background: #27ae60; } .c-poem { background: #2980b9; } .c-other { background: #8e44ad; }
         h1 { color: #1a012b; text-align: center; font-size: 22px; margin: 0 0 10px 0; }
-        select, input { width: 100%; padding: 10px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        select, input[type="text"], input[type="date"] { width: 100%; padding: 10px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<img src="https://i.ibb.co/6fH9vjx/1.png" class="teacher-avatar" alt="Вчителька">
+<img src="https://i.ibb.co/3Y0DKmpg/Gemini-Generated-Image-21e37521e37521e3.png" class="teacher-avatar" alt="Вчителька">
 <div class="speech-bubble">Нам точно є над чим ще попрацювати! ✨</div>
 
 <div class="card">
