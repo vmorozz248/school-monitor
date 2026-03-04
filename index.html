@@ -10,47 +10,20 @@
         body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.jpg') no-repeat center center fixed; background-size: cover; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; position: relative; z-index: 2; }
         
-        /* ВЧИТЕЛЬКА - ТЕПЕР ТОЧНО БЕЗ ФОНУ */
-        .teacher-avatar { 
-            position: fixed; 
-            bottom: -20px; 
-            right: -40px; 
-            width: 380px; 
-            z-index: 100; 
-            transition: all 0.4s ease; 
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); 
-            cursor: pointer; 
-        }
+        /* АВАТАР - Використовуємо пряме посилання на оригінал */
+        .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 380px; z-index: 100; transition: all 0.4s ease; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); cursor: pointer; }
         .teacher-avatar:hover { transform: scale(1.03) translate(-10px, -5px); }
-        
-        .speech-bubble { 
-            position: fixed; 
-            bottom: 340px; 
-            right: 220px; 
-            background: white; 
-            padding: 12px 20px; 
-            border-radius: 25px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
-            font-size: 15px; 
-            font-weight: bold; 
-            color: #61309e; 
-            display: none; 
-            z-index: 101; 
-            border: 2px solid #e9dcf5;
-            max-width: 200px;
-            text-align: center;
-        }
-        .teacher-avatar:hover + .speech-bubble { display: block; animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+        .speech-bubble { position: fixed; bottom: 340px; right: 220px; background: white; padding: 12px 20px; border-radius: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); font-size: 15px; font-weight: bold; color: #61309e; display: none; z-index: 101; border: 2px solid #e9dcf5; max-width: 200px; text-align: center; }
+        .teacher-avatar:hover + .speech-bubble { display: block; }
         
         @media (max-width: 1000px) { .teacher-avatar, .speech-bubble { display: none !important; } }
 
-        /* РІВНЕ МЕНЮ УЧНІВ */
+        /* СПИСОК УЧНІВ */
         .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; margin-bottom: 10px; max-height: 250px; overflow-y: auto; }
-        .student-grid label { display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: #4b1681; border: 1px solid #f0e6f7; padding: 10px; border-radius: 8px; box-sizing: border-box; min-height: 45px; }
+        .student-grid label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4b1681; border: 1px solid #f0e6f7; padding: 10px; border-radius: 8px; cursor: pointer; }
         
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
-        .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
+        .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
         h1 { color: #1a012b; text-align: center; font-size: 22px; margin: 0 0 10px 0; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
@@ -64,6 +37,7 @@
 
 <div class="card">
     <h1>Шкільний монітор</h1>
+    
     <div id="adminPanel" class="hidden">
         <div class="tab-menu">
             <div id="tab1" class="tab active" onclick="showTab(1)">➕ Додати</div>
@@ -75,11 +49,13 @@
         </div>
         <div id="view2" class="hidden"><div id="journalArea"></div></div>
     </div>
+
     <div id="loginForm">
         <select id="uSel" style="width:100%; padding:10px; margin-bottom:10px; border-radius:10px; border:2px solid #e9dcf5;"></select>
         <input type="text" id="pInp" placeholder="Код" style="width:100%; padding:10px; margin-bottom:10px; border-radius:10px; border:2px solid #e9dcf5;">
         <button onclick="login()">Увійти</button>
     </div>
+
     <div id="resultView" class="hidden">
         <button onclick="location.reload()" style="width:auto; padding:5px 15px; margin-bottom:10px;">⬅ Назад</button>
         <h3 id="sNameTitle" style="text-align:center;"></h3>
@@ -113,5 +89,46 @@
     };
 
     const sortedIds = Object.keys(students).sort((a,b) => students[a].name.localeCompare(students[b].name));
+    
+    // ВІДОБРАЖЕННЯ СПИСКУ
+    const chkArea = document.getElementById('chkArea');
+    const uSel = document.getElementById('uSel');
     sortedIds.forEach(id => {
-        document.getElementById('chkArea').innerHTML += `<label>${students[id].name.split
+        chkArea.innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
+        uSel.innerHTML += `<option value="${id}">${students[id].name}</option>`;
+    });
+
+    function login() {
+        const id = uSel.value, code = document.getElementById('pInp').value.trim();
+        if (code === "21.08") {
+            if (id) { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id); }
+            else { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); }
+        } else if (id && students[id].code === code) {
+            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id);
+        } else alert("Помилка!");
+    }
+
+    function loadData(id) {
+        document.getElementById('sNameTitle').innerText = students[id].name;
+        db.ref('students/' + id).on('value', snap => {
+            const data = snap.val() || {}, area = document.getElementById('debtListArea'); area.innerHTML = "";
+            for (let sub in data) {
+                let div = `<div style="background:#fdfaff; border:1px solid #e9dcf5; padding:12px; border-radius:15px; margin-top:15px;"><h4>${sub}</h4>`;
+                for (let cat in data[sub]) {
+                    for (let k in data[sub][cat]) {
+                        const d = data[sub][cat][k];
+                        div += `<div style="display:flex; gap:10px; margin-bottom:10px; background:white; padding:10px; border-radius:12px; border:1px solid #f3ebf9;"><b>${d.date}</b>: ${d.val}</div>`;
+                    }
+                }
+                area.innerHTML += div + `</div>`;
+            }
+        });
+    }
+
+    function showTab(n) {
+        document.getElementById('view1').classList.toggle('hidden', n !== 1);
+        document.getElementById('view2').classList.toggle('hidden', n !== 2);
+    }
+</script>
+</body>
+</html>
