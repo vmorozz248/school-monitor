@@ -10,22 +10,33 @@
         body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.jpg') no-repeat center center fixed; background-size: cover; margin: 0; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; position: relative; z-index: 2; }
         
-        /* АВАТАР - Використовуємо пряме посилання на оригінал */
+        /* ВЧИТЕЛЬКА */
         .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 380px; z-index: 100; transition: all 0.4s ease; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); cursor: pointer; }
         .teacher-avatar:hover { transform: scale(1.03) translate(-10px, -5px); }
         .speech-bubble { position: fixed; bottom: 340px; right: 220px; background: white; padding: 12px 20px; border-radius: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); font-size: 15px; font-weight: bold; color: #61309e; display: none; z-index: 101; border: 2px solid #e9dcf5; max-width: 200px; text-align: center; }
         .teacher-avatar:hover + .speech-bubble { display: block; }
-        
         @media (max-width: 1000px) { .teacher-avatar, .speech-bubble { display: none !important; } }
 
         /* СПИСОК УЧНІВ */
         .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; margin-bottom: 10px; max-height: 250px; overflow-y: auto; }
         .student-grid label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4b1681; border: 1px solid #f0e6f7; padding: 10px; border-radius: 8px; cursor: pointer; }
         
+        /* ВКЛАДКИ */
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
+
+        /* ЖУРНАЛ ТА ДАТИ */
+        .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
+        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; }
+        .debt-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
+        .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 42px; text-align: center; }
+        .cat-tag { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 5px; border-radius: 4px; color: white; display: inline-block; }
+        .c-diag { background: #e74c3c; } .c-creat { background: #27ae60; } .c-poem { background: #2980b9; } .c-other { background: #8e44ad; }
+
         h1 { color: #1a012b; text-align: center; font-size: 22px; margin: 0 0 10px 0; }
+        select, input { width: 100%; padding: 10px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
     </style>
@@ -37,7 +48,6 @@
 
 <div class="card">
     <h1>Шкільний монітор</h1>
-    
     <div id="adminPanel" class="hidden">
         <div class="tab-menu">
             <div id="tab1" class="tab active" onclick="showTab(1)">➕ Додати</div>
@@ -45,17 +55,18 @@
         </div>
         <div id="view1">
             <div class="student-grid" id="chkArea"></div>
+            <select id="subSel"><option value="Математика|Діагностична">Математика (Діаг.)</option><option value="Українська мова|Інше">Укр. мова (Інше)</option></select>
+            <input type="text" id="taskInp" placeholder="Назва роботи">
+            <input type="date" id="dateInp">
             <button onclick="sendDebt()">Розіслати борг</button>
         </div>
         <div id="view2" class="hidden"><div id="journalArea"></div></div>
     </div>
-
     <div id="loginForm">
-        <select id="uSel" style="width:100%; padding:10px; margin-bottom:10px; border-radius:10px; border:2px solid #e9dcf5;"></select>
-        <input type="text" id="pInp" placeholder="Код" style="width:100%; padding:10px; margin-bottom:10px; border-radius:10px; border:2px solid #e9dcf5;">
+        <select id="uSel"></select>
+        <input type="text" id="pInp" placeholder="Код">
         <button onclick="login()">Увійти</button>
     </div>
-
     <div id="resultView" class="hidden">
         <button onclick="location.reload()" style="width:auto; padding:5px 15px; margin-bottom:10px;">⬅ Назад</button>
         <h3 id="sNameTitle" style="text-align:center;"></h3>
@@ -89,17 +100,13 @@
     };
 
     const sortedIds = Object.keys(students).sort((a,b) => students[a].name.localeCompare(students[b].name));
-    
-    // ВІДОБРАЖЕННЯ СПИСКУ
-    const chkArea = document.getElementById('chkArea');
-    const uSel = document.getElementById('uSel');
     sortedIds.forEach(id => {
-        chkArea.innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
-        uSel.innerHTML += `<option value="${id}">${students[id].name}</option>`;
+        document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
+        document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
 
     function login() {
-        const id = uSel.value, code = document.getElementById('pInp').value.trim();
+        const id = document.getElementById('uSel').value, code = document.getElementById('pInp').value.trim();
         if (code === "21.08") {
             if (id) { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id); }
             else { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); }
@@ -108,16 +115,42 @@
         } else alert("Помилка!");
     }
 
+    function sendDebt() {
+        const sel = Array.from(document.querySelectorAll('#chkArea input:checked')).map(c => c.value);
+        const sub = document.getElementById('subSel').value.split('|'), task = document.getElementById('taskInp').value, raw = document.getElementById('dateInp').value;
+        if (!task || sel.length === 0 || !raw) return alert("Заповніть!");
+        const fDate = raw.split('-').reverse().join('.');
+        sel.forEach(sid => db.ref(`students/${sid}/${sub[0]}/${sub[1]}`).push({ date: fDate, val: task }));
+        alert("Розіслано!");
+    }
+
+    function loadJournal() {
+        db.ref('students').on('value', snap => {
+            const data = snap.val() || {}, area = document.getElementById('journalArea'); area.innerHTML = "";
+            for (let sid in data) {
+                for (let sub in data[sid]) {
+                    for (let cat in data[sid][sub]) {
+                        for (let tid in data[sid][sub][cat]) {
+                            const d = data[sid][sub][cat][tid];
+                            area.innerHTML += `<div class="journal-card"><b>${d.date} - ${sub}</b>: ${d.val} (${students[sid].name}) <button onclick="db.ref('students/${sid}/${sub}/${cat}/${tid}').remove()" style="width:auto; padding:2px 5px; background:red;">X</button></div>`;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     function loadData(id) {
         document.getElementById('sNameTitle').innerText = students[id].name;
         db.ref('students/' + id).on('value', snap => {
             const data = snap.val() || {}, area = document.getElementById('debtListArea'); area.innerHTML = "";
             for (let sub in data) {
-                let div = `<div style="background:#fdfaff; border:1px solid #e9dcf5; padding:12px; border-radius:15px; margin-top:15px;"><h4>${sub}</h4>`;
+                let div = `<div class="subject-group"><h4>${sub}</h4>`;
                 for (let cat in data[sub]) {
                     for (let k in data[sub][cat]) {
                         const d = data[sub][cat][k];
-                        div += `<div style="display:flex; gap:10px; margin-bottom:10px; background:white; padding:10px; border-radius:12px; border:1px solid #f3ebf9;"><b>${d.date}</b>: ${d.val}</div>`;
+                        const cls = cat.includes('Діагностична') ? 'c-diag' : 'c-other';
+                        div += `<div class="debt-row"><div class="date-bubble">${d.date}</div><div><span class="cat-tag ${cls}">${cat}</span><br><b>${d.val}</b></div></div>`;
                     }
                 }
                 area.innerHTML += div + `</div>`;
@@ -128,6 +161,7 @@
     function showTab(n) {
         document.getElementById('view1').classList.toggle('hidden', n !== 1);
         document.getElementById('view2').classList.toggle('hidden', n !== 2);
+        if (n === 2) loadJournal();
     }
 </script>
 </body>
