@@ -353,10 +353,21 @@
                 if (debts.length > 0) {
                     let div = `<div class="subject-group"><h4>${sub}</h4>`;
                     debts.forEach(d => {
-                        const cls = d.cat.includes('Діагностична') ? 'c-diag' : d.cat.includes('Творча') ? 'c-creat' : d.cat.includes('Вірш') ? 'c-poem' : 'c-other';
-                        div += `<div class="debt-row"><div class="date-bubble">${d.date}</div><div><span class="cat-tag ${cls}">${d.cat}</span><br><b>${d.val}</b></div></div>`;
-                    });
-                    area.innerHTML += div + `</div>`;
+    // Визначаємо колір за категорією
+    const cls = d.cat.includes('Діагностична') ? 'c-diag' : 
+                d.cat.includes('Творча') ? 'c-creat' : 
+                d.cat.includes('Вірш') ? 'c-poem' : 'c-other';
+
+    // Додаємо картку боргу з кольоровим тегом
+    div += `<div class="debt-row">
+                <div class="date-bubble">${d.date}</div>
+                <div>
+                    <span class="cat-tag ${cls}">${d.cat}</span><br>
+                    <b>${d.val}</b>
+                </div>
+            </div>`;
+});
+area.innerHTML += div + `</div>`;
                 }
             }
         });
@@ -365,5 +376,6 @@
 </script>
 </body>
 </html>
+
 
 
