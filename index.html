@@ -160,6 +160,29 @@
 
 /* Колір для всього іншого (Фіолетовий) */
 .c-other { background: #8e44ad; }
+/* Стильний вигляд календаря */
+input[type="date"] {
+    background-color: #ffffff;
+    color: #61309e;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+/* Ефект при натисканні */
+input[type="date"]:focus {
+    border-color: #8e44ad;
+    box-shadow: 0 0 8px rgba(142, 68, 173, 0.2);
+}
+
+/* Стилізація іконки календаря (для Chrome) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 24 24" fill="none" stroke="%2361309e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
+    cursor: pointer;
+    padding: 5px;
+}
     </style>
 </head>
 <body>
@@ -210,6 +233,8 @@
 </div>
 
 <script>
+    // Автоматично ставимо сьогоднішню дату
+document.getElementById('dateInp').value = new Date().toISOString().split('T')[0];
     const firebaseConfig = {
         apiKey: "AIzaSyCaf5Zwl4mIxdReLgdoUCkzi1KWEMzeEpA",
         authDomain: "schoolmonitor-b1c8b.firebaseapp.com",
@@ -376,6 +401,7 @@ area.innerHTML += div + `</div>`;
 </script>
 </body>
 </html>
+
 
 
 
