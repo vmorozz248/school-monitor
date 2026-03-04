@@ -59,10 +59,52 @@
         select, input { width: 100%; padding: 10px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 15px; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
+/* Стилі для твого аватара */
+.teacher-avatar { 
+    position: fixed; 
+    bottom: -20px; 
+    right: -40px; 
+    width: 380px; 
+    z-index: 100; 
+    transition: all 0.4s ease; 
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); 
+    cursor: pointer; 
+}
+
+.teacher-avatar:hover { 
+    transform: scale(1.03) translate(-10px, -5px); 
+}
+
+.speech-bubble { 
+    position: fixed; 
+    bottom: 340px; 
+    right: 220px; 
+    background: white; 
+    padding: 12px 20px; 
+    border-radius: 25px; 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
+    font-size: 15px; 
+    font-weight: bold; 
+    color: #61309e; 
+    display: none; 
+    z-index: 101; 
+    border: 2px solid #e9dcf5;
+    max-width: 200px;
+    text-align: center;
+}
+
+.teacher-avatar:hover + .speech-bubble { 
+    display: block; 
+}
+
+@media (max-width: 1000px) { 
+    .teacher-avatar, .speech-bubble { display: none !important; } 
+}
     </style>
 </head>
 <body>
-
+<img src="https://i.ibb.co/6fH9vjx/1.png" class="teacher-avatar" alt="Вчителька">
+<div class="speech-bubble">Нам точно є над чим ще попрацювати! ✨</div>
 <div id="editModal">
     <div class="modal-content">
         <h3 style="color:#61309e; margin-top:0;">Редагувати</h3>
