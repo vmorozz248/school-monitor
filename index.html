@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Шкільний монітор</title>
+    <title>Шкільний монітор 4-А</title>
     <style>
-        /* Твій стиль з ідеальним фоном та центруванням */
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            /* Використовуємо твоє перевірене посилання з GitHub */
+            /* Надійне посилання на твій фон з GitHub */
             background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed; 
             background-size: cover;
             display: flex; 
@@ -20,68 +19,63 @@
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.9); /* Біла картка з легкою прозорістю */
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
             text-align: center;
         }
 
-        h2 { color: #4a148c; }
-
-        select, input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            font-size: 16px;
-        }
-
-        button {
-            background-color: #6a1b9a;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        button:hover { background-color: #4a148c; }
+        h2 { color: #4a148c; margin-bottom: 20px; }
 
         .filter-section {
-            margin-bottom: 20px;
-            padding: 10px;
-            background: #f0e6f5;
-            border-radius: 12px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f3e5f5;
+            border-radius: 15px;
+            border: 1px solid #e1bee7;
         }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        select {
+            width: 80%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #9575cd;
+            font-size: 16px;
+            outline: none;
+        }
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        th { background-color: #7e57c2; color: white; padding: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         
-        /* Кольорові теги для статусів (як ми робили раніше) */
         .status-debt { color: #d32f2f; font-weight: bold; }
-        .status-done { color: #388e3c; }
+        .status-done { color: #388e3c; font-weight: bold; }
+
+        .teacher-img {
+            position: fixed;
+            bottom: 10px;
+            right: 20px;
+            width: 140px;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Шкільний монітор 4-А</h2>
+        <h2>🏫 Шкільний монітор 4-А</h2>
 
         <div class="filter-section">
-            <label for="subjectFilter">📚 Оберіть предмет:</label>
+            <label for="subjectFilter">🔎 <b>Оберіть предмет:</b></label><br><br>
             <select id="subjectFilter" onchange="filterTable()">
-                <option value="all">Усі предмети</option>
-                <option value="math">Математика</option>
-                <option value="ua">Українська мова</option>
-                <option value="reading">Читання</option>
-                <option value="nature">Я досліджую світ</option>
+                <option value="all">🌟 Усі предмети</option>
+                <option value="math">📐 Математика</option>
+                <option value="ua">🇺🇦 Українська мова</option>
+                <option value="reading">📖 Читання</option>
+                <option value="nature">🌍 Я досліджую світ</option>
             </select>
         </div>
 
@@ -89,46 +83,49 @@
             <thead>
                 <tr>
                     <th>Учень</th>
-                    <th>Робота</th>
+                    <th>Робота / Предмет</th>
                     <th>Статус</th>
                 </tr>
             </thead>
             <tbody>
                 <tr class="data-row" data-subject="math">
                     <td>Богдан</td>
-                    <td>Ділення в стовпчик</td>
+                    <td>Математика: Ділення</td>
                     <td class="status-debt">Борг</td>
                 </tr>
                 <tr class="data-row" data-subject="ua">
                     <td>Валерія</td>
-                    <td>Диктант</td>
+                    <td>Укр. мова: Диктант</td>
                     <td class="status-done">Виконано</td>
                 </tr>
                 <tr class="data-row" data-subject="reading">
                     <td>Артем</td>
-                    <td>Переказ</td>
+                    <td>Читання: Переказ</td>
                     <td class="status-debt">Борг</td>
                 </tr>
-                <tr class="data-row" data-subject="math">
+                <tr class="data-row" data-subject="nature">
                     <td>Марія</td>
-                    <td>Задача №5</td>
+                    <td>ЯДС: Проєкт про птахів</td>
                     <td class="status-done">Виконано</td>
+                </tr>
+                <tr class="data-row" data-subject="math">
+                    <td>Микола</td>
+                    <td>Математика: Задача №12</td>
+                    <td class="status-debt">Борг</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <div style="position: fixed; bottom: 0; right: 20px; width: 150px;">
-        <img src="https://i.postimg.cc/mD8P8p0c/teacher-character.png" alt="Вчителька" style="width: 100%;">
-    </div>
+    <img src="https://i.postimg.cc/mD8P8p0c/teacher-character.png" alt="Вчителька" class="teacher-img">
 
     <script>
         function filterTable() {
-            let selected = document.getElementById('subjectFilter').value;
-            let rows = document.querySelectorAll('.data-row');
+            const selected = document.getElementById('subjectFilter').value;
+            const rows = document.querySelectorAll('.data-row');
 
             rows.forEach(row => {
-                let subject = row.getAttribute('data-subject');
+                const subject = row.getAttribute('data-subject');
                 if (selected === 'all' || subject === selected) {
                     row.style.display = '';
                 } else {
