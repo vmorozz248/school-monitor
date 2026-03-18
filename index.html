@@ -7,37 +7,28 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed; background-size: cover; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; }
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
-        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin-bottom: 10px; max-height: 250px; overflow-y: auto; }
-        .student-grid label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b1681; border: 1px solid #f0e6f7; padding: 6px; border-radius: 8px; cursor: pointer; }
-        .plan-badge { background: #61309e; color: white; padding: 3px 10px; border-radius: 10px; font-size: 12px; display: inline-block; margin-bottom: 10px; }
-        .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; }
-        .subject-group h4 { color: #61309e; margin: 0 0 5px 0; font-size: 16px; }
-        .debt-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
-        .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 42px; text-align: center; }
-        .cat-tag { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 5px; border-radius: 4px; color: white; display: inline-block; }
+        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; max-height: 220px; overflow-y: auto; margin-bottom: 10px; }
+        .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #4b1681; border: 1px solid #f0e6f7; padding: 5px; border-radius: 8px; cursor: pointer; }
+        .plan-badge { background: #61309e; color: white; padding: 3px 10px; border-radius: 10px; font-size: 11px; display: inline-block; margin-bottom: 10px; }
+        .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; text-align: left; }
+        .subject-group h4 { color: #61309e; margin: 0 0 5px 0; font-size: 15px; }
+        .debt-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; background: white; padding: 8px; border-radius: 10px; border: 1px solid #f3ebf9; }
+        .date-bubble { background: #61309e; color: white; padding: 3px 7px; border-radius: 6px; font-size: 10px; font-weight: bold; min-width: 38px; text-align: center; }
+        .cat-tag { font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 1px 4px; border-radius: 3px; color: white; display: inline-block; }
         .c-diag { background: #e74c3c; } .c-creat { background: #27ae60; } .c-poem { background: #2980b9; } .c-other { background: #8e44ad; }
-        h1 { color: #1a012b; text-align: center; font-size: 22px; margin: 0 0 10px 0; }
-        select, input { width: 100%; padding: 10px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        h1 { color: #1a012b; text-align: center; font-size: 20px; margin: 0 0 10px 0; }
+        select, input { width: 100%; padding: 8px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; font-size: 14px; }
+        button { width: 100%; padding: 10px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
-        .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 380px; z-index: 100; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); }
-        .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; text-align: left; }
-        .journal-header { font-weight: bold; color: #61309e; font-size: 14px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 350px; z-index: 100; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); pointer-events: none; }
+        .journal-card { background: white; border: 1px solid #e9dcf5; padding: 10px; border-radius: 12px; margin-bottom: 10px; text-align: left; font-size: 13px; }
+        .journal-header { font-weight: bold; color: #61309e; display: block; border-bottom: 1px solid #eee; padding-bottom: 3px; margin-bottom: 5px; }
+        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 2px 7px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -56,26 +47,22 @@
         <div id="view1">
             <div class="student-grid" id="chkArea"></div>
             <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <button style="padding:5px; font-size:11px;" onclick="selectAll(true)">Усі</button>
-                <button style="padding:5px; font-size:11px;" onclick="selectAll(false)">Скинути</button>
+                <button style="padding:4px; font-size:10px;" onclick="selectAll(true)">Усі</button>
+                <button style="padding:4px; font-size:10px;" onclick="selectAll(false)">Скинути</button>
             </div>
             
-            <select id="subSel" onchange="loadSubjectPlan()">
-                <option value="">-- Оберіть предмет --</option>
-            </select>
-            
-            <div style="background: #fdfaff; padding: 10px; border-radius: 10px; border: 1px solid #e9dcf5; margin-bottom: 10px;">
-                <label style="font-size: 11px; color: #61309e; font-weight: bold;">📊 План робіт з предмета (для лічильника):</label>
-                <input type="number" id="planInp" placeholder="Введіть загальну кількість робіт" onchange="saveSubjectPlan()">
+            <select id="subSel" onchange="loadSubjectPlan()"><option value="">-- Оберіть предмет --</option></select>
+            <div style="background: #fdfaff; padding: 8px; border-radius: 10px; border: 1px solid #e9dcf5; margin-bottom: 10px; text-align: left;">
+                <label style="font-size: 10px; color: #61309e; font-weight: bold;">📊 План робіт з предмета:</label>
+                <input type="number" id="planInp" onchange="saveSubjectPlan()">
             </div>
-
             <input type="date" id="dateInp">
             <input type="text" id="taskInp" placeholder="Назва роботи">
             <button onclick="sendDebt()">Розіслати борг</button>
         </div>
 
         <div id="view2" class="hidden">
-            <div id="journalArea">Завантаження...</div>
+            <div id="journalArea">Оновлення даних...</div>
         </div>
     </div>
 
@@ -87,7 +74,7 @@
 
     <div id="resultView" class="hidden">
         <button onclick="location.reload()" style="width:auto; padding:5px 15px; margin-bottom:10px;">⬅ Назад</button>
-        <h3 id="sNameTitle" style="text-align:center;"></h3>
+        <h3 id="sNameTitle" style="text-align:center; color:#61309e; margin:10px 0;"></h3>
         <div id="debtListArea"></div>
     </div>
 </div>
@@ -132,11 +119,7 @@
         document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
 
-    for (let s in structure) {
-        structure[s].forEach(c => {
-            document.getElementById('subSel').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`;
-        });
-    }
+    for (let s in structure) structure[s].forEach(c => document.getElementById('subSel').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
 
     function saveSubjectPlan() {
         const sub = document.getElementById('subSel').value.split('|')[0];
@@ -173,8 +156,7 @@
         if (!task || sel.length === 0 || !subInfo[0]) return alert("Заповніть усе!");
         const d = new Date(dateRaw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0'), sKey = dateRaw.replace(/-/g, '');
         sel.forEach(sid => {
-            const k = db.ref().child('students').push().key;
-            db.ref(`students/${sid}/${subInfo[0]}/${subInfo[1]}/${k}`).set({ date: fDate, val: task, sortDate: sKey, fullDate: dateRaw });
+            db.ref(`students/${sid}/${subInfo[0]}/${subInfo[1]}`).push({ date: fDate, val: task, sortDate: sKey });
         });
         alert("Розіслано!"); document.getElementById('taskInp').value = ""; selectAll(false);
     }
@@ -184,28 +166,31 @@
         area.innerHTML = "Синхронізація...";
         db.ref('students').once('value', snap => {
             const data = snap.val() || {};
-            area.innerHTML = ""; let sum = {};
-            for (let sid in data) {
-                for (let sub in data[sid]) {
-                    for (let cat in data[sid][sub]) {
-                        for (let tid in data[sid][sub][cat]) {
-                            const t = data[sid][sub][cat][tid];
-                            const key = `${sub}|${cat}|${t.val}|${t.date}`;
-                            if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, sKey: t.sortDate, list: [] };
-                            sum[key].list.push({sid, tid});
+            area.innerHTML = ""; 
+            let sum = {};
+            try {
+                for (let sid in data) {
+                    for (let sub in data[sid]) {
+                        for (let cat in data[sid][sub]) {
+                            for (let tid in data[sid][sub][cat]) {
+                                const t = data[sid][sub][cat][tid];
+                                const key = `${sub}|${cat}|${t.val}|${t.date}`;
+                                if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, sKey: t.sortDate || '0', list: [] };
+                                sum[key].list.push({sid, tid});
+                            }
                         }
                     }
                 }
-            }
-            const items = Object.values(sum);
-            if(items.length === 0) { area.innerHTML = "Журнал порожній"; return; }
-            items.sort((a,b) => b.sKey.localeCompare(a.sKey)).forEach(item => {
-                area.innerHTML += `<div class="journal-card">
-                    <span class="journal-header">📅 ${item.date} — ${item.sub}</span>
-                    <div style="margin:5px 0; font-size:13px;"><b>${item.task}</b> (${item.cat})</div>
-                    ${item.list.map(l => `<span class="debtor-tag" onclick="animatedDelete(this, '${l.sid}','${item.sub}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}
-                </div>`;
-            });
+                const items = Object.values(sum);
+                if (items.length === 0) { area.innerHTML = "Журнал порожній"; return; }
+                items.sort((a,b) => b.sKey.localeCompare(a.sKey)).forEach(item => {
+                    area.innerHTML += `<div class="journal-card">
+                        <span class="journal-header">📅 ${item.date} — ${item.sub}</span>
+                        <div style="margin:4px 0;"><b>${item.task}</b> <small>(${item.cat})</small></div>
+                        ${item.list.map(l => `<span class="debtor-tag" onclick="animatedDelete(this, '${l.sid}','${item.sub}','${item.cat}','${l.tid}')">${students[l.sid] ? students[l.sid].name.split(' ')[0] : 'Учень'}</span>`).join('')}
+                    </div>`;
+                });
+            } catch(e) { console.error(e); area.innerHTML = "Помилка завантаження. Спробуйте оновити."; }
         });
     }
 
@@ -222,14 +207,14 @@
                             for (let k in data[sub][cat]) debts.push({ ...data[sub][cat][k], cat });
                         }
                     });
-                    const plan = plans[sub] || 0, done = plan - debts.length;
-                    let div = `<div class="subject-group"><h4>${sub}</h4><span class="plan-badge">Виконано: ${done < 0 ? 0 : done} з ${plan}</span>`;
+                    const plan = plans[sub] || 0, done = Math.max(0, plan - debts.length);
+                    let div = `<div class="subject-group"><h4>${sub}</h4><span class="plan-badge">Виконано: ${done} з ${plan}</span>`;
                     if (debts.length > 0) {
-                        debts.sort((a, b) => b.sortDate.localeCompare(a.sortDate)).forEach(d => {
+                        debts.sort((a, b) => (b.sortDate || "").localeCompare(a.sortDate || "")).forEach(d => {
                             const cls = d.cat.includes('Діагностична') ? 'c-diag' : d.cat.includes('Творча') ? 'c-creat' : d.cat.includes('Вірш') ? 'c-poem' : 'c-other';
                             div += `<div class="debt-row"><div class="date-bubble">${d.date}</div><div><span class="cat-tag ${cls}">${d.cat}</span><br><b>${d.val}</b></div></div>`;
                         });
-                    }
+                    } else if (plan > 0) { div += `<p style="font-size:11px; color:green; margin:5px 0;">✨ Боргів немає!</p>`; }
                     area.innerHTML += div + `</div>`;
                 }
             });
@@ -237,7 +222,9 @@
     }
 
     function animatedDelete(element, sid, sub, cat, tid) {
-        if (confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(() => loadJournal());
+        if (confirm("Видалити борг?")) {
+            db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(() => loadJournal());
+        }
     }
 
     function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); }
