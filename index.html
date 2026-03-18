@@ -53,7 +53,7 @@
             
             <select id="subSel" onchange="loadSubjectPlan()"><option value="">-- Оберіть предмет --</option></select>
             <div style="background: #fdfaff; padding: 8px; border-radius: 10px; border: 1px solid #e9dcf5; margin-bottom: 10px; text-align: left;">
-                <label style="font-size: 10px; color: #61309e; font-weight: bold;">📊 План робіт з предмета:</label>
+                <label style="font-size: 10px; color: #61309e; font-weight: bold;">📊 План робіт з предмета (лічильник):</label>
                 <input type="number" id="planInp" onchange="saveSubjectPlan()">
             </div>
             <input type="date" id="dateInp">
@@ -158,75 +158,25 @@
         alert("Розіслано!"); document.getElementById('taskInp').value = ""; selectAll(false);
     }
 
-    // ТУТ ОНОВЛЕНА ФУНКЦІЯ ГРУПУВАННЯ ЗА ПРЕДМЕТАМИ
     function loadJournal() {
-        function loadJournal() {
-    const area = document.getElementById('journalArea');
-    area.innerHTML = "Синхронізація...";
-    db.ref('students').on('value', snap => {
-        const data = snap.val() || {};
-        area.innerHTML = ""; 
-        let subjects = {};
-
-        for (let sid in data) {
-            for (let sub in data[sid]) {
-                // Якщо назва предмета коректна
-                if (!subjects[sub]) subjects[sub] = {};
-                for (let cat in data[sid][sub]) {
-                    for (let tid in data[sid][sub][cat]) {
-                        const t = data[sid][sub][cat][tid];
-                        // Перевіряємо, чи є дані, щоб не було "undefined"
-                        const taskName = t.val || "Без назви";
-                        const taskDate = t.date || "---";
-                        const key = `${cat}|${taskName}|${taskDate}`;
-                        
-                        if (!subjects[sub][key]) {
-                            subjects[sub][key] = { 
-                                cat: cat, 
-                                task: taskName, 
-                                date: taskDate, 
-                                sKey: t.sortDate || '0', 
-                                list: [] 
-                            };
-                        }
-                        subjects[sub][key].list.push({sid, tid});
-                    }
-                }
-            }
-        }
-
-        for (let subName in subjects) {
-            // Виводимо тільки якщо назва предмета не "undefined"
-            if (subName === "undefined") continue; 
-
-            let subHtml = `<div class="subject-group"><h4>📚 ${subName}</h4>`;
-            let tasks = Object.values(subjects[subName]).sort((a,b) => b.sKey.localeCompare(a.sKey));
-            
-            tasks.forEach(item => {
-                subHtml += `<div class="journal-card">
-                    <span class="journal-header">📅 ${item.date} — ${item.cat}</span>
-                    <div style="margin-bottom:5px;"><b>${item.task}</b></div>
-                    ${item.list.map(l => `<span class="debtor-tag" onclick="animatedDelete(this, '${l.sid}','${subName}','${item.cat}','${l.tid}')">${students[l.sid] ? students[l.sid].name.split(' ')[0] : 'Учень'}</span>`).join('')}
-                </div>`;
-            });
-            area.innerHTML += subHtml + `</div>`;
-        }
-    });
-}
         const area = document.getElementById('journalArea');
-        area.innerHTML = "Синхронізація...";
+        area.innerHTML = "Оновлення...";
         db.ref('students').on('value', snap => {
             const data = snap.val() || {};
             area.innerHTML = ""; 
-            
-            // 1. Групуємо все за предметами
             let subjects = {};
+
             for (let sid in data) {
                 for (let sub in data[sid]) {
+                    // Фільтруємо системні написи
+                    if (sub === "lastChange" || sub === "undefined") continue;
+                    
                     if (!subjects[sub]) subjects[sub] = {};
                     for (let cat in data[sid][sub]) {
+                        if (cat === "undefined") continue;
                         for (let tid in data[sid][sub][cat]) {
                             const t = data[sid][sub][cat][tid];
+                            if (!t.val || !t.date) continue;
                             const key = `${cat}|${t.val}|${t.date}`;
                             if (!subjects[sub][key]) subjects[sub][key] = { cat, task: t.val, date: t.date, sKey: t.sortDate || '0', list: [] };
                             subjects[sub][key].list.push({sid, tid});
@@ -235,11 +185,9 @@
                 }
             }
 
-            // 2. Виводимо по черзі кожен предмет
             for (let subName in subjects) {
                 let subHtml = `<div class="subject-group"><h4>📚 ${subName}</h4>`;
                 let tasks = Object.values(subjects[subName]).sort((a,b) => b.sKey.localeCompare(a.sKey));
-                
                 tasks.forEach(item => {
                     subHtml += `<div class="journal-card">
                         <span class="journal-header">📅 ${item.date} — ${item.cat}</span>
@@ -249,7 +197,7 @@
                 });
                 area.innerHTML += subHtml + `</div>`;
             }
-            if (area.innerHTML === "") area.innerHTML = "Журнал порожній";
+            if (area.innerHTML === "") area.innerHTML = "<p style='text-align:center; padding:20px; color:#888;'>Журнал порожній</p>";
         });
     }
 
