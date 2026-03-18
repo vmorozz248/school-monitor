@@ -14,9 +14,12 @@
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
         .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; max-height: 220px; overflow-y: auto; margin-bottom: 10px; }
         .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #4b1681; border: 1px solid #f0e6f7; padding: 5px; border-radius: 8px; cursor: pointer; }
-        .plan-badge { background: #61309e; color: white; padding: 3px 10px; border-radius: 10px; font-size: 11px; display: inline-block; margin-bottom: 10px; }
         .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 15px; text-align: left; }
-        .subject-group h4 { color: #61309e; margin: 0 0 5px 0; font-size: 15px; }
+        .subject-group h4 { color: #61309e; margin: 0 0 8px 0; font-size: 16px; border-bottom: 2px solid #e9dcf5; padding-bottom: 4px; }
+        .plan-badge { background: #61309e; color: white; padding: 3px 10px; border-radius: 10px; font-size: 11px; display: inline-block; margin-bottom: 10px; }
+        .journal-card { background: white; border: 1px solid #eee; padding: 10px; border-radius: 10px; margin-bottom: 8px; }
+        .journal-header { font-weight: bold; color: #61309e; font-size: 13px; margin-bottom: 4px; display: block; }
+        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 2px 7px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .debt-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; background: white; padding: 8px; border-radius: 10px; border: 1px solid #f3ebf9; }
         .date-bubble { background: #61309e; color: white; padding: 3px 7px; border-radius: 6px; font-size: 10px; font-weight: bold; min-width: 38px; text-align: center; }
         .cat-tag { font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 1px 4px; border-radius: 3px; color: white; display: inline-block; }
@@ -26,9 +29,6 @@
         button { width: 100%; padding: 10px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
         .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 350px; z-index: 100; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); pointer-events: none; }
-        .journal-card { background: white; border: 1px solid #e9dcf5; padding: 10px; border-radius: 12px; margin-bottom: 10px; text-align: left; font-size: 13px; }
-        .journal-header { font-weight: bold; color: #61309e; display: block; border-bottom: 1px solid #eee; padding-bottom: 3px; margin-bottom: 5px; }
-        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 2px 7px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -62,7 +62,7 @@
         </div>
 
         <div id="view2" class="hidden">
-            <div id="journalArea">Оновлення даних...</div>
+            <div id="journalArea">Синхронізація...</div>
         </div>
     </div>
 
@@ -118,19 +118,7 @@
         document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
         document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
-
     for (let s in structure) structure[s].forEach(c => document.getElementById('subSel').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
-
-    function saveSubjectPlan() {
-        const sub = document.getElementById('subSel').value.split('|')[0];
-        const count = document.getElementById('planInp').value;
-        if (sub) db.ref(`plans/${sub}`).set(count);
-    }
-
-    function loadSubjectPlan() {
-        const sub = document.getElementById('subSel').value.split('|')[0];
-        if (sub) db.ref(`plans/${sub}`).once('value', s => { document.getElementById('planInp').value = s.val() || 0; });
-    }
 
     function login() {
         const id = document.getElementById('uSel').value, code = document.getElementById('pInp').value.trim();
@@ -148,6 +136,17 @@
         if (n === 2) loadJournal();
     }
 
+    function saveSubjectPlan() {
+        const sub = document.getElementById('subSel').value.split('|')[0];
+        const count = document.getElementById('planInp').value;
+        if (sub) db.ref(`plans/${sub}`).set(count);
+    }
+
+    function loadSubjectPlan() {
+        const sub = document.getElementById('subSel').value.split('|')[0];
+        if (sub) db.ref(`plans/${sub}`).once('value', s => { document.getElementById('planInp').value = s.val() || 0; });
+    }
+
     function sendDebt() {
         const sel = Array.from(document.querySelectorAll('#chkArea input:checked')).map(c => c.value);
         const subInfo = document.getElementById('subSel').value.split('|');
@@ -155,42 +154,49 @@
         const dateRaw = document.getElementById('dateInp').value;
         if (!task || sel.length === 0 || !subInfo[0]) return alert("Заповніть усе!");
         const d = new Date(dateRaw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0'), sKey = dateRaw.replace(/-/g, '');
-        sel.forEach(sid => {
-            db.ref(`students/${sid}/${subInfo[0]}/${subInfo[1]}`).push({ date: fDate, val: task, sortDate: sKey });
-        });
+        sel.forEach(sid => { db.ref(`students/${sid}/${subInfo[0]}/${subInfo[1]}`).push({ date: fDate, val: task, sortDate: sKey }); });
         alert("Розіслано!"); document.getElementById('taskInp').value = ""; selectAll(false);
     }
 
+    // ТУТ ОНОВЛЕНА ФУНКЦІЯ ГРУПУВАННЯ ЗА ПРЕДМЕТАМИ
     function loadJournal() {
         const area = document.getElementById('journalArea');
         area.innerHTML = "Синхронізація...";
-        db.ref('students').once('value', snap => {
+        db.ref('students').on('value', snap => {
             const data = snap.val() || {};
             area.innerHTML = ""; 
-            let sum = {};
-            try {
-                for (let sid in data) {
-                    for (let sub in data[sid]) {
-                        for (let cat in data[sid][sub]) {
-                            for (let tid in data[sid][sub][cat]) {
-                                const t = data[sid][sub][cat][tid];
-                                const key = `${sub}|${cat}|${t.val}|${t.date}`;
-                                if (!sum[key]) sum[key] = { sub, cat, task: t.val, date: t.date, sKey: t.sortDate || '0', list: [] };
-                                sum[key].list.push({sid, tid});
-                            }
+            
+            // 1. Групуємо все за предметами
+            let subjects = {};
+            for (let sid in data) {
+                for (let sub in data[sid]) {
+                    if (!subjects[sub]) subjects[sub] = {};
+                    for (let cat in data[sid][sub]) {
+                        for (let tid in data[sid][sub][cat]) {
+                            const t = data[sid][sub][cat][tid];
+                            const key = `${cat}|${t.val}|${t.date}`;
+                            if (!subjects[sub][key]) subjects[sub][key] = { cat, task: t.val, date: t.date, sKey: t.sortDate || '0', list: [] };
+                            subjects[sub][key].list.push({sid, tid});
                         }
                     }
                 }
-                const items = Object.values(sum);
-                if (items.length === 0) { area.innerHTML = "Журнал порожній"; return; }
-                items.sort((a,b) => b.sKey.localeCompare(a.sKey)).forEach(item => {
-                    area.innerHTML += `<div class="journal-card">
-                        <span class="journal-header">📅 ${item.date} — ${item.sub}</span>
-                        <div style="margin:4px 0;"><b>${item.task}</b> <small>(${item.cat})</small></div>
-                        ${item.list.map(l => `<span class="debtor-tag" onclick="animatedDelete(this, '${l.sid}','${item.sub}','${item.cat}','${l.tid}')">${students[l.sid] ? students[l.sid].name.split(' ')[0] : 'Учень'}</span>`).join('')}
+            }
+
+            // 2. Виводимо по черзі кожен предмет
+            for (let subName in subjects) {
+                let subHtml = `<div class="subject-group"><h4>📚 ${subName}</h4>`;
+                let tasks = Object.values(subjects[subName]).sort((a,b) => b.sKey.localeCompare(a.sKey));
+                
+                tasks.forEach(item => {
+                    subHtml += `<div class="journal-card">
+                        <span class="journal-header">📅 ${item.date} — ${item.cat}</span>
+                        <div style="margin-bottom:5px;"><b>${item.task}</b></div>
+                        ${item.list.map(l => `<span class="debtor-tag" onclick="animatedDelete(this, '${l.sid}','${subName}','${item.cat}','${l.tid}')">${students[l.sid] ? students[l.sid].name.split(' ')[0] : 'Учень'}</span>`).join('')}
                     </div>`;
                 });
-            } catch(e) { console.error(e); area.innerHTML = "Помилка завантаження. Спробуйте оновити."; }
+                area.innerHTML += subHtml + `</div>`;
+            }
+            if (area.innerHTML === "") area.innerHTML = "Журнал порожній";
         });
     }
 
@@ -214,7 +220,7 @@
                             const cls = d.cat.includes('Діагностична') ? 'c-diag' : d.cat.includes('Творча') ? 'c-creat' : d.cat.includes('Вірш') ? 'c-poem' : 'c-other';
                             div += `<div class="debt-row"><div class="date-bubble">${d.date}</div><div><span class="cat-tag ${cls}">${d.cat}</span><br><b>${d.val}</b></div></div>`;
                         });
-                    } else if (plan > 0) { div += `<p style="font-size:11px; color:green; margin:5px 0;">✨ Боргів немає!</p>`; }
+                    }
                     area.innerHTML += div + `</div>`;
                 }
             });
@@ -222,11 +228,8 @@
     }
 
     function animatedDelete(element, sid, sub, cat, tid) {
-        if (confirm("Видалити борг?")) {
-            db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(() => loadJournal());
-        }
+        if (confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove();
     }
-
     function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); }
 </script>
 </body>
