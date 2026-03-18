@@ -53,7 +53,7 @@
             
             <select id="subSel" onchange="loadSubjectPlan()"><option value="">-- Оберіть предмет --</option></select>
             <div style="background: #fdfaff; padding: 8px; border-radius: 10px; border: 1px solid #e9dcf5; margin-bottom: 10px; text-align: left;">
-                <label style="font-size: 10px; color: #61309e; font-weight: bold;">📊 План робіт з предмета (лічильник):</label>
+                <label style="font-size: 10px; color: #61309e; font-weight: bold;">📊 План робіт з предмета:</label>
                 <input type="number" id="planInp" onchange="saveSubjectPlan()">
             </div>
             <input type="date" id="dateInp">
@@ -160,7 +160,7 @@
 
     function loadJournal() {
         const area = document.getElementById('journalArea');
-        area.innerHTML = "Оновлення...";
+        area.innerHTML = "Синхронізація...";
         db.ref('students').on('value', snap => {
             const data = snap.val() || {};
             area.innerHTML = ""; 
@@ -168,15 +168,15 @@
 
             for (let sid in data) {
                 for (let sub in data[sid]) {
-                    // Фільтруємо системні написи
-                    if (sub === "lastChange" || sub === "undefined") continue;
+                    // ФІЛЬТР: ігноруємо технічні записи та undefined
+                    if (sub === "lastChange" || sub === "undefined" || sub.includes('_date') || sub.includes('_val')) continue;
                     
                     if (!subjects[sub]) subjects[sub] = {};
                     for (let cat in data[sid][sub]) {
                         if (cat === "undefined") continue;
                         for (let tid in data[sid][sub][cat]) {
                             const t = data[sid][sub][cat][tid];
-                            if (!t.val || !t.date) continue;
+                            if (!t || !t.val || !t.date) continue;
                             const key = `${cat}|${t.val}|${t.date}`;
                             if (!subjects[sub][key]) subjects[sub][key] = { cat, task: t.val, date: t.date, sKey: t.sortDate || '0', list: [] };
                             subjects[sub][key].list.push({sid, tid});
