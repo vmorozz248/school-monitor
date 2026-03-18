@@ -35,7 +35,7 @@
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
         .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 380px; z-index: 100; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); }
-        .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
+        .journal-card { background: white; border: 1px solid #e9dcf5; padding: 12px; border-radius: 12px; margin-bottom: 10px; text-align: left; }
         .journal-header { font-weight: bold; color: #61309e; font-size: 14px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 3px 8px; border-radius: 10px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
     </style>
@@ -65,8 +65,8 @@
             </select>
             
             <div style="background: #fdfaff; padding: 10px; border-radius: 10px; border: 1px solid #e9dcf5; margin-bottom: 10px;">
-                <label style="font-size: 11px; color: #61309e; font-weight: bold;">📚 План робіт з предмета:</label>
-                <input type="number" id="planInp" placeholder="Кількість обов'язкових робіт" onchange="saveSubjectPlan()">
+                <label style="font-size: 11px; color: #61309e; font-weight: bold;">📊 План робіт з предмета (для лічильника):</label>
+                <input type="number" id="planInp" placeholder="Введіть загальну кількість робіт" onchange="saveSubjectPlan()">
             </div>
 
             <input type="date" id="dateInp">
@@ -125,7 +125,7 @@
         "Дизайн і технології": ["Творча робота"]
     };
 
-    // Ініціалізація списків
+    document.getElementById('dateInp').valueAsDate = new Date();
     const sortedIds = Object.keys(students).sort((a,b) => students[a].name.localeCompare(students[b].name));
     sortedIds.forEach(id => {
         document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
@@ -146,11 +146,7 @@
 
     function loadSubjectPlan() {
         const sub = document.getElementById('subSel').value.split('|')[0];
-        if (sub) {
-            db.ref(`plans/${sub}`).once('value', s => {
-                document.getElementById('planInp').value = s.val() || 0;
-            });
-        }
+        if (sub) db.ref(`plans/${sub}`).once('value', s => { document.getElementById('planInp').value = s.val() || 0; });
     }
 
     function login() {
@@ -184,8 +180,10 @@
     }
 
     function loadJournal() {
-        db.ref('students').on('value', snap => {
-            const data = snap.val() || {}, area = document.getElementById('journalArea');
+        const area = document.getElementById('journalArea');
+        area.innerHTML = "Синхронізація...";
+        db.ref('students').once('value', snap => {
+            const data = snap.val() || {};
             area.innerHTML = ""; let sum = {};
             for (let sid in data) {
                 for (let sub in data[sid]) {
@@ -199,9 +197,12 @@
                     }
                 }
             }
-            Object.values(sum).sort((a,b) => b.sKey.localeCompare(a.sKey)).forEach(item => {
+            const items = Object.values(sum);
+            if(items.length === 0) { area.innerHTML = "Журнал порожній"; return; }
+            items.sort((a,b) => b.sKey.localeCompare(a.sKey)).forEach(item => {
                 area.innerHTML += `<div class="journal-card">
-                    <span class="journal-header">✏️ ${item.date} - ${item.sub}: ${item.task}</span>
+                    <span class="journal-header">📅 ${item.date} — ${item.sub}</span>
+                    <div style="margin:5px 0; font-size:13px;"><b>${item.task}</b> (${item.cat})</div>
                     ${item.list.map(l => `<span class="debtor-tag" onclick="animatedDelete(this, '${l.sid}','${item.sub}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}
                 </div>`;
             });
@@ -236,11 +237,10 @@
     }
 
     function animatedDelete(element, sid, sub, cat, tid) {
-        if (confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove();
+        if (confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(() => loadJournal());
     }
 
     function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); }
-    document.getElementById('dateInp').valueAsDate = new Date();
 </script>
 </body>
 </html>
