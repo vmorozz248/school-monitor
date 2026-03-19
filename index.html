@@ -13,9 +13,9 @@
         .tab-menu { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #e9dcf5; justify-content: space-around; }
         .tab { padding: 10px 5px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; flex: 1; text-align: center; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
-        .student-list-container { background: white; border: 1px solid #e9dcf5; border-radius: 15px; padding: 5px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
-        .student-row { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f9f4fd; cursor: pointer; }
-        .student-row input { width: 20px; height: 20px; margin-right: 15px; accent-color: #61309e; }
+        .sub-tab-menu { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; background: #f3ebf9; padding: 5px; border-radius: 12px; }
+        .sub-tab { padding: 8px 15px; cursor: pointer; font-size: 13px; border-radius: 10px; font-weight: bold; color: #61309e; }
+        .sub-tab.active { background: #61309e; color: white; }
         .group-header { background: #fff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #61309e; font-weight: bold; }
         .group-content { display: none; padding: 5px 10px; }
         .group-content.open { display: block; }
@@ -23,17 +23,12 @@
         .cat-tag { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; color: white; display: inline-block; margin: 3px 0; }
         .c-diag { background: #e74c3c; } .c-creat { background: #27ae60; } .c-poem { background: #2980b9; } .c-other { background: #8e44ad; }
         .date-badge { background: #61309e; color: white; padding: 2px 6px; border-radius: 5px; font-size: 11px; font-weight: bold; }
-        .debtor-tag { display: inline-block; background: #e9dcf5; color: #61309e; padding: 3px 8px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .debtor-tag:hover { background: #f1c40f; color: #000; }
-        .plan-subject-block { background: #f4f0f9; padding: 10px; border-radius: 15px; margin-top: 15px; border: 1px solid #e9dcf5; }
-        .plan-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #eee; }
-        .plan-item:last-child { border: 0; }
-        select, input[type="text"], input[type="number"], input[type="date"] { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 15px; margin-bottom: 12px; outline: none; }
-        button { width: 100%; padding: 14px; background: #61309e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
-        .btn-small { padding: 8px; font-size: 12px; margin-top: 5px; }
-        .btn-red { background: #e74c3c; }
+        .debtor-tag { display: inline-block; background: #e9dcf5; color: #61309e; padding: 3px 8px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .report-btn { color: #27ae60; cursor: pointer; font-size: 18px; margin-left: 10px; }
         .hidden { display: none !important; }
         .teacher-avatar { position: fixed; bottom: -10px; right: -30px; width: 300px; z-index: 100; pointer-events: none; opacity: 0.9; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 15px; margin-bottom: 12px; outline: none; }
+        button { width: 100%; padding: 14px; background: #61309e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -51,19 +46,25 @@
         </div>
         
         <div id="view1">
-            <div class="student-list-container" id="chkArea"></div>
+            <div id="chkArea" style="background: white; border: 1px solid #e9dcf5; border-radius: 15px; padding: 5px; max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
             <select id="subSel"><option value="">-- Предмет --</option></select>
             <input type="date" id="dateInp">
             <input type="text" id="taskInp" placeholder="Назва роботи">
             <button onclick="sendDebt()">Розіслати борг</button>
         </div>
 
-        <div id="view2" class="hidden"><div id="journalArea"></div></div>
+        <div id="view2" class="hidden">
+            <div class="sub-tab-menu">
+                <div id="subTabSub" class="sub-tab active" onclick="setJournalMode('subjects')">📚 Предмети</div>
+                <div id="subTabStud" class="sub-tab" onclick="setJournalMode('students')">👤 Учні</div>
+            </div>
+            <div id="journalArea"></div>
+        </div>
 
         <div id="view3" class="hidden">
             <div id="planList" style="max-height: 350px; overflow-y: auto;"></div>
-            <button onclick="saveAllPlans()" style="margin-top:15px;">Зберегти всі плани</button>
-            <button class="btn-red" style="margin-top:10px;" onclick="resetAllDebts()">❌ Очистити ВСІ борги</button>
+            <button onclick="saveAllPlans()" style="margin-top:10px;">Зберегти плани</button>
+            <button style="background: #e74c3c; margin-top: 10px;" onclick="resetAllDebts()">❌ Очистити ВСІ борги</button>
         </div>
     </div>
 
@@ -113,23 +114,22 @@
         "Дизайн і технології": ["Творча робота"]
     };
 
+    let journalMode = 'subjects';
     let openGroups = new Set();
     document.getElementById('dateInp').valueAsDate = new Date();
 
     const sortedIds = Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name));
     sortedIds.forEach(id => {
-        document.getElementById('chkArea').innerHTML += `<div class="student-row" onclick="this.querySelector('input').click()"><input type="checkbox" value="${id}" onclick="event.stopPropagation()"><span>${students[id].name}</span></div>`;
+        document.getElementById('chkArea').innerHTML += `<div style="display:flex; align-items:center; padding:10px; border-bottom:1px solid #f9f4fd; cursor:pointer;" onclick="this.querySelector('input').click()"><input type="checkbox" value="${id}" style="width:20px; height:20px; margin-right:15px;" onclick="event.stopPropagation()"><span>${students[id].name}</span></div>`;
         document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
 
     for(let s in structure) {
-        let block = `<div class="plan-subject-block"><strong>📚 ${s}</strong>`;
+        document.getElementById('planList').innerHTML += `<div style="background:#f4f0f9; padding:5px 10px; font-weight:bold; color:#61309e; margin-top:10px; border-radius:5px;">${s}</div>`;
         structure[s].forEach(c => { 
             document.getElementById('subSel').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`; 
-            block += `<div class="plan-item"><span>${c}</span><input type="number" id="plan_${s}_${c}" style="width:50px; margin:0; padding:4px;"></div>`;
+            document.getElementById('planList').innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:white; border-radius:10px; margin-bottom:4px; border:1px solid #e9dcf5;"><span>${c}</span><input type="number" id="plan_${s}_${c}" style="width:60px; margin:0; text-align:center; padding:5px;"></div>`;
         });
-        block += `<button class="btn-small btn-red" onclick="clearBySubject('${s}')">🗑 Видалити борги ${s}</button></div>`;
-        document.getElementById('planList').innerHTML += block;
     }
 
     function showTab(n) {
@@ -154,17 +154,7 @@
         });
     }
 
-    function resetAllDebts() { if(confirm("Видалити ВСІ борги в базі?")) db.ref('students').remove().then(() => alert("Базу очищено!")); }
-
-    function clearBySubject(s) {
-        if(confirm(`Видалити всі борги з предмета "${s}"?`)) {
-            db.ref('students').once('value', snap => {
-                const data = snap.val() || {};
-                for(let sid in data) { if(data[sid][s]) db.ref(`students/${sid}/${s}`).remove(); }
-                alert(`Борги з "${s}" видалено!`);
-            });
-        }
-    }
+    function resetAllDebts() { if(confirm("Очистити всю базу боргів?")) db.ref('students').remove().then(() => alert("Очищено!")); }
 
     function sendDebt() {
         const sel = Array.from(document.querySelectorAll('#chkArea input:checked')).map(c => c.value);
@@ -178,56 +168,95 @@
     }
 
     function loadJournal() {
-        const area = document.getElementById('journalArea'); area.innerHTML = "Завантаження...";
+        const area = document.getElementById('journalArea'); area.innerHTML = "Синхронізація...";
         db.ref('students').once('value', snap => {
             const data = snap.val() || {}; area.innerHTML = "";
-            let subs = {};
-            for(let sid in data) {
-                for(let sub in data[sid]) {
-                    if(!structure[sub]) continue;
-                    if(!subs[sub]) subs[sub] = {};
-                    for(let cat in data[sid][sub]) {
-                        if(!structure[sub].includes(cat)) continue;
-                        for(let tid in data[sid][sub][cat]) {
-                            const t = data[sid][sub][cat][tid];
-                            if(!t || !t.val) continue;
-                            const key = `${cat}|${t.val}|${t.date}`;
-                            if(!subs[sub][key]) subs[sub][key] = {cat, task: t.val, date: t.date, list: []};
-                            subs[sub][key].list.push({sid, tid});
-                        }
+            if (journalMode === 'subjects') renderSubjects(data, area);
+            else renderStudents(data, area);
+        });
+    }
+
+    function renderSubjects(data, area) {
+        let subs = {};
+        for(let sid in data) {
+            for(let sub in data[sid]) {
+                if(!structure[sub]) continue;
+                if(!subs[sub]) subs[sub] = {};
+                for(let cat in data[sid][sub]) {
+                    if(!structure[sub].includes(cat)) continue;
+                    for(let tid in data[sid][sub][cat]) {
+                        const t = data[sid][sub][cat][tid];
+                        if(!t || !t.val) continue;
+                        const key = `${cat}|${t.val}|${t.date}`;
+                        if(!subs[sub][key]) subs[sub][key] = {cat, task: t.val, date: t.date, list: []};
+                        subs[sub][key].list.push({sid, tid});
                     }
                 }
             }
-            for(let n in subs) {
-                const isOpen = openGroups.has(n);
-                let h = `<div class="group-header" onclick="toggleGr(this, '${n}')"><span>📚 ${n}</span><span>${isOpen?'▲':'▼'}</span></div>`;
-                let c = `<div class="group-content ${isOpen?'open':''}">`;
-                Object.values(subs[n]).forEach(item => {
-                    const cls = item.cat.includes('Діагностична')?'c-diag':item.cat.includes('Творча')?'c-creat':item.cat.includes('Вірш')?'c-poem':'c-other';
-                    c += `<div class="journal-card"><span class="date-badge">${item.date}</span> <span class="cat-tag ${cls}">${item.cat}</span><br><b>${item.task}</b><br>
-                    ${item.list.map(l=>`<span class="debtor-tag" title="Натисніть щоб видалити" onclick="del('${l.sid}','${n}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
-                });
-                area.innerHTML += h + c + `</div>`;
+        }
+        for(let n in subs) {
+            const isOpen = openGroups.has(n);
+            let h = `<div class="group-header" onclick="toggleGr(this, '${n}')"><span>📚 ${n}</span><span>${isOpen?'▲':'▼'}</span></div>`;
+            let c = `<div class="group-content ${isOpen?'open':''}">`;
+            Object.values(subs[n]).forEach(item => {
+                const cls = item.cat.includes('Діагностична')?'c-diag':item.cat.includes('Творча')?'c-creat':item.cat.includes('Вірш')?'c-poem':'c-other';
+                c += `<div class="journal-card"><span class="date-badge">${item.date}</span> <span class="cat-tag ${cls}">${item.cat}</span><br><b>${item.task}</b><br>
+                ${item.list.map(l=>`<span class="debtor-tag" onclick="del('${l.sid}','${n}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
+            });
+            area.innerHTML += h + c + `</div>`;
+        }
+    }
+
+    function renderStudents(data, area) {
+        sortedIds.forEach(sid => {
+            if(!data[sid]) return;
+            const isOpen = openGroups.has(sid);
+            let h = `<div class="group-header" onclick="toggleGr(this, '${sid}')"><span>👤 ${students[sid].name} <span class="report-btn" onclick="copyReport('${sid}', event)">📢</span></span><span>${isOpen?'▲':'▼'}</span></div>`;
+            let c = `<div class="group-content ${isOpen?'open':''}">`, has = false;
+            let reportText = "";
+            for(let sub in data[sid]) {
+                if(!structure[sub]) continue;
+                for(let cat in data[sid][sub]) {
+                    for(let tid in data[sid][sub][cat]) {
+                        has = true; const t = data[sid][sub][cat][tid];
+                        c += `<div class="journal-card" onclick="del('${sid}','${sub}','${cat}','${tid}')"><b>${sub}</b>: ${t.val} (${t.date})</div>`;
+                    }
+                }
             }
-            if(area.innerHTML === "") area.innerHTML = "<p style='text-align:center; padding:20px;'>Журнал порожній</p>";
+            if(has) area.innerHTML += h + c + `</div>`;
+        });
+    }
+
+    async function copyReport(sid, e) {
+        e.stopPropagation();
+        const snap = await db.ref('students/' + sid).once('value');
+        const data = snap.val();
+        if(!data) return alert("Боргів немає!");
+
+        let text = `📢 *БОРГИ: ${students[sid].name}*\n\n`;
+        for(let sub in data) {
+            if(!structure[sub]) continue;
+            text += `📚 *${sub}:*\n`;
+            for(let cat in data[sub]) {
+                for(let tid in data[sub][cat]) {
+                    const t = data[sub][cat][tid];
+                    text += `  • ${t.val} (${t.date})\n`;
+                }
+            }
+            text += `\n`;
+        }
+        text += `🔗 Перевірити на сайті: [посилання на сайт]`;
+
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Звіт скопійовано! Вставте його у Telegram.");
         });
     }
 
     function toggleGr(h, id) { const c = h.nextElementSibling; const isOp = c.classList.toggle('open'); if(isOp) openGroups.add(id); else openGroups.delete(id); h.querySelector('span:last-child').innerText = isOp ? '▲' : '▼'; }
-
-    function del(sid, sub, cat, tid) { if(confirm(`Видалити борг для ${students[sid].name}?`)) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(loadJournal); }
-
-    function login() {
-        const id = document.getElementById('uSel').value, code = document.getElementById('pInp').value;
-        if(code === "21.08") {
-            if(id) { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id); }
-            else { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); }
-        } else if(id && students[id].code === code) {
-            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id);
-        } else alert("Помилка!");
-    }
-
-    function loadData(id) {
+    function del(sid, sub, cat, tid) { if(confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(loadJournal); }
+    function setJournalMode(m) { journalMode = m; loadJournal(); }
+    function login() { /* стандартна функція логіну */ const id=document.getElementById('uSel').value, code=document.getElementById('pInp').value; if(code==="21.08"){if(id){document.getElementById('loginForm').classList.add('hidden');document.getElementById('resultView').classList.remove('hidden');loadData(id);}else{document.getElementById('loginForm').classList.add('hidden');document.getElementById('adminPanel').classList.remove('hidden');}} else if(id && students[id].code===code){document.getElementById('loginForm').classList.add('hidden');document.getElementById('resultView').classList.remove('hidden');loadData(id);}else alert("Помилка!"); }
+    function loadData(id) { /* сторінка учня */
         document.getElementById('sNameTitle').innerText = students[id].name;
         db.ref('plans_v2').once('value', pSnap => {
             const plans = pSnap.val() || {};
@@ -240,14 +269,11 @@
                         const planVal = (plans[sub] && plans[sub][cat]) ? parseInt(plans[sub][cat]) : 0;
                         if(planVal > 0) {
                             hasWork = true;
-                            let debts = []; if(data[sub] && data[sub][cat]) for(let k in data[sub][cat]) { let d = data[sub][cat][k]; if(d && d.val) debts.push(d); }
+                            let debts = []; if(data[sub] && data[sub][cat]) for(let k in data[sub][cat]) debts.push(data[sub][cat][k]);
                             const done = Math.max(0, planVal - debts.length);
                             const cls = cat.includes('Діагностична')?'c-diag':cat.includes('Творча')?'c-creat':cat.includes('Вірш')?'c-poem':'c-other';
-                            div += `<div style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                                <span class="cat-tag ${cls}" style="margin:0;">${cat}</span>
-                                <span style="font-size:11px; font-weight:bold; color:#61309e;">Виконано: ${done} з ${planVal}</span>
-                            </div>`;
-                            debts.forEach(d => { div += `<div style="display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:10px; border:1px solid #f3ebf9; margin-bottom:4px; font-size:13px;"><span class="date-badge">${d.date}</span><b>${d.val}</b></div>`; });
+                            div += `<div style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span class="cat-tag ${cls}" style="margin:0;">${cat}</span><span style="font-size:11px; font-weight:bold; color:#61309e;">Виконано: ${done} з ${planVal}</span></div>`;
+                            debts.forEach(d => { div += `<div style="display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:10px; border:1px solid #f3ebf9; margin-bottom:4px; font-size:13px;"><span style="background:#61309e; color:white; padding:2px 5px; border-radius:5px; font-size:10px;">${d.date}</span><b>${d.val}</b></div>`; });
                             div += `</div>`;
                         }
                     });
