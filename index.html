@@ -9,48 +9,31 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed; background-size: cover; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; }
-        
         .card { background: rgba(255, 255, 255, 0.98); padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; position: relative; }
-        
-        /* Вкладки */
         .tab-menu { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #e9dcf5; }
-        .tab { padding: 10px 15px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; transition: 0.3s; }
+        .tab { padding: 10px 15px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
-        
         .sub-tab-menu { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; background: #f3ebf9; padding: 5px; border-radius: 12px; }
         .sub-tab { padding: 8px 15px; cursor: pointer; font-size: 13px; border-radius: 10px; font-weight: bold; color: #61309e; }
         .sub-tab.active { background: #61309e; color: white; }
-
-        /* Виправлений список учнів */
         .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: white; border: 1px solid #e9dcf5; border-radius: 15px; padding: 15px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
-        .student-grid label { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #4b1681; cursor: pointer; padding: 5px; border-radius: 8px; transition: 0.2s; }
-        .student-grid label:hover { background: #fdfaff; }
-        .student-grid input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #61309e; }
-
-        /* Елементи журналу */
+        .student-grid label { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #4b1681; cursor: pointer; padding: 5px; }
+        .student-grid input[type="checkbox"] { width: 18px; height: 18px; accent-color: #61309e; }
         .group-header { background: #fff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-bottom: 8px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #61309e; font-weight: bold; }
         .group-content { display: none; padding: 5px 10px 10px 10px; }
         .group-content.open { display: block; }
-        
-        .journal-card { background: #fdfaff; border: 1px solid #eee; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 13px; text-align: left; position: relative; }
+        .journal-card { background: #fdfaff; border: 1px solid #eee; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 13px; text-align: left; }
         .debtor-tag { display: inline-block; background: #e9dcf5; color: #61309e; padding: 2px 7px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
-        
         .plan-item { background: white; padding: 12px; border-radius: 15px; border: 1px solid #e9dcf5; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
         .plan-item span { font-size: 14px; font-weight: bold; color: #4b1681; }
-        .plan-item input { width: 70px; margin: 0; padding: 8px; text-align: center; border: 2px solid #f3ebf9; }
-
+        .plan-item input { width: 70px; padding: 8px; text-align: center; border: 2px solid #f3ebf9; border-radius: 10px; }
         .cat-tag { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; color: white; display: inline-block; margin-bottom: 4px; }
         .c-diag { background: #e74c3c; } .c-creat { background: #27ae60; } .c-poem { background: #2980b9; } .c-other { background: #8e44ad; }
-        
         .debt-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; background: white; padding: 10px; border-radius: 12px; border: 1px solid #f3ebf9; }
         .date-bubble { background: #61309e; color: white; padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; min-width: 45px; text-align: center; }
-        
-        select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; margin-bottom: 12px; font-size: 15px; outline: none; transition: 0.3s; }
-        select:focus, input:focus { border-color: #61309e; }
-        button { width: 100%; padding: 14px; background: #61309e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.3s; }
-        button:active { transform: scale(0.98); }
+        select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; margin-bottom: 12px; font-size: 15px; outline: none; }
+        button { width: 100%; padding: 14px; background: #61309e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
         .btn-red { background: #e74c3c; margin-top: 15px; }
-        
         .del-all-btn { color: #e74c3c; cursor: pointer; font-size: 18px; margin-left: 10px; }
         .hidden { display: none !important; }
         .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 350px; z-index: 100; pointer-events: none; opacity: 0.9; }
@@ -140,8 +123,9 @@
     };
 
     let journalMode = 'subjects';
-    document.getElementById('dateInp').valueAsDate = new Date();
+    let openGroups = new Set(); // Зберігаємо ID відкритих груп
 
+    document.getElementById('dateInp').valueAsDate = new Date();
     const sortedIds = Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name));
     sortedIds.forEach(id => {
         document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
@@ -182,6 +166,7 @@
 
     function setJournalMode(m) {
         journalMode = m;
+        openGroups.clear(); // Очищуємо при зміні режиму
         document.getElementById('subTabSub').classList.toggle('active', m === 'subjects');
         document.getElementById('subTabStud').classList.toggle('active', m === 'students');
         loadJournal();
@@ -189,7 +174,7 @@
 
     function loadJournal() {
         const area = document.getElementById('journalArea');
-        area.innerHTML = "Завантаження...";
+        area.innerHTML = "Синхронізація...";
         db.ref('students').once('value', snap => {
             const data = snap.val() || {};
             area.innerHTML = "";
@@ -215,8 +200,9 @@
             }
         }
         for(let n in subs) {
-            let h = `<div class="group-header" onclick="toggleGr(this)"><span>📚 ${n}</span><span>▼</span></div>`;
-            let c = `<div class="group-content">`;
+            const isOpen = openGroups.has(n);
+            let h = `<div class="group-header" onclick="toggleGr(this, '${n}')"><span>📚 ${n}</span><span>${isOpen?'▲':'▼'}</span></div>`;
+            let c = `<div class="group-content ${isOpen?'open':''}">`;
             Object.values(subs[n]).forEach(item => {
                 c += `<div class="journal-card"><b>${item.date}</b> — ${item.task} <span class="del-all-btn" onclick="delWork('${n}','${item.cat}','${item.task}','${item.date}')">🗑️</span><br>
                 ${item.list.map(l=>`<span class="debtor-tag" onclick="del('${l.sid}','${n}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
@@ -228,8 +214,9 @@
     function renderStudents(data, area) {
         sortedIds.forEach(sid => {
             if(!data[sid]) return;
-            let h = `<div class="group-header" onclick="toggleGr(this)"><span>👤 ${students[sid].name}</span><span>▼</span></div>`;
-            let c = `<div class="group-content">`, has = false;
+            const isOpen = openGroups.has(sid);
+            let h = `<div class="group-header" onclick="toggleGr(this, '${sid}')"><span>👤 ${students[sid].name}</span><span>${isOpen?'▲':'▼'}</span></div>`;
+            let c = `<div class="group-content ${isOpen?'open':''}">`, has = false;
             for(let sub in data[sid]) {
                 if(sub.includes('_') || sub === "undefined" || sub === "lastChange") continue;
                 for(let cat in data[sid][sub]) {
@@ -243,7 +230,12 @@
         });
     }
 
-    function toggleGr(h) { const c = h.nextElementSibling; c.classList.toggle('open'); h.querySelector('span:last-child').innerText = c.classList.contains('open') ? '▲' : '▼'; }
+    function toggleGr(h, id) {
+        const c = h.nextElementSibling;
+        const isOp = c.classList.toggle('open');
+        if(isOp) openGroups.add(id); else openGroups.delete(id);
+        h.querySelector('span:last-child').innerText = isOp ? '▲' : '▼';
+    }
 
     function delWork(sub, cat, task, date) {
         if(confirm(`Видалити "${task}" для ВСІХ?`)) {
