@@ -7,40 +7,49 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed; background-size: cover; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; box-sizing: border-box; }
+        * { box-sizing: border-box; } /* Щоб нічого не вилазило за кордони */
+        
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed; background-size: cover; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; }
+        
+        .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 500px; position: relative; }
+        
         .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e9dcf5; }
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
         
         .sub-tab-menu { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; background: #f3ebf9; padding: 5px; border-radius: 12px; }
-        .sub-tab { padding: 8px 15px; cursor: pointer; font-size: 13px; border-radius: 10px; font-weight: bold; color: #61309e; transition: 0.3s; }
+        .sub-tab { padding: 8px 15px; cursor: pointer; font-size: 13px; border-radius: 10px; font-weight: bold; color: #61309e; }
         .sub-tab.active { background: #61309e; color: white; }
 
-        /* Стилі для акордеона */
-        .group-container { margin-top: 10px; }
-        .group-header { 
-            background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; 
-            margin-bottom: 8px; text-align: left; cursor: pointer; 
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .group-header h4 { color: #61309e; margin: 0; font-size: 15px; pointer-events: none; }
+        .group-header { background: #fff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-bottom: 8px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #61309e; font-weight: bold; }
         .group-content { display: none; padding: 5px 10px 10px 10px; }
-        .group-container.active .group-content { display: block; }
-        .group-container.active .arrow { transform: rotate(180deg); }
-        .arrow { transition: 0.3s; color: #61309e; font-weight: bold; }
+        .group-content.open { display: block; }
+        
+        .journal-card { background: #fdfaff; border: 1px solid #eee; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 13px; text-align: left; }
+        .debtor-tag { display: inline-block; background: #e9dcf5; color: #61309e; padding: 2px 7px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        
+        /* Кольоровий розподіл категорій */
+        .cat-tag { font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 2px 5px; border-radius: 4px; color: white; display: inline-block; margin-bottom: 3px; }
+        .c-diag { background: #e74c3c; } /* Червоний */
+        .c-creat { background: #27ae60; } /* Зелений */
+        .c-poem { background: #2980b9; } /* Синій */
+        .c-other { background: #8e44ad; } /* Фіолетовий */
 
-        .journal-card { background: white; border: 1px solid #eee; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 2px 7px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .debt-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; background: white; padding: 8px; border-radius: 10px; border: 1px solid #f3ebf9; }
+        .date-bubble { background: #61309e; color: white; padding: 3px 7px; border-radius: 6px; font-size: 10px; font-weight: bold; min-width: 40px; text-align: center; }
+
+        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 10px; }
+        .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #4b1681; cursor: pointer; }
         
-        .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; max-height: 220px; overflow-y: auto; margin-bottom: 10px; }
-        .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #4b1681; border: 1px solid #f0e6f7; padding: 5px; border-radius: 8px; cursor: pointer; }
+        .plan-badge { background: #61309e; color: white; padding: 2px 8px; border-radius: 8px; font-size: 11px; margin-bottom: 10px; display: inline-block; }
         
-        .plan-badge { background: #61309e; color: white; padding: 2px 8px; border-radius: 8px; font-size: 11px; margin-top: 5px; display: inline-block; }
-        select, input { width: 100%; padding: 10px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; font-size: 14px; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; font-size: 14px; outline: none; }
         button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        
         .hidden { display: none !important; }
-        .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 350px; z-index: 100; pointer-events: none; }
+        .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 350px; z-index: 100; pointer-events: none; opacity: 0.9; }
+        
+        @media (max-width: 400px) { .teacher-avatar { width: 250px; right: -20px; } }
     </style>
 </head>
 <body>
@@ -48,18 +57,18 @@
 <img src="https://i.ibb.co/6fH9vjx/1.png" class="teacher-avatar" alt="Вчителька">
 
 <div class="card">
-    <h2 style="color: #1a012b; text-align: center; margin-top: 0;">Шкільний монітор</h2>
+    <h2 style="color: #1a012b; text-align: center; margin: 0 0 15px 0;">Шкільний монітор</h2>
 
     <div id="adminPanel" class="hidden">
         <div class="tab-menu">
-            <div id="tab1" class="tab active" onclick="showTab(1)">➕ Додати</div>
-            <div id="tab2" class="tab" onclick="showTab(2)">📓 Журнал</div>
+            <div class="tab active" onclick="showTab(1)">➕ Додати</div>
+            <div class="tab" onclick="showTab(2)">📓 Журнал</div>
         </div>
         
         <div id="view1">
             <div class="student-grid" id="chkArea"></div>
-            <select id="subSel" onchange="loadSubjectPlan()"><option value="">-- Оберіть предмет --</option></select>
-            <input type="number" id="planInp" placeholder="План робіт" onchange="saveSubjectPlan()">
+            <select id="subSel" onchange="loadSubjectPlan()"><option value="">-- Предмет --</option></select>
+            <input type="number" id="planInp" placeholder="План робіт">
             <input type="date" id="dateInp">
             <input type="text" id="taskInp" placeholder="Назва роботи">
             <button onclick="sendDebt()">Розіслати борг</button>
@@ -67,8 +76,8 @@
 
         <div id="view2" class="hidden">
             <div class="sub-tab-menu">
-                <div id="subTabSub" class="sub-tab active" onclick="setJournalMode('subjects')">📚 За предметами</div>
-                <div id="subTabStud" class="sub-tab" onclick="setJournalMode('students')">👤 За учнями</div>
+                <div id="subTabSub" class="sub-tab active" onclick="setJournalMode('subjects')">📚 Предмети</div>
+                <div id="subTabStud" class="sub-tab" onclick="setJournalMode('students')">👤 Учні</div>
             </div>
             <div id="journalArea"></div>
         </div>
@@ -76,13 +85,13 @@
 
     <div id="loginForm">
         <select id="uSel"><option value="">-- Учень --</option></select>
-        <input type="text" id="pInp" placeholder="Код" onkeypress="if(event.key==='Enter') login()">
+        <input type="text" id="pInp" placeholder="Код">
         <button onclick="login()">Увійти</button>
     </div>
 
     <div id="resultView" class="hidden">
         <button onclick="location.reload()" style="width:auto; padding:5px 15px; margin-bottom:10px;">⬅ Назад</button>
-        <h3 id="sNameTitle" style="text-align:center; color:#61309e;"></h3>
+        <h3 id="sNameTitle" style="text-align:center; color:#61309e; margin: 10px 0;"></h3>
         <div id="debtListArea"></div>
     </div>
 </div>
@@ -123,16 +132,28 @@
     let journalMode = 'subjects';
     document.getElementById('dateInp').valueAsDate = new Date();
     
-    // Рендер вибору учнів
-    Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name)).forEach(id => {
+    // Сортування та рендер учнів
+    const sortedIds = Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name));
+    sortedIds.forEach(id => {
         document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
         document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
     for(let s in structure) structure[s].forEach(c => document.getElementById('subSel').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`);
 
+    // Делегування для акордеона
+    document.getElementById('journalArea').addEventListener('click', function(e) {
+        const h = e.target.closest('.group-header');
+        if(h) {
+            const content = h.nextElementSibling;
+            const isOp = content.classList.toggle('open');
+            h.querySelector('span:last-child').innerText = isOp ? '▲' : '▼';
+        }
+    });
+
     function showTab(n) {
         document.getElementById('view1').classList.toggle('hidden', n !== 1);
         document.getElementById('view2').classList.toggle('hidden', n !== 2);
+        document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i+1 === n));
         if(n===2) loadJournal();
     }
 
@@ -143,73 +164,65 @@
         loadJournal();
     }
 
-    function toggleGroup(el) {
-        el.parentElement.classList.toggle('active');
-    }
-
     function loadJournal() {
         const area = document.getElementById('journalArea');
-        area.innerHTML = "<p style='text-align:center; color:#61309e;'>Завантаження...</p>";
+        area.innerHTML = "<p style='text-align:center;'>Синхронізація...</p>";
         db.ref('students').once('value', snap => {
             const data = snap.val() || {};
             area.innerHTML = "";
-            if (journalMode === 'subjects') renderBySubjects(data, area);
-            else renderByStudents(data, area);
+            if (journalMode === 'subjects') renderSubjects(data, area);
+            else renderStudents(data, area);
         });
     }
 
-    function renderBySubjects(data, area) {
-        let subjects = {};
+    function renderSubjects(data, area) {
+        let subs = {};
         for(let sid in data) {
             for(let sub in data[sid]) {
-                if(sub === "undefined" || sub === "lastChange" || sub.includes('_')) continue;
-                if(!subjects[sub]) subjects[sub] = {};
+                if(sub === "lastChange" || sub === "undefined" || sub.includes('_')) continue;
+                if(!subs[sub]) subs[sub] = {};
                 for(let cat in data[sid][sub]) {
-                    if(cat === "undefined") continue;
                     for(let tid in data[sid][sub][cat]) {
                         const t = data[sid][sub][cat][tid];
                         if(!t || !t.val) continue;
                         const key = `${cat}|${t.val}|${t.date}`;
-                        if(!subjects[sub][key]) subjects[sub][key] = {cat, task: t.val, date: t.date, sKey: t.sortDate, list: []};
-                        subjects[sub][key].list.push({sid, tid});
+                        if(!subs[sub][key]) subs[sub][key] = {cat, task: t.val, date: t.date, sKey: t.sortDate, list: []};
+                        subs[sub][key].list.push({sid, tid});
                     }
                 }
             }
         }
-        for(let subName in subjects) {
-            let container = document.createElement('div');
-            container.className = 'group-container';
-            container.innerHTML = `<div class="group-header" onclick="toggleGroup(this)"><h4>📚 ${subName}</h4><span class="arrow">▼</span></div><div class="group-content"></div>`;
-            const content = container.querySelector('.group-content');
-            Object.values(subjects[subName]).sort((a,b)=>b.sKey.localeCompare(a.sKey)).forEach(item => {
-                content.innerHTML += `<div class="journal-card"><b>${item.date}</b> — ${item.task}<br>${item.list.map(l=>`<span class="debtor-tag" onclick="animatedDelete(this,'${l.sid}','${subName}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
+        for(let n in subs) {
+            let h = `<div class="group-header"><span>📚 ${n}</span><span>▼</span></div>`;
+            let c = `<div class="group-content">`;
+            Object.values(subs[n]).sort((a,b)=>b.sKey.localeCompare(a.sKey)).forEach(item => {
+                c += `<div class="journal-card"><b>${item.date}</b> — ${item.task}<br>${item.list.map(l=>`<span class="debtor-tag" onclick="del('${l.sid}','${n}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
             });
-            area.appendChild(container);
+            area.innerHTML += h + c + `</div>`;
         }
     }
 
-    function renderByStudents(data, area) {
-        Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name)).forEach(sid => {
+    function renderStudents(data, area) {
+        sortedIds.forEach(sid => {
             if(!data[sid]) return;
-            let container = document.createElement('div');
-            container.className = 'group-container';
-            container.innerHTML = `<div class="group-header" onclick="toggleGroup(this)"><h4>👤 ${students[sid].name}</h4><span class="arrow">▼</span></div><div class="group-content"></div>`;
-            const content = container.querySelector('.group-content');
-            let hasRealDebts = false;
+            let h = `<div class="group-header"><span>👤 ${students[sid].name}</span><span>▼</span></div>`;
+            let c = `<div class="group-content">`, has = false;
             for(let sub in data[sid]) {
-                if(sub === "undefined" || sub === "lastChange" || sub.includes('_')) continue;
+                if(sub === "lastChange" || sub === "undefined" || sub.includes('_')) continue;
                 for(let cat in data[sid][sub]) {
                     for(let tid in data[sid][sub][cat]) {
                         const t = data[sid][sub][cat][tid];
                         if(!t || !t.val) continue;
-                        hasRealDebts = true;
-                        content.innerHTML += `<div class="journal-card" onclick="animatedDelete(this,'${sid}','${sub}','${cat}','${tid}')"><b>${sub}</b>: ${t.val} (${t.date})</div>`;
+                        has = true;
+                        c += `<div class="journal-card" onclick="del('${sid}','${sub}','${cat}','${tid}')"><b>${sub}</b>: ${t.val} (${t.date})</div>`;
                     }
                 }
             }
-            if(hasRealDebts) area.appendChild(container);
+            if(has) area.innerHTML += h + c + `</div>`;
         });
     }
+
+    function del(sid, sub, cat, tid) { if(confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(loadJournal); }
 
     function loadData(id) {
         document.getElementById('sNameTitle').innerText = students[id].name;
@@ -221,7 +234,8 @@
                     let debts = [];
                     structure[sub].forEach(cat => { if(data[sub] && data[sub][cat]) for(let k in data[sub][cat]) { let d = data[sub][cat][k]; if(d && d.val) debts.push({...d, cat}); } });
                     const plan = plans[sub] || 0, done = Math.max(0, plan - debts.length);
-                    let div = `<div class="subject-group"><h4>${sub}</h4><span class="plan-badge">Виконано: ${done} з ${plan}</span>`;
+                    let div = `<div class="subject-group" style="background:#fdfaff; border:1px solid #e9dcf5; padding:12px; border-radius:15px; margin-top:15px; text-align:left;">
+                        <h4 style="color:#61309e; margin:0 0 5px 0;">${sub}</h4><span class="plan-badge">Виконано: ${done} з ${plan}</span>`;
                     debts.sort((a,b)=>(b.sortDate||"").localeCompare(a.sortDate||"")).forEach(d => {
                         const cls = d.cat.includes('Діагностична')?'c-diag':d.cat.includes('Творча')?'c-creat':d.cat.includes('Вірш')?'c-poem':'c-other';
                         div += `<div class="debt-row"><div class="date-bubble">${d.date}</div><div><span class="cat-tag ${cls}">${d.cat}</span><br><b>${d.val}</b></div></div>`;
@@ -232,11 +246,18 @@
         });
     }
 
+    function login() {
+        const id = document.getElementById('uSel').value, code = document.getElementById('pInp').value;
+        if(code === "21.08") {
+            if(id) { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id); }
+            else { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('adminPanel').classList.remove('hidden'); }
+        } else if(id && students[id].code === code) {
+            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id);
+        } else alert("Помилка!");
+    }
+
     function saveSubjectPlan() { const sub = document.getElementById('subSel').value.split('|')[0]; const count = document.getElementById('planInp').value; if(sub) db.ref(`plans/${sub}`).set(count); }
     function loadSubjectPlan() { const sub = document.getElementById('subSel').value.split('|')[0]; if(sub) db.ref(`plans/${sub}`).once('value', s => { document.getElementById('planInp').value = s.val() || 0; }); }
-    function animatedDelete(el, sid, sub, cat, tid) { if(confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(()=>loadJournal()); }
-    function login() { const id=document.getElementById('uSel').value, code=document.getElementById('pInp').value.trim(); if(code==="21.08"){if(id){document.getElementById('loginForm').classList.add('hidden');document.getElementById('resultView').classList.remove('hidden');loadData(id);}else{document.getElementById('loginForm').classList.add('hidden');document.getElementById('adminPanel').classList.remove('hidden');}} else if(id && students[id].code===code){document.getElementById('loginForm').classList.add('hidden');document.getElementById('resultView').classList.remove('hidden');loadData(id);}else alert("Помилка!"); }
-    function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); }
 </script>
 </body>
 </html>
