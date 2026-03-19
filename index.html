@@ -13,25 +13,26 @@
         .tab { padding: 10px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
         
-        /* Стилі для під-вкладок у журналі */
-        .sub-tab-menu { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; background: #f3ebf9; padding: 5px; border-radius: 10px; }
-        .sub-tab { padding: 6px 12px; cursor: pointer; font-size: 12px; border-radius: 8px; font-weight: bold; color: #61309e; transition: 0.3s; }
+        /* Під-вкладки для журналу */
+        .sub-tab-menu { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; background: #f3ebf9; padding: 5px; border-radius: 12px; }
+        .sub-tab { padding: 8px 15px; cursor: pointer; font-size: 13px; border-radius: 10px; font-weight: bold; color: #61309e; transition: 0.3s; }
         .sub-tab.active { background: #61309e; color: white; }
 
         .student-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: white; border: 1px solid #ddd; border-radius: 12px; padding: 10px; max-height: 220px; overflow-y: auto; margin-bottom: 10px; }
         .student-grid label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #4b1681; border: 1px solid #f0e6f7; padding: 5px; border-radius: 8px; cursor: pointer; }
         
-        .subject-group { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 10px; text-align: left; }
-        .subject-group h4 { color: #61309e; margin: 0; font-size: 15px; cursor: pointer; display: flex; justify-content: space-between; }
+        .group-header { background: #fdfaff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-top: 10px; text-align: left; cursor: pointer; position: relative; }
+        .group-header h4 { color: #61309e; margin: 0; font-size: 15px; display: flex; justify-content: space-between; }
+        .group-content { display: none; padding-top: 10px; }
+        .group-header.open .group-content { display: block; }
         
-        .journal-card { background: white; border: 1px solid #eee; padding: 10px; border-radius: 10px; margin-top: 8px; font-size: 13px; }
+        .journal-card { background: white; border: 1px solid #eee; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 13px; }
         .debtor-tag { display: inline-block; background: #f3ebf9; color: #61309e; padding: 2px 7px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
         
         .plan-badge { background: #61309e; color: white; padding: 2px 8px; border-radius: 8px; font-size: 11px; margin-top: 5px; display: inline-block; }
-
         h1 { color: #1a012b; text-align: center; font-size: 20px; margin: 0 0 10px 0; }
-        select, input { width: 100%; padding: 8px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; font-size: 14px; }
-        button { width: 100%; padding: 10px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        select, input { width: 100%; padding: 10px; border: 2px solid #e9dcf5; border-radius: 10px; margin-bottom: 10px; font-size: 14px; }
+        button { width: 100%; padding: 12px; background: #61309e; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
         .teacher-avatar { position: fixed; bottom: -20px; right: -40px; width: 350px; z-index: 100; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15)); pointer-events: none; }
     </style>
@@ -113,9 +114,8 @@
         "Дизайн і технології": ["Творча робота"]
     };
 
-    let journalMode = 'subjects'; // 'subjects' або 'students'
+    let journalMode = 'subjects';
 
-    // Ініціалізація інтерфейсу
     document.getElementById('dateInp').valueAsDate = new Date();
     Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name)).forEach(id => {
         document.getElementById('chkArea').innerHTML += `<label><input type="checkbox" value="${id}"> ${students[id].name.split(' ')[0]}</label>`;
@@ -142,12 +142,8 @@
         db.ref('students').once('value', snap => {
             const data = snap.val() || {};
             area.innerHTML = "";
-            
-            if (journalMode === 'subjects') {
-                renderBySubjects(data, area);
-            } else {
-                renderByStudents(data, area);
-            }
+            if (journalMode === 'subjects') renderBySubjects(data, area);
+            else renderByStudents(data, area);
         });
     }
 
@@ -155,11 +151,12 @@
         let subjects = {};
         for(let sid in data) {
             for(let sub in data[sid]) {
-                if(sub === "undefined" || sub.includes('_')) continue;
+                if(sub === "undefined" || sub === "lastChange" || sub.includes('_')) continue;
                 if(!subjects[sub]) subjects[sub] = {};
                 for(let cat in data[sid][sub]) {
                     for(let tid in data[sid][sub][cat]) {
                         const t = data[sid][sub][cat][tid];
+                        if(!t.val || !t.date) continue;
                         const key = `${cat}|${t.val}|${t.date}`;
                         if(!subjects[sub][key]) subjects[sub][key] = {cat, task: t.val, date: t.date, sKey: t.sortDate, list: []};
                         subjects[sub][key].list.push({sid, tid});
@@ -168,30 +165,39 @@
             }
         }
         for(let subName in subjects) {
-            let div = `<div class="subject-group"><h4>📚 ${subName} <span>▼</span></h4>`;
+            let div = document.createElement('div');
+            div.className = 'group-header';
+            div.innerHTML = `<h4>📚 ${subName} <span>▼</span></h4><div class="group-content"></div>`;
+            const content = div.querySelector('.group-content');
             Object.values(subjects[subName]).sort((a,b)=>b.sKey.localeCompare(a.sKey)).forEach(item => {
-                div += `<div class="journal-card"><b>${item.date}</b> — ${item.task}<br>${item.list.map(l=>`<span class="debtor-tag" onclick="animatedDelete(this,'${l.sid}','${subName}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
+                content.innerHTML += `<div class="journal-card"><b>${item.date}</b> — ${item.task}<br>${item.list.map(l=>`<span class="debtor-tag" onclick="animatedDelete(this,'${l.sid}','${subName}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
             });
-            area.innerHTML += div + `</div>`;
+            div.onclick = (e) => { if(e.target.tagName !== 'SPAN') div.classList.toggle('open'); };
+            area.appendChild(div);
         }
     }
 
     function renderByStudents(data, area) {
         Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name)).forEach(sid => {
             if(!data[sid]) return;
-            let div = `<div class="subject-group"><h4>👤 ${students[sid].name} <span>▼</span></h4>`;
-            let hasDebts = false;
+            let div = document.createElement('div');
+            div.className = 'group-header';
+            div.innerHTML = `<h4>👤 ${students[sid].name} <span>▼</span></h4><div class="group-content"></div>`;
+            const content = div.querySelector('.group-content');
+            let hasRealDebts = false;
             for(let sub in data[sid]) {
-                if(sub === "undefined" || sub.includes('_')) continue;
+                if(sub === "undefined" || sub === "lastChange" || sub.includes('_')) continue;
                 for(let cat in data[sid][sub]) {
                     for(let tid in data[sid][sub][cat]) {
                         const t = data[sid][sub][cat][tid];
-                        hasDebts = true;
-                        div += `<div class="journal-card" onclick="animatedDelete(this,'${sid}','${sub}','${cat}','${tid}')"><b>${sub}</b>: ${t.val} (${t.date})</div>`;
+                        if(!t.val || !t.date) continue;
+                        hasRealDebts = true;
+                        content.innerHTML += `<div class="journal-card" onclick="animatedDelete(this,'${sid}','${sub}','${cat}','${tid}')"><b>${sub}</b>: ${t.val} (${t.date})</div>`;
                     }
                 }
             }
-            if(hasDebts) area.innerHTML += div + `</div>`;
+            div.onclick = (e) => { if(e.target.tagName !== 'SPAN') div.classList.toggle('open'); };
+            if(hasRealDebts) area.appendChild(div);
         });
     }
 
@@ -203,7 +209,10 @@
                 const data = snap.val() || {}, area = document.getElementById('debtListArea'); area.innerHTML = "";
                 for(let sub in structure) {
                     let debts = [];
-                    structure[sub].forEach(cat => { if(data[sub] && data[sub][cat]) for(let k in data[sub][cat]) debts.push({...data[sub][cat][k], cat}); });
+                    structure[sub].forEach(cat => { if(data[sub] && data[sub][cat]) for(let k in data[sub][cat]) { 
+                        let d = data[sub][cat][k];
+                        if(d && typeof d === 'object') debts.push({...d, cat}); 
+                    }});
                     const plan = plans[sub] || 0, done = Math.max(0, plan - debts.length);
                     let div = `<div class="subject-group"><h4>${sub}</h4><span class="plan-badge">Виконано: ${done} з ${plan}</span>`;
                     debts.sort((a,b)=>(b.sortDate||"").localeCompare(a.sortDate||"")).forEach(d => {
@@ -218,8 +227,8 @@
 
     function saveSubjectPlan() { const sub = document.getElementById('subSel').value.split('|')[0]; const count = document.getElementById('planInp').value; if(sub) db.ref(`plans/${sub}`).set(count); }
     function loadSubjectPlan() { const sub = document.getElementById('subSel').value.split('|')[0]; if(sub) db.ref(`plans/${sub}`).once('value', s => { document.getElementById('planInp').value = s.val() || 0; }); }
-    function animatedDelete(el, sid, sub, cat, tid) { if(confirm("Видалити?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(()=>loadJournal()); }
-    function login() { /* стандартна функція логіну */ const id=document.getElementById('uSel').value, code=document.getElementById('pInp').value.trim(); if(code==="21.08"){if(id){document.getElementById('loginForm').classList.add('hidden');document.getElementById('resultView').classList.remove('hidden');loadData(id);}else{document.getElementById('loginForm').classList.add('hidden');document.getElementById('adminPanel').classList.remove('hidden');}} else if(id && students[id].code===code){document.getElementById('loginForm').classList.add('hidden');document.getElementById('resultView').classList.remove('hidden');loadData(id);}else alert("Помилка!"); }
+    function animatedDelete(el, sid, sub, cat, tid) { if(confirm("Видалити борг?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(()=>loadJournal()); }
+    function login() { const id=document.getElementById('uSel').value, code=document.getElementById('pInp').value.trim(); if(code==="21.08"){if(id){document.getElementById('loginForm').classList.add('hidden');document.getElementById('resultView').classList.remove('hidden');loadData(id);}else{document.getElementById('loginForm').classList.add('hidden');document.getElementById('adminPanel').classList.remove('hidden');}} else if(id && students[id].code===code){document.getElementById('loginForm').classList.add('hidden');document.getElementById('resultView').classList.remove('hidden');loadData(id);}else alert("Помилка!"); }
     function selectAll(v) { document.querySelectorAll('#chkArea input').forEach(c => c.checked = v); }
 </script>
 </body>
