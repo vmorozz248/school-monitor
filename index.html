@@ -10,7 +10,9 @@
         * { box-sizing: border-box; }
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            background: #f4f0f9; /* Чистий лавандовий фон без картинки */
+            /* ПОВЕРНУВ ФОН З КАНЦЕЛЯРІЄЮ */
+            background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed; 
+            background-size: cover;
             display: flex; 
             justify-content: center; 
             align-items: center; 
@@ -18,7 +20,9 @@
             margin: 0; 
             padding: 10px; 
         }
-        .card { background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; position: relative; }
+        /* ВЧИТЕЛЬКУ ПРИБРАНО ПОВНІСТЮ */
+
+        .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 450px; position: relative; }
         .tab-menu { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #e9dcf5; justify-content: space-around; }
         .tab { padding: 10px 5px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; flex: 1; text-align: center; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
