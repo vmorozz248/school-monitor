@@ -126,19 +126,36 @@
     let openGroups = new Set();
     document.getElementById('dateInp').valueAsDate = new Date();
 
-    // Ініціалізація списків
+    // Рендер вибору учнів
     const sortedIds = Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name));
+    const chkArea = document.getElementById('chkArea');
+    const uSel = document.getElementById('uSel');
+    
     sortedIds.forEach(id => {
-        document.getElementById('chkArea').innerHTML += `<div class="student-row" onclick="const i=this.querySelector('input');i.checked=!i.checked"><input type="checkbox" value="${id}" onclick="event.stopPropagation()"><span>${students[id].name}</span></div>`;
-        document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
+        const row = document.createElement('div');
+        row.className = 'student-row';
+        row.innerHTML = `<input type="checkbox" value="${id}"><span>${students[id].name}</span>`;
+        row.onclick = function(e) {
+            if(e.target.tagName !== 'INPUT') {
+                const cb = this.querySelector('input');
+                cb.checked = !cb.checked;
+            }
+        };
+        chkArea.appendChild(row);
+        uSel.innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
 
+    // Рендер предметів та планів
+    const subSel = document.getElementById('subSel');
+    const planList = document.getElementById('planList');
     for(let s in structure) {
-        structure[s].forEach(c => { document.getElementById('subSel').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`; });
-        document.getElementById('planList').innerHTML += `<div style="background:#f4f0f9; padding:5px; font-weight:bold; color:#61309e; margin-top:5px;">${s}</div>`;
+        structure[s].forEach(c => { subSel.innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`; });
+        const pGroup = document.createElement('div');
+        pGroup.innerHTML = `<div style="background:#f4f0f9; padding:5px; font-weight:bold; color:#61309e; margin-top:5px;">${s}</div>`;
         structure[s].forEach(c => {
-            document.getElementById('planList').innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee;"><span>${c}</span><input type="number" id="plan_${s}_${c}" style="width:60px; margin:0; padding:5px;"></div>`;
+            pGroup.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee;"><span>${c}</span><input type="number" id="plan_${s}_${c}" style="width:60px; margin:0; padding:5px;"></div>`;
         });
+        planList.appendChild(pGroup);
     }
 
     function showTab(n) {
@@ -154,7 +171,8 @@
         db.ref('plans_v2').once('value', snap => {
             const data = snap.val() || {};
             for(let s in structure) structure[s].forEach(c => {
-                if(data[s]) document.getElementById(`plan_${s}_${c}`).value = data[s][c] || 0;
+                const inp = document.getElementById(`plan_${s}_${c}`);
+                if(inp && data[s]) inp.value = data[s][c] || 0;
             });
         });
     }
@@ -172,7 +190,7 @@
 
     function loadJournal() {
         const area = document.getElementById('journalArea');
-        area.innerHTML = "Завантаження...";
+        area.innerHTML = "Синхронізація...";
         db.ref('students').once('value', snap => {
             const data = snap.val() || {};
             area.innerHTML = "";
@@ -185,12 +203,16 @@
     function renderSubjects(data, area) {
         let subs = {};
         for(let sid in data) {
-            for(let sub in data[sid]) {
+            const studentData = data[sid];
+            for(let sub in studentData) {
                 if(!structure[sub]) continue;
                 if(!subs[sub]) subs[sub] = {};
-                for(let cat in data[sid][sub]) {
-                    for(let tid in data[sid][sub][cat]) {
-                        const t = data[sid][sub][cat][tid];
+                const categories = studentData[sub];
+                for(let cat in categories) {
+                    const tasks = categories[cat];
+                    for(let tid in tasks) {
+                        const t = tasks[tid];
+                        if(!t || !t.val) continue;
                         const key = `${cat}|${t.val}|${t.date}`;
                         if(!subs[sub][key]) subs[sub][key] = {cat, task: t.val, date: t.date, list: []};
                         subs[sub][key].list.push({sid, tid});
@@ -200,14 +222,17 @@
         }
         for(let n in subs) {
             const isOpen = openGroups.has(n);
-            let h = `<div class="group-header" onclick="toggleGr(this, '${n}')"><span>📚 ${n}</span><span>${isOpen?'▲':'▼'}</span></div>`;
-            let c = `<div class="group-content ${isOpen?'open':''}">`;
+            const container = document.createElement('div');
+            container.innerHTML = `<div class="group-header" onclick="toggleGr(this, '${n}')"><span>📚 ${n}</span><span>${isOpen?'▲':'▼'}</span></div>`;
+            const content = document.createElement('div');
+            content.className = `group-content ${isOpen?'open':''}`;
             Object.values(subs[n]).forEach(item => {
                 const cls = item.cat.includes('Діагностична')?'c-diag':item.cat.includes('Творча')?'c-creat':item.cat.includes('Вірш')?'c-poem':'c-other';
-                c += `<div class="journal-card"><b>${item.date}</b> — <b>${item.task}</b> <span class="cat-tag ${cls}">${item.cat}</span><br>
+                content.innerHTML += `<div class="journal-card"><b>${item.date}</b> — <b>${item.task}</b> <span class="cat-tag ${cls}">${item.cat}</span><br>
                 ${item.list.map(l=>`<span class="debtor-tag" onclick="del('${l.sid}','${n}','${item.cat}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
             });
-            area.innerHTML += h + c + `</div>`;
+            container.appendChild(content);
+            area.appendChild(container);
         }
     }
 
@@ -215,18 +240,24 @@
         sortedIds.forEach(sid => {
             if(!data[sid]) return;
             const isOpen = openGroups.has(sid);
-            let h = `<div class="group-header" onclick="toggleGr(this, '${sid}')"><span>👤 ${students[sid].name} <span onclick="copyReport('${sid}', event)">📢</span></span><span>${isOpen?'▲':'▼'}</span></div>`;
-            let c = `<div class="group-content ${isOpen?'open':''}">`;
-            for(let sub in data[sid]) {
+            const container = document.createElement('div');
+            container.innerHTML = `<div class="group-header" onclick="toggleGr(this, '${sid}')"><span>👤 ${students[sid].name} <span onclick="copyReport('${sid}', event)">📢</span></span><span>${isOpen?'▲':'▼'}</span></div>`;
+            const content = document.createElement('div');
+            content.className = `group-content ${isOpen?'open':''}`;
+            const studentData = data[sid];
+            for(let sub in studentData) {
                 if(!structure[sub]) continue;
-                for(let cat in data[sid][sub]) {
-                    for(let tid in data[sid][sub][cat]) {
-                        const t = data[sid][sub][cat][tid];
-                        c += `<div class="journal-card" onclick="del('${sid}','${sub}','${cat}','${tid}')"><b>${sub}</b>: ${t.val} (${t.date})</div>`;
+                const categories = studentData[sub];
+                for(let cat in categories) {
+                    const tasks = categories[cat];
+                    for(let tid in tasks) {
+                        const t = tasks[tid];
+                        content.innerHTML += `<div class="journal-card" onclick="del('${sid}','${sub}','${cat}','${tid}')"><b>${sub}</b>: ${t.val} (${t.date})</div>`;
                     }
                 }
             }
-            area.innerHTML += h + c + `</div>`;
+            container.appendChild(content);
+            area.appendChild(container);
         });
     }
 
@@ -251,9 +282,16 @@
         navigator.clipboard.writeText(text).then(() => alert("Скопійовано!"));
     }
 
-    function toggleGr(h, id) { const c = h.nextElementSibling; const isOp = c.classList.toggle('open'); if(isOp) openGroups.add(id); else openGroups.delete(id); h.querySelector('span:last-child').innerText = isOp ? '▲' : '▼'; }
+    function toggleGr(h, id) { 
+        const c = h.nextElementSibling; 
+        const isOp = c.classList.toggle('open'); 
+        if(isOp) openGroups.add(id); else openGroups.delete(id); 
+        h.querySelector('span:last-child').innerText = isOp ? '▲' : '▼'; 
+    }
+    
     function del(sid, sub, cat, tid) { if(confirm("Видалити?")) db.ref(`students/${sid}/${sub}/${cat}/${tid}`).remove().then(loadJournal); }
     function setJournalMode(m) { journalMode = m; loadJournal(); }
+    
     function sendDebt() {
         const sel = Array.from(document.querySelectorAll('#chkArea input:checked')).map(c => c.value);
         const subInfo = document.getElementById('subSel').value.split('|');
@@ -262,7 +300,8 @@
         if (!task || sel.length === 0 || !subInfo[0]) return alert("Заповніть усе!");
         const d = new Date(dateRaw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
         sel.forEach(sid => { db.ref(`students/${sid}/${subInfo[0]}/${subInfo[1]}`).push({ date: fDate, val: task }); });
-        alert("Розіслано!"); document.getElementById('taskInp').value = ""; document.querySelectorAll('#chkArea input').forEach(c => c.checked = false);
+        alert("Розіслано!"); document.getElementById('taskInp').value = ""; 
+        document.querySelectorAll('#chkArea input').forEach(c => c.checked = false);
     }
 
     function login() {
@@ -276,27 +315,33 @@
     }
 
     function loadData(id) {
-        document.getElementById('sNameTitle').innerText = students[id].name;
+        const title = document.getElementById('sNameTitle');
+        title.innerText = students[id].name;
         db.ref('plans_v2').once('value', pSnap => {
             const plans = pSnap.val() || {};
             db.ref('students/'+id).on('value', snap => {
                 const data = snap.val() || {}, area = document.getElementById('debtListArea'); area.innerHTML = "";
                 for(let sub in structure) {
-                    let div = `<div style="background:#fdfaff; border:1px solid #e9dcf5; padding:12px; border-radius:15px; margin-top:15px; text-align:left;"><h4 style="color:#61309e; margin:0 0 10px 0;">${sub}</h4>`;
+                    const subBlock = document.createElement('div');
+                    subBlock.style.cssText = "background:#fdfaff; border:1px solid #e9dcf5; padding:12px; border-radius:15px; margin-top:15px; text-align:left;";
+                    subBlock.innerHTML = `<h4 style="color:#61309e; margin:0 0 10px 0;">${sub}</h4>`;
                     let hasWork = false;
                     structure[sub].forEach(cat => {
                         const planVal = (plans[sub] && plans[sub][cat]) ? parseInt(plans[sub][cat]) : 0;
                         if(planVal > 0) {
                             hasWork = true;
-                            let debts = []; if(data[sub] && data[sub][cat]) for(let k in data[sub][cat]) debts.push(data[sub][cat][k]);
+                            let debts = []; if(data[sub] && data[sub][cat]) {
+                                const tasks = data[sub][cat];
+                                for(let k in tasks) debts.push(tasks[k]);
+                            }
                             const done = Math.max(0, planVal - debts.length);
                             const cls = cat.includes('Діагностична')?'c-diag':cat.includes('Творча')?'c-creat':cat.includes('Вірш')?'c-poem':'c-other';
-                            div += `<div style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span class="cat-tag ${cls}" style="margin:0;">${cat}</span><span style="font-size:11px; font-weight:bold; color:#61309e;">Виконано: ${done} з ${planVal}</span></div>`;
-                            debts.forEach(d => { div += `<div style="display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:10px; border:1px solid #f3ebf9; margin-bottom:4px; font-size:13px;"><span style="background:#61309e; color:white; padding:2px 5px; border-radius:5px; font-size:10px;">${d.date}</span><b>${d.val}</b></div>`; });
-                            div += `</div>`;
+                            subBlock.innerHTML += `<div style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span class="cat-tag ${cls}" style="margin:0;">${cat}</span><span style="font-size:11px; font-weight:bold; color:#61309e;">Виконано: ${done} з ${planVal}</span></div>`;
+                            debts.forEach(d => { subBlock.innerHTML += `<div style="display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:10px; border:1px solid #f3ebf9; margin-bottom:4px; font-size:13px;"><span style="background:#61309e; color:white; padding:2px 5px; border-radius:5px; font-size:10px;">${d.date}</span><b>${d.val}</b></div>`; });
+                            subBlock.innerHTML += `</div>`;
                         }
                     });
-                    if(hasWork) area.innerHTML += div + `</div>`;
+                    if(hasWork) area.appendChild(subBlock);
                 }
             });
         });
