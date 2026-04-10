@@ -10,24 +10,40 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed; background-size: cover; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; }
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 450px; position: relative; }
+        
         .tab-menu { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #e9dcf5; justify-content: space-around; }
         .tab { padding: 10px 5px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; flex: 1; text-align: center; }
         .tab.active { color: #61309e; border-bottom: 3px solid #61309e; }
+        
         .sub-tab-menu { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; background: #f3ebf9; padding: 5px; border-radius: 12px; }
         .sub-tab { padding: 8px 15px; cursor: pointer; font-size: 13px; border-radius: 10px; font-weight: bold; color: #61309e; }
         .sub-tab.active { background: #61309e; color: white; }
-        .student-list-container { background: white; border: 1px solid #e9dcf5; border-radius: 15px; padding: 5px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
-        .student-row { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f9f4fd; cursor: pointer; }
-        .student-row input { width: 20px; height: 20px; margin-right: 15px; accent-color: #61309e; }
-        .group-header { background: #fff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #61309e; font-weight: bold; }
-        .journal-card { background: #fdfaff; border: 1px solid #eee; padding: 12px; border-radius: 15px; margin-bottom: 10px; font-size: 14px; text-align: left; }
-        .cat-tag { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; color: white; display: inline-block; margin-bottom: 5px; }
-        .c-diag { background: #e74c3c; } .c-creat { background: #27ae60; } .c-poem { background: #2980b9; } .c-other { background: #8e44ad; }
-        .debtor-tag { display: inline-block; background: #e9dcf5; color: #61309e; padding: 3px 8px; border-radius: 8px; margin: 2px; font-size: 11px; font-weight: bold; cursor: pointer; }
-        select, input[type="text"], input[type="number"], input[type="date"] { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 15px; margin-bottom: 12px; outline: none; }
-        button { width: 100%; padding: 14px; background: #61309e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
+
+        .group-header { background: #fff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #61309e; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* Стиль карток у вкладці Учні */
+        .student-debt-card { background: white; border: 1px solid #f0e6f7; border-left: 5px solid #61309e; padding: 10px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; cursor: pointer; }
+        .student-debt-card:hover { transform: translateX(5px); background: #fff5ff; border-color: #e74c3c; }
+        .debt-info b { color: #4b1681; font-size: 14px; display: block; }
+        .debt-info span { font-size: 12px; color: #777; }
+        
+        .date-badge { background: #f0e6f7; color: #61309e; padding: 2px 6px; border-radius: 6px; font-size: 10px; font-weight: bold; margin-right: 5px; }
+        .cat-tag { font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 2px 5px; border-radius: 4px; color: white; }
+        .del-icon { color: #ccc; font-size: 18px; font-weight: normal; }
+        .student-debt-card:hover .del-icon { color: #e74c3c; }
+
+        /* Кольори категорій */
+        .c-diag { border-left-color: #e74c3c; } .tag-diag { background: #e74c3c; }
+        .c-creat { border-left-color: #27ae60; } .tag-creat { background: #27ae60; }
+        .c-poem { border-left-color: #2980b9; } .tag-poem { background: #2980b9; }
+        .c-other { border-left-color: #8e44ad; } .tag-other { background: #8e44ad; }
+
         .report-btn { color: #27ae60; cursor: pointer; font-size: 18px; margin-left: 10px; }
         .hidden { display: none !important; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 15px; margin-bottom: 12px; outline: none; }
+        button { width: 100%; padding: 14px; background: #61309e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .student-list-container { background: white; border: 1px solid #e9dcf5; border-radius: 15px; padding: 5px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
+        .student-row { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f9f4fd; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -56,7 +72,7 @@
             <div id="journalArea"></div>
         </div>
         <div id="view3" class="hidden">
-            <div id="planList" style="max-height: 300px; overflow-y: auto;"></div>
+            <div id="planList" style="max-height: 350px; overflow-y: auto;"></div>
             <button onclick="savePlans()" style="margin-top:10px;">Зберегти плани</button>
         </div>
     </div>
@@ -123,17 +139,6 @@
         document.getElementById('planList').innerHTML += pDiv + `</div>`;
     }
 
-    function login() {
-        const id = document.getElementById('uSel').value, code = document.getElementById('pInp').value;
-        if(code === "21.08") {
-            document.getElementById('loginForm').classList.add('hidden');
-            if(id) { document.getElementById('resultView').classList.remove('hidden'); loadData(id); }
-            else { document.getElementById('adminPanel').classList.remove('hidden'); }
-        } else if(id && students[id].code === code) {
-            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id);
-        } else alert("Помилка доступу!");
-    }
-
     function showTab(n) {
         document.getElementById('view1').classList.toggle('hidden', n !== 1);
         document.getElementById('view2').classList.toggle('hidden', n !== 2);
@@ -152,7 +157,6 @@
                 for(let sid in data) {
                     for(let s in data[sid]) {
                         for(let c in data[sid][s]) {
-                            // ФІЛЬТР: якщо категорія не з нашої структури — ігноруємо
                             if(!structure[s] || !structure[s].includes(c)) continue;
                             for(let tid in data[sid][s][c]) {
                                 const key = `${s}|${c}|${data[sid][s][c][tid].val}`;
@@ -165,18 +169,27 @@
                 for(let k in subs) {
                     const item = subs[k];
                     const cls = item.c.includes('Діагностична')?'c-diag':item.c.includes('Творча')?'c-creat':'c-poem';
-                    area.innerHTML += `<div class="journal-card"><span class="cat-tag ${cls}">${item.s} - ${item.c}</span><br><b>${item.val}</b><br>
+                    area.innerHTML += `<div class="journal-card"><span class="cat-tag ${cls.replace('c-','tag-')}">${item.s} - ${item.c}</span><br><b>${item.val}</b><br>
                     ${item.list.map(l => `<span class="debtor-tag" onclick="del('${l.sid}','${item.s}','${item.c}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
                 }
             } else {
                 sorted.forEach(sid => {
                     if(data[sid]) {
-                        let h = `<div class="group-header" onclick="this.nextElementSibling.classList.toggle('hidden')"><span>👤 ${students[sid].name} <span class="report-btn" onclick="copyReport('${sid}', event)">📢</span></span></div><div class="hidden">`;
+                        let h = `<div class="group-header" onclick="this.nextElementSibling.classList.toggle('hidden')"><span>👤 ${students[sid].name} <span class="report-btn" onclick="copyReport('${sid}', event)">📢</span></span></div><div class="hidden" style="padding: 0 5px;">`;
                         for(let s in data[sid]) {
                             for(let c in data[sid][s]) {
                                 if(!structure[s] || !structure[s].includes(c)) continue;
                                 for(let tid in data[sid][s][c]) { 
-                                    h += `<div class="journal-card" onclick="del('${sid}','${s}','${c}','${tid}')"><b>${s}</b>: ${data[sid][s][c][tid].val} <small>(видалити)</small></div>`; 
+                                    const t = data[sid][s][c][tid];
+                                    const cls = c.includes('Діагностична')?'c-diag':c.includes('Творча')?'c-creat':'c-poem';
+                                    h += `<div class="student-debt-card ${cls}" onclick="del('${sid}','${s}','${c}','${tid}')">
+                                            <div class="debt-info">
+                                                <b>${s}</b>
+                                                <span class="date-badge">${t.date}</span><span>${c}</span><br>
+                                                <span style="color:#1a012b; font-weight:500;">${t.val}</span>
+                                            </div>
+                                            <div class="del-icon">✕</div>
+                                          </div>`; 
                                 }
                             }
                         }
@@ -187,10 +200,17 @@
         });
     }
 
-    function del(sid, s, c, tid) {
-        if(confirm(`Видалити цей борг?`)) {
-            db.ref(`students/${sid}/${s}/${c}/${tid}`).remove().then(() => loadJournal());
-        }
+    function del(sid, s, c, tid) { if(confirm(`Видалити цей борг?`)) db.ref(`students/${sid}/${s}/${c}/${tid}`).remove().then(() => loadJournal()); }
+    
+    function login() {
+        const id = document.getElementById('uSel').value, code = document.getElementById('pInp').value;
+        if(code === "21.08") {
+            document.getElementById('loginForm').classList.add('hidden');
+            if(id) { document.getElementById('resultView').classList.remove('hidden'); loadData(id); }
+            else { document.getElementById('adminPanel').classList.remove('hidden'); }
+        } else if(id && students[id].code === code) {
+            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id);
+        } else alert("Помилка доступу!");
     }
 
     function loadData(id) {
@@ -205,10 +225,9 @@
                         const pVal = (plans[s] && plans[s][cat]) ? parseInt(plans[s][cat]) : 0;
                         if(pVal > 0) {
                             has = true; let dArr = []; if(data[s] && data[s][cat]) for(let k in data[s][cat]) dArr.push(data[s][cat][k]);
-                            const cls = cat.includes('Діагностична')?'c-diag':cat.includes('Творча')?'c-creat':'c-poem';
+                            const cls = cat.includes('Діагностична')?'tag-diag':cat.includes('Творча')?'tag-creat':'tag-poem';
                             sHtml += `<span class="cat-tag ${cls}">${cat}</span><br><small>Виконано ${Math.max(0, pVal - dArr.length)} з ${pVal}</small>`;
                             dArr.forEach(d => { sHtml += `<div style="background:white; padding:8px; border-radius:10px; margin-top:5px; font-size:13px; border:1px solid #eee;">${d.date} — <b>${d.val}</b></div>`; });
-                            sHtml += `<hr style="border:0; border-top:1px solid #f3ebf9; margin:10px 0;">`;
                         }
                     });
                     if(has) area.innerHTML += sHtml + `</div>`;
