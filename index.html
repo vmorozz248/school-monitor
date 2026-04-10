@@ -8,13 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
         * { box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed; 
-            background-size: cover;
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; margin: 0; padding: 10px; 
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f0f9 url('https://raw.githubusercontent.com/vmorozz248/school-monitor/main/background.png') no-repeat center center fixed; background-size: cover; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; }
         .card { background: rgba(255, 255, 255, 0.98); padding: 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 450px; position: relative; }
         .tab-menu { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #e9dcf5; justify-content: space-around; }
         .tab { padding: 10px 5px; cursor: pointer; font-weight: bold; color: #8352b2; font-size: 14px; flex: 1; text-align: center; }
@@ -22,18 +16,14 @@
         .sub-tab-menu { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; background: #f3ebf9; padding: 5px; border-radius: 12px; }
         .sub-tab { padding: 8px 15px; cursor: pointer; font-size: 13px; border-radius: 10px; font-weight: bold; color: #61309e; }
         .sub-tab.active { background: #61309e; color: white; }
-        .student-list-container { background: white; border: 1px solid #e9dcf5; border-radius: 15px; padding: 5px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
-        .student-row { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f9f4fd; cursor: pointer; width: 100%; }
-        .student-row input { width: 20px; height: 20px; margin-right: 15px; accent-color: #61309e; }
-        .group-header { background: #fff; border: 1px solid #e9dcf5; padding: 12px; border-radius: 15px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #61309e; font-weight: bold; }
-        .group-content { display: none; padding: 5px 10px; }
-        .group-content.open { display: block; }
-        .journal-card { background: #fdfaff; border: 1px solid #eee; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 14px; text-align: left; }
-        .cat-tag { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; color: white; display: inline-block; margin: 3px 0; }
-        .c-diag { background: #e74c3c; } .c-creat { background: #27ae60; } .c-poem { background: #2980b9; } .c-other { background: #8e44ad; }
         select, input { width: 100%; padding: 12px; border: 2px solid #e9dcf5; border-radius: 12px; font-size: 15px; margin-bottom: 12px; outline: none; background: white; }
         button { width: 100%; padding: 14px; background: #61309e; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .journal-card { background: #fdfaff; border: 1px solid #eee; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 14px; text-align: left; }
+        .cat-tag { font-size: 10px; font-weight: bold; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; color: white; display: inline-block; margin-bottom: 5px; }
+        .c-diag { background: #e74c3c; } .c-creat { background: #27ae60; } .c-poem { background: #2980b9; } .c-other { background: #8e44ad; }
+        .report-btn { color: #27ae60; cursor: pointer; font-size: 18px; margin-left: 10px; }
         .hidden { display: none !important; }
+        .student-row { padding: 5px; border-bottom: 1px solid #f9f4fd; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -48,7 +38,7 @@
             <div class="tab" onclick="showTab(3)">📊 План</div>
         </div>
         <div id="view1">
-            <div class="student-list-container" id="chkArea"></div>
+            <div id="chkArea" style="background: white; border: 1px solid #e9dcf5; border-radius: 15px; padding: 5px; max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
             <select id="subSel"><option value="">-- Предмет --</option></select>
             <input type="date" id="dateInp">
             <input type="text" id="taskInp" placeholder="Назва роботи">
@@ -56,21 +46,20 @@
         </div>
         <div id="view2" class="hidden">
             <div class="sub-tab-menu">
-                <div id="subTabSub" class="sub-tab active" onclick="setJournalMode('subjects')">📚 Предмети</div>
-                <div id="subTabStud" class="sub-tab" onclick="setJournalMode('students')">👤 Учні</div>
+                <div id="st_s" class="sub-tab active" onclick="setJMode('s')">📚 Предмети</div>
+                <div id="st_u" class="sub-tab" onclick="setJMode('u')">👤 Учні</div>
             </div>
             <div id="journalArea"></div>
         </div>
         <div id="view3" class="hidden">
-            <div id="planList" style="max-height: 350px; overflow-y: auto;"></div>
-            <button onclick="saveAllPlans()">Зберегти плани</button>
-            <button style="background:#e74c3c; margin-top:10px;" onclick="resetAllDebts()">❌ Очистити базу</button>
+            <div id="planList" style="max-height: 300px; overflow-y: auto;"></div>
+            <button onclick="savePlans()" style="margin-top:10px;">Зберегти плани</button>
         </div>
     </div>
 
     <div id="loginForm">
         <select id="uSel" style="margin-bottom: 15px;"><option value="">-- Учень --</option></select>
-        <input type="text" id="pInp" placeholder="Код" onkeypress="if(event.key==='Enter') login()">
+        <input type="text" id="pInp" placeholder="Код">
         <button onclick="login()">Увійти</button>
     </div>
 
@@ -114,105 +103,69 @@
         "Дизайн і технології": ["Творча робота"]
     };
 
-    let journalMode = 'subjects';
-    let openGroups = new Set();
+    let jMode = 's';
     document.getElementById('dateInp').valueAsDate = new Date();
 
-    const sortedIds = Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name));
-    sortedIds.forEach(id => {
-        document.getElementById('chkArea').innerHTML += `<div class="student-row" onclick="const i=this.querySelector('input');if(i)i.checked=!i.checked"><input type="checkbox" value="${id}" onclick="event.stopPropagation()"><span>${students[id].name}</span></div>`;
+    const sorted = Object.keys(students).sort((a,b)=>students[a].name.localeCompare(students[b].name));
+    sorted.forEach(id => {
+        document.getElementById('chkArea').innerHTML += `<div class="student-row" onclick="const i=this.querySelector('input');i.checked=!i.checked"><input type="checkbox" value="${id}" onclick="event.stopPropagation()"> ${students[id].name}</div>`;
         document.getElementById('uSel').innerHTML += `<option value="${id}">${students[id].name}</option>`;
     });
 
     for(let s in structure) {
         structure[s].forEach(c => { document.getElementById('subSel').innerHTML += `<option value="${s}|${c}">${s} - ${c}</option>`; });
-        document.getElementById('planList').innerHTML += `<div style="background:#f4f0f9; padding:5px; font-weight:bold; color:#61309e; margin-top:5px;">${s}</div>`;
-        structure[s].forEach(c => {
-            document.getElementById('planList').innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee;"><span>${c}</span><input type="number" id="plan_${s}_${c}" style="width:60px; margin:0; padding:5px;" value="0"></div>`;
-        });
+        let pDiv = `<div style="background:#f4f0f9; padding:8px; border-radius:10px; margin-top:10px;"><b>${s}</b>`;
+        structure[s].forEach(c => { pDiv += `<div style="display:flex; justify-content:space-between; margin-top:5px;">${c} <input type="number" id="p_${s}_${c}" style="width:50px; margin:0;"></div>`; });
+        document.getElementById('planList').innerHTML += pDiv + `</div>`;
+    }
+
+    function login() {
+        const id = document.getElementById('uSel').value, code = document.getElementById('pInp').value;
+        if(code === "21.08") {
+            document.getElementById('loginForm').classList.add('hidden');
+            if(id) { document.getElementById('resultView').classList.remove('hidden'); loadData(id); }
+            else { document.getElementById('adminPanel').classList.remove('hidden'); }
+        } else if(id && students[id].code === code) {
+            document.getElementById('loginForm').classList.add('hidden'); document.getElementById('resultView').classList.remove('hidden'); loadData(id);
+        } else alert("Помилка доступу!");
     }
 
     function showTab(n) {
         document.getElementById('view1').classList.toggle('hidden', n !== 1);
         document.getElementById('view2').classList.toggle('hidden', n !== 2);
         document.getElementById('view3').classList.toggle('hidden', n !== 3);
-        document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i+1 === n));
-        if(n===2) loadJournal();
-        if(n===3) loadAllPlans();
+        if(n === 2) loadJournal();
+        if(n === 3) loadPlans();
     }
-
-    function loadAllPlans() {
-        db.ref('plans_v2').once('value', snap => {
-            const data = snap.val() || {};
-            for(let s in structure) {
-                structure[s].forEach(c => {
-                    const inp = document.getElementById(`plan_${s}_${c}`);
-                    if(inp && data[s]) inp.value = data[s][c] || 0;
-                });
-            }
-        });
-    }
-
-    function saveAllPlans() {
-        let plans = {};
-        for(let s in structure) {
-            plans[s] = {};
-            structure[s].forEach(c => {
-                plans[s][c] = document.getElementById(`plan_${s}_${c}`).value || 0;
-            });
-        }
-        db.ref('plans_v2').set(plans).then(() => alert("Плани збережено!"));
-    }
-
-    function resetAllDebts() { if(confirm("Видалити все?")) db.ref('students').remove().then(() => alert("Очищено!")); }
 
     function loadJournal() {
-        const area = document.getElementById('journalArea');
-        area.innerHTML = "Синхронізація...";
+        const area = document.getElementById('journalArea'); area.innerHTML = "Отримання даних...";
         db.ref('students').once('value', snap => {
             const data = snap.val() || {}; area.innerHTML = "";
-            if (journalMode === 'subjects') {
+            if(jMode === 's') {
                 for(let sid in data) {
-                    for(let sub in data[sid]) {
-                        if(!structure[sub]) continue;
-                        for(let cat in data[sid][sub]) {
-                            for(let tid in data[sid][sub][cat]) {
-                                area.innerHTML += `<div class="journal-card"><b>${sub}</b>: ${data[sid][sub][cat][tid].val} — ${students[sid].name}</div>`;
+                    for(let s in data[sid]) {
+                        for(let c in data[sid][s]) {
+                            for(let tid in data[sid][s][c]) {
+                                area.innerHTML += `<div class="journal-card"><b>${s}</b>: ${data[sid][s][c][tid].val} — <u>${students[sid].name}</u></div>`;
                             }
                         }
                     }
                 }
             } else {
-                sortedIds.forEach(sid => {
+                sorted.forEach(sid => {
                     if(data[sid]) {
-                        area.innerHTML += `<div class="group-header" onclick="this.nextElementSibling.classList.toggle('open')"><span>👤 ${students[sid].name}</span></div><div class="group-content">`;
-                        for(let sub in data[sid]) {
-                            for(let cat in data[sid][sub]) {
-                                for(let tid in data[sid][sub][cat]) {
-                                    area.innerHTML += `<div class="journal-card">${sub}: ${data[sid][sub][cat][tid].val}</div>`;
-                                }
+                        let h = `<div class="group-header" onclick="this.nextElementSibling.classList.toggle('hidden')"><span>${students[sid].name} <span class="report-btn" onclick="copyReport('${sid}', event)">📢</span></span></div><div class="hidden">`;
+                        for(let s in data[sid]) {
+                            for(let c in data[sid][s]) {
+                                for(let tid in data[sid][s][c]) { h += `<div class="journal-card">${s}: ${data[sid][s][c][tid].val}</div>`; }
                             }
                         }
-                        area.innerHTML += `</div>`;
+                        area.innerHTML += h + `</div>`;
                     }
                 });
             }
-            if(area.innerHTML === "") area.innerHTML = "Порожньо";
-        });
-    }
-
-    function login() {
-        const id = document.getElementById('uSel').value;
-        const code = document.getElementById('pInp').value;
-        if(code === "21.08") {
-            document.getElementById('loginForm').classList.add('hidden');
-            if(id) { document.getElementById('resultView').classList.remove('hidden'); loadData(id); }
-            else { document.getElementById('adminPanel').classList.remove('hidden'); }
-        } else if(id && students[id].code === code) {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('resultView').classList.remove('hidden');
-            loadData(id);
-        } else alert("Помилка!");
+        }).catch(e => { area.innerHTML = "Блокування Firebase! Змініть Rules."; });
     }
 
     function loadData(id) {
@@ -220,42 +173,54 @@
         db.ref('plans_v2').once('value', pSnap => {
             const plans = pSnap.val() || {};
             db.ref('students/'+id).on('value', snap => {
-                const data = snap.val() || {}, area = document.getElementById('debtListArea'); area.innerHTML = "";
-                for(let sub in structure) {
-                    let html = `<div style="background:#fdfaff; border:1px solid #e9dcf5; padding:12px; border-radius:15px; margin-top:15px; text-align:left;"><h4 style="color:#61309e; margin:0 0 5px 0;">${sub}</h4>`;
-                    let hasWork = false;
-                    structure[sub].forEach(cat => {
-                        const planVal = (plans[sub] && plans[sub][cat]) ? parseInt(plans[sub][cat]) : 0;
-                        if(planVal > 0) {
-                            hasWork = true;
-                            let debts = []; 
-                            if(data[sub] && data[sub][cat]) { for(let k in data[sub][cat]) debts.push(data[sub][cat][k]); }
-                            const done = Math.max(0, planVal - debts.length);
-                            const cls = cat.includes('Діагностична')?'c-diag':cat.includes('Творча')?'c-creat':cat.includes('Вірш')?'c-poem':'c-other';
-                            html += `<div style="margin-bottom:12px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span class="cat-tag ${cls}" style="margin:0;">${cat}</span><span style="font-size:11px; font-weight:bold; color:#61309e;">Виконано: ${done} з ${planVal}</span></div>`;
-                            debts.forEach(d => { html += `<div style="display:flex; align-items:center; gap:8px; background:white; padding:8px; border-radius:10px; border:1px solid #f3ebf9; margin-bottom:4px; font-size:13px;"><span style="background:#61309e; color:white; padding:2px 5px; border-radius:5px; font-size:10px;">${d.date}</span><b>${d.val}</b></div>`; });
-                            html += `</div>`;
+                const data = snap.val() || {}; const area = document.getElementById('debtListArea'); area.innerHTML = "";
+                for(let s in structure) {
+                    let sHtml = `<div class="journal-card"><h4>${s}</h4>`; let has = false;
+                    structure[s].forEach(cat => {
+                        const pVal = (plans[s] && plans[s][cat]) ? parseInt(plans[s][cat]) : 0;
+                        if(pVal > 0) {
+                            has = true; let dArr = []; if(data[s] && data[s][cat]) for(let k in data[s][cat]) dArr.push(data[s][cat][k]);
+                            const cls = cat.includes('Діагностична')?'c-diag':cat.includes('Творча')?'c-creat':'c-poem';
+                            sHtml += `<span class="cat-tag ${cls}">${cat}</span><br><small>Виконано ${Math.max(0, pVal - dArr.length)} з ${pVal}</small>`;
+                            dArr.forEach(d => { sHtml += `<div style="background:white; padding:5px; border-radius:5px; margin-top:3px; font-size:11px;">${d.date} — ${d.val}</div>`; });
                         }
                     });
-                    if(hasWork) area.innerHTML += html + `</div>`;
+                    if(has) area.innerHTML += sHtml + `</div>`;
                 }
             });
         });
     }
 
     function sendDebt() {
-        const sel = Array.from(document.querySelectorAll('#chkArea input:checked')).map(c => c.value);
-        const subVal = document.getElementById('subSel').value;
-        const task = document.getElementById('taskInp').value.trim();
-        const dateRaw = document.getElementById('dateInp').value;
-        if (!task || sel.length === 0 || !subVal) return alert("Заповніть усе!");
-        const subInfo = subVal.split('|');
-        const d = new Date(dateRaw), fDate = d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0');
-        sel.forEach(sid => { db.ref(`students/${sid}/${subInfo[0]}/${subInfo[1]}`).push({ date: fDate, val: task }); });
-        alert("Розіслано!"); document.getElementById('taskInp').value = ""; document.querySelectorAll('#chkArea input').forEach(c => c.checked = false);
+        const ids = Array.from(document.querySelectorAll('#chkArea input:checked')).map(i => i.value);
+        const sub = document.getElementById('subSel').value.split('|');
+        const task = document.getElementById('taskInp').value;
+        const date = document.getElementById('dateInp').value;
+        if(!task || ids.length === 0 || !sub[0]) return alert("Заповніть все!");
+        ids.forEach(id => db.ref(`students/${id}/${sub[0]}/${sub[1]}`).push({val: task, date: date.split('-').reverse().join('.')}));
+        alert("Окей!");
     }
 
-    function setJournalMode(m) { journalMode = m; loadJournal(); }
+    async function copyReport(sid, e) {
+        e.stopPropagation(); const snap = await db.ref('students/'+sid).once('value'); const data = snap.val();
+        if(!data) return alert("Боргів немає!");
+        let t = `📢 *БОРГИ: ${students[sid].name}*\n\n`;
+        for(let s in data) { t += `📚 *${s}:*\n`; for(let c in data[s]) { for(let id in data[s][c]) t += ` • ${data[s][c][id].val} (${data[s][c][id].date})\n`; } t += `\n`; }
+        navigator.clipboard.writeText(t).then(() => alert("Звіт скопійовано!"));
+    }
+
+    function setJMode(m) { jMode = m; loadJournal(); }
+    function savePlans() {
+        let p = {};
+        for(let s in structure) { p[s] = {}; structure[s].forEach(c => { p[s][c] = document.getElementById('p_'+s+'_'+c).value || 0; }); }
+        db.ref('plans_v2').set(p).then(() => alert("Збережено!"));
+    }
+    function loadPlans() {
+        db.ref('plans_v2').once('value', snap => {
+            const d = snap.val() || {};
+            for(let s in structure) structure[s].forEach(c => { if(d[s]) document.getElementById('p_'+s+'_'+c).value = d[s][c] || 0; });
+        });
+    }
 </script>
 </body>
 </html>
