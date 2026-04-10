@@ -152,6 +152,8 @@
                 for(let sid in data) {
                     for(let s in data[sid]) {
                         for(let c in data[sid][s]) {
+                            // ФІЛЬТР: якщо категорія не з нашої структури — ігноруємо
+                            if(!structure[s] || !structure[s].includes(c)) continue;
                             for(let tid in data[sid][s][c]) {
                                 const key = `${s}|${c}|${data[sid][s][c][tid].val}`;
                                 if(!subs[key]) subs[key] = {s, c, val: data[sid][s][c][tid].val, list: []};
@@ -164,7 +166,7 @@
                     const item = subs[k];
                     const cls = item.c.includes('Діагностична')?'c-diag':item.c.includes('Творча')?'c-creat':'c-poem';
                     area.innerHTML += `<div class="journal-card"><span class="cat-tag ${cls}">${item.s} - ${item.c}</span><br><b>${item.val}</b><br>
-                    ${item.list.map(l => `<span class="debtor-tag" onclick="del('${l.sid}','${item.s}','item.c','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
+                    ${item.list.map(l => `<span class="debtor-tag" onclick="del('${l.sid}','${item.s}','${item.c}','${l.tid}')">${students[l.sid].name.split(' ')[0]}</span>`).join('')}</div>`;
                 }
             } else {
                 sorted.forEach(sid => {
@@ -172,7 +174,10 @@
                         let h = `<div class="group-header" onclick="this.nextElementSibling.classList.toggle('hidden')"><span>👤 ${students[sid].name} <span class="report-btn" onclick="copyReport('${sid}', event)">📢</span></span></div><div class="hidden">`;
                         for(let s in data[sid]) {
                             for(let c in data[sid][s]) {
-                                for(let tid in data[sid][s][c]) { h += `<div class="journal-card" onclick="del('${sid}','${s}','${c}','${tid}')"><b>${s}</b>: ${data[sid][s][c][tid].val} <small>(видалити)</small></div>`; }
+                                if(!structure[s] || !structure[s].includes(c)) continue;
+                                for(let tid in data[sid][s][c]) { 
+                                    h += `<div class="journal-card" onclick="del('${sid}','${s}','${c}','${tid}')"><b>${s}</b>: ${data[sid][s][c][tid].val} <small>(видалити)</small></div>`; 
+                                }
                             }
                         }
                         area.innerHTML += h + `</div>`;
@@ -182,7 +187,11 @@
         });
     }
 
-    function del(sid, s, c, tid) { if(confirm(`Видалити борг?`)) db.ref(`students/${sid}/${s}/${cat}/${tid}`).remove().then(() => loadJournal()); }
+    function del(sid, s, c, tid) {
+        if(confirm(`Видалити цей борг?`)) {
+            db.ref(`students/${sid}/${s}/${c}/${tid}`).remove().then(() => loadJournal());
+        }
+    }
 
     function loadData(id) {
         document.getElementById('sNameTitle').innerText = students[id].name;
@@ -199,6 +208,7 @@
                             const cls = cat.includes('Діагностична')?'c-diag':cat.includes('Творча')?'c-creat':'c-poem';
                             sHtml += `<span class="cat-tag ${cls}">${cat}</span><br><small>Виконано ${Math.max(0, pVal - dArr.length)} з ${pVal}</small>`;
                             dArr.forEach(d => { sHtml += `<div style="background:white; padding:8px; border-radius:10px; margin-top:5px; font-size:13px; border:1px solid #eee;">${d.date} — <b>${d.val}</b></div>`; });
+                            sHtml += `<hr style="border:0; border-top:1px solid #f3ebf9; margin:10px 0;">`;
                         }
                     });
                     if(has) area.innerHTML += sHtml + `</div>`;
